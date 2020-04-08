@@ -1,6 +1,6 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-07T19:44:45-07:00</updated><id>/feed.xml</id><title type="html">Hashim Colombowala</title><subtitle>Learning to make cloud tools with python. Hoping to write short technical blogs.</subtitle><entry><title type="html">Designing Data Intensive Applications</title><link href="/book/2020/04/07/designing-data-intensive-applications.html" rel="alternate" type="text/html" title="Designing Data Intensive Applications" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>/book/2020/04/07/designing-data-intensive-applications</id><content type="html" xml:base="/book/2020/04/07/designing-data-intensive-applications.html">&lt;p&gt;Updating as I read the book&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-07T19:48:52-07:00</updated><id>/feed.xml</id><title type="html">Hashim Colombowala</title><subtitle>Learning to make cloud tools with python. Hoping to write short technical blogs.</subtitle><entry><title type="html">Designing Data Intensive Applications</title><link href="/book/2020/04/07/designing-data-intensive-applications.html" rel="alternate" type="text/html" title="Designing Data Intensive Applications" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>/book/2020/04/07/designing-data-intensive-applications</id><content type="html" xml:base="/book/2020/04/07/designing-data-intensive-applications.html">&lt;p&gt;Updating as I read the book&lt;/p&gt;
 
-&lt;h2 id=&quot;chapter-1---reliable-scalable-and-maintaiable-applications&quot;&gt;Chapter 1 - Reliable, Scalable and Maintaiable applications&lt;/h2&gt;
+&lt;h2 id=&quot;chapter-1---reliable-scalable-and-maintainable-applications&quot;&gt;Chapter 1 - Reliable, Scalable and Maintainable applications&lt;/h2&gt;
 
 &lt;h3 id=&quot;latency-and-response-time&quot;&gt;Latency and Response time&lt;/h3&gt;
 
@@ -18,7 +18,7 @@
 
 &lt;h2 id=&quot;the-cat-ate-my-source-code&quot;&gt;The Cat ate my source code&lt;/h2&gt;
 
-&lt;p&gt;Provide solutions and not exuses. In the book, the cat while playing with a laser pointer ate the source code and owner uses that as an excuse. My key takeaway was that its okay to make mistakes, but always have options.&lt;/p&gt;
+&lt;p&gt;Provide solutions and not excuses. In the book, the cat while playing with a laser pointer ate the source code and owner uses that as an excuse. My key takeaway was that its okay to make mistakes, but always have options.&lt;/p&gt;
 
 &lt;h2 id=&quot;good-enough-software&quot;&gt;Good-enough software&lt;/h2&gt;
 
