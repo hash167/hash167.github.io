@@ -2,7 +2,7 @@
 layout: post
 title:  "The Pragmatic Programmer 2020"
 date:   2020-04-07 18:54:00 -0700
-categories: learnings
+categories: book
 ---
 
 Updating as I read the book
