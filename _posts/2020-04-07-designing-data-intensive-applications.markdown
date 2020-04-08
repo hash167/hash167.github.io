@@ -7,7 +7,7 @@ categories: book
 
 Updating as I read the book
 
-## Chapter 1 - Reliable, Scalable and Maintaiable applications
+## Chapter 1 - Reliable, Scalable and Maintainable applications
 
 ### Latency and Response time
 

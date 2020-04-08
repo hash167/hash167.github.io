@@ -9,7 +9,7 @@ Updating as I read the book
 
 ## The Cat ate my source code
 
-Provide solutions and not exuses. In the book, the cat while playing with a laser pointer ate the source code and owner uses that as an excuse. My key takeaway was that its okay to make mistakes, but always have options.
+Provide solutions and not excuses. In the book, the cat while playing with a laser pointer ate the source code and owner uses that as an excuse. My key takeaway was that its okay to make mistakes, but always have options.
 
 ## Good-enough software
 
