@@ -1,30 +1,40 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2020-04-07T19:52:52-07:00</updated><id>/feed.xml</id><title type="html">Hashim Colombowala</title><subtitle>Learning to make cloud tools with python.</subtitle><entry><title type="html">Designing Data Intensive Applications</title><link href="/book/2020/04/07/designing-data-intensive-applications.html" rel="alternate" type="text/html" title="Designing Data Intensive Applications" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>/book/2020/04/07/designing-data-intensive-applications</id><content type="html" xml:base="/book/2020/04/07/designing-data-intensive-applications.html">&lt;p&gt;Updating as I read the book&lt;/p&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.0">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-06-20T17:40:45-07:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Hashim Colombowala</title><subtitle>Learning to make cloud tools with python.</subtitle><entry><title type="html">The Go Spec</title><link href="http://localhost:4000/book/2020/06/20/the-go-spec.html" rel="alternate" type="text/html" title="The Go Spec" /><published>2020-06-20T16:00:00-07:00</published><updated>2020-06-20T16:00:00-07:00</updated><id>http://localhost:4000/book/2020/06/20/the-go-spec</id><content type="html" xml:base="http://localhost:4000/book/2020/06/20/the-go-spec.html">&lt;h2 id=&quot;go-spec&quot;&gt;Go Spec&lt;/h2&gt;
 
-&lt;h2 id=&quot;chapter-1---reliable-scalable-and-maintainable-applications&quot;&gt;Chapter 1 - Reliable, Scalable and Maintainable applications&lt;/h2&gt;
+&lt;p&gt;The Go compiler can compile the Go source go with different go specs. Fo example, if you have installed go 1.14, you can compile your source with &lt;code class=&quot;highlighter-rouge&quot;&gt;Go spec 1.13&lt;/code&gt;.&lt;/p&gt;
 
-&lt;h3 id=&quot;latency-and-response-time&quot;&gt;Latency and Response time&lt;/h3&gt;
+&lt;h3 id=&quot;the-rules-for-which-version-of-the-go-spec-used-during-compilation-appear-to-be&quot;&gt;The rules for which version of the Go spec used during compilation appear to be&lt;/h3&gt;
 
-&lt;p&gt;The &lt;code class=&quot;highlighter-rouge&quot;&gt;response time&lt;/code&gt; is what the client sees which includes service time, network delays and queueing delays&lt;/p&gt;
+&lt;ol&gt;
+  &lt;li&gt;If your source code is stored within the &lt;code class=&quot;highlighter-rouge&quot;&gt;GOPATH&lt;/code&gt; (or you have disabled modules with &lt;code class=&quot;highlighter-rouge&quot;&gt;GO111MODULE=off&lt;/code&gt;) then the version of the Go spec used to compile matches the version of the compiler you are using. ie if you have go 1.13 installed then the go spec used will be 1.13&lt;/li&gt;
+  &lt;li&gt;If your source code is outside the &lt;code class=&quot;highlighter-rouge&quot;&gt;GOPATH&lt;/code&gt;(or &lt;code class=&quot;highlighter-rouge&quot;&gt;GO111MODULE=on&lt;/code&gt;), then the go tool will take the version from the &lt;code class=&quot;highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file&lt;/li&gt;
+  &lt;li&gt;If no &lt;code class=&quot;highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file is provided, then same as point 1&lt;/li&gt;
+  &lt;li&gt;If you are in module mode(see point 2) and no version is specified in the &lt;code class=&quot;highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file, then &lt;code class=&quot;highlighter-rouge&quot;&gt;go 1.13&lt;/code&gt; is used by default&lt;/li&gt;
+&lt;/ol&gt;
 
-&lt;p&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Latency&lt;/code&gt; is how long the request is waiting to be serviced.&lt;/p&gt;
+&lt;p&gt;The last point is interesting.&lt;/p&gt;</content><author><name></name></author><summary type="html">Go Spec</summary></entry><entry><title type="html">The Zen of Python</title><link href="http://localhost:4000/book/2020/04/07/zen-of-python.html" rel="alternate" type="text/html" title="The Zen of Python" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>http://localhost:4000/book/2020/04/07/zen-of-python</id><content type="html" xml:base="http://localhost:4000/book/2020/04/07/zen-of-python.html">&lt;p&gt;Recently I came across &lt;strong&gt;this&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; import this
+The Zen of Python, by Tim Peters
 
-&lt;h3 id=&quot;p95-p99-and-p999-percentile-of-requests&quot;&gt;p95, p99 and p999 percentile of requests&lt;/h3&gt;
-
-&lt;p&gt;Customers with slow latency are the ones most likely to have more data to compute. Thus its important to look at these outliers and not just the average customer. In Amazon’s case, an outlier could mean that a customer has more orders in his shopping cart.&lt;/p&gt;
-
-&lt;p&gt;High percentiles of response times are also known as tail latencies&lt;/p&gt;
-
-&lt;p&gt;An apm like New Relic can give you these metrics.&lt;/p&gt;</content><author><name></name></author><summary type="html">Updating as I read the book</summary></entry><entry><title type="html">The Pragmatic Programmer 2020</title><link href="/book/2020/04/07/pragmatic-programmer-2020.html" rel="alternate" type="text/html" title="The Pragmatic Programmer 2020" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>/book/2020/04/07/pragmatic-programmer-2020</id><content type="html" xml:base="/book/2020/04/07/pragmatic-programmer-2020.html">&lt;p&gt;Updating as I read the book&lt;/p&gt;
-
-&lt;h2 id=&quot;the-cat-ate-my-source-code&quot;&gt;The Cat ate my source code&lt;/h2&gt;
-
-&lt;p&gt;Provide solutions and not excuses. In the book, the cat while playing with a laser pointer ate the source code and owner uses that as an excuse. My key takeaway was that its okay to make mistakes, but always have options.&lt;/p&gt;
-
-&lt;h2 id=&quot;good-enough-software&quot;&gt;Good-enough software&lt;/h2&gt;
-
-&lt;p&gt;Good enough software doesn’t mean its okay to build sloppy code. Codebase that is simple, has automated testing and deployment, meets security and privacy standards and most importantly satisfies core user requirements. The additional bells and whistles can be added later. For eg. Give the user a &lt;code class=&quot;highlighter-rouge&quot;&gt;not implemented&lt;/code&gt; message.&lt;/p&gt;
-
-&lt;p&gt;Building software is all about trade-offs. Speed over perfection maybe a better solution&lt;/p&gt;</content><author><name></name></author><summary type="html">Updating as I read the book</summary></entry><entry><title type="html">Python decorator common use cases</title><link href="/python/decorator/2020/04/04/python-decorator-use-cases.html" rel="alternate" type="text/html" title="Python decorator common use cases" /><published>2020-04-04T15:54:35-07:00</published><updated>2020-04-04T15:54:35-07:00</updated><id>/python/decorator/2020/04/04/python-decorator-use-cases</id><content type="html" xml:base="/python/decorator/2020/04/04/python-decorator-use-cases.html">&lt;ul&gt;
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+Special cases aren&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;t special enough to &lt;span class=&quot;nb&quot;&gt;break &lt;/span&gt;the rules.
+Although practicality beats purity.
+Errors should never pass silently.
+Unless explicitly silenced.
+In the face of ambiguity, refuse the temptation to guess.
+There should be one-- and preferably only one &lt;span class=&quot;nt&quot;&gt;--obvious&lt;/span&gt; way to &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;it.
+Although that way may not be obvious at first unless you&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;re Dutch.
+Now is better than never.
+Although never is often better than &lt;span class=&quot;k&quot;&gt;*&lt;/span&gt;right&lt;span class=&quot;k&quot;&gt;*&lt;/span&gt; now.
+If the implementation is hard to explain, it&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;s a bad idea.
+If the implementation is easy to explain, it may be a good idea.
+Namespaces are one honking great idea &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;s &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;more of those!
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><summary type="html">Recently I came across this ```zsh import this The Zen of Python, by Tim Peters</summary></entry><entry><title type="html">Python decorator common use cases</title><link href="http://localhost:4000/python/decorator/2020/04/04/python-decorator-use-cases.html" rel="alternate" type="text/html" title="Python decorator common use cases" /><published>2020-04-04T15:54:35-07:00</published><updated>2020-04-04T15:54:35-07:00</updated><id>http://localhost:4000/python/decorator/2020/04/04/python-decorator-use-cases</id><content type="html" xml:base="http://localhost:4000/python/decorator/2020/04/04/python-decorator-use-cases.html">&lt;ul&gt;
   &lt;li&gt;Timing functions. Almost always the first example on StackOverflow. (You can always use a Context Manager for these too, writing them is a good way to learn those and their &lt;code class=&quot;highlighter-rouge&quot;&gt;__enter__&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;__exit__&lt;/code&gt; dunders.)&lt;/li&gt;
   &lt;li&gt;Retrying functions. Bonus points for having longer times between tries per try.&lt;/li&gt;
   &lt;li&gt;Setting a maximum time for a function to finish executing, if the function is amenable to it (e.g. it runs in a loop)&lt;/li&gt;
