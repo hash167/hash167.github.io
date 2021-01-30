@@ -1,4 +1,99 @@
-<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.0.1">Jekyll</generator><link href="http://localhost:4000/feed.xml" rel="self" type="application/atom+xml" /><link href="http://localhost:4000/" rel="alternate" type="text/html" /><updated>2020-12-29T19:49:07-08:00</updated><id>http://localhost:4000/feed.xml</id><title type="html">Hashim Colombowala</title><subtitle>Learning to make cloud tools with python.</subtitle><entry><title type="html">Abstract classes using Metaclasses</title><link href="http://localhost:4000/python/2020/12/28/python-metaclasses.html" rel="alternate" type="text/html" title="Abstract classes using Metaclasses" /><published>2020-12-28T16:00:00-08:00</published><updated>2020-12-28T16:00:00-08:00</updated><id>http://localhost:4000/python/2020/12/28/python-metaclasses</id><content type="html" xml:base="http://localhost:4000/python/2020/12/28/python-metaclasses.html">&lt;h3 id=&quot;type-and-class&quot;&gt;Type and Class&lt;/h3&gt;
+<?xml version="1.0" encoding="utf-8"?><feed xmlns="http://www.w3.org/2005/Atom" ><generator uri="https://jekyllrb.com/" version="4.2.0">Jekyll</generator><link href="/feed.xml" rel="self" type="application/atom+xml" /><link href="/" rel="alternate" type="text/html" /><updated>2021-01-30T00:53:54-08:00</updated><id>/feed.xml</id><title type="html">The Reclusive Polyglot</title><subtitle>Learning to make cloud tools.</subtitle><author><name>Hashim Colombowala</name><email>hashim@hey.com</email></author><entry><title type="html">Signalling docker containers</title><link href="/docker/python/signal/" rel="alternate" type="text/html" title="Signalling docker containers" /><published>2021-01-26T17:33:40-08:00</published><updated>2021-01-26T17:33:40-08:00</updated><id>/docker/python/signal</id><content type="html" xml:base="/docker/python/signal/">&lt;p&gt;When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-o&lt;/span&gt; nounset
+&lt;span class=&quot;nb&quot;&gt;set&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-x&lt;/span&gt;
+gunicorn &lt;span class=&quot;nt&quot;&gt;--config&lt;/span&gt; config/gunicorn/&lt;span class=&quot;nv&quot;&gt;$GUNICORN_CONFIG&lt;/span&gt;.py config.wsgi
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Here we are executing the gunicorn service with PID 1 when the container is deployed. Suppose we want to terminate the container with a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker stop &amp;lt;container_id&amp;gt;&lt;/code&gt;, the command will send a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SIGTERM&lt;/code&gt; to the container. As the gunicorn process is PID 1, this signal is ignored.&lt;/p&gt;
+
+&lt;p&gt;The way to resolve this issue is to use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exec&lt;/code&gt; before the command to start your application. The last line of the above shell script should be  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;gunicorn --config config/gunicorn/$GUNICORN_CONFIG.py config.wsgi&lt;/code&gt;. A simple example is shown below&lt;/p&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;t.py:&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;signal&lt;/span&gt;
+&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;time&lt;/span&gt;
+
+&lt;span class=&quot;n&quot;&gt;got_signal&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;False&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;process_signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;signum&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;frame&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;):&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;global&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;got_signal&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;got_signal&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;
+
+    &lt;span class=&quot;n&quot;&gt;signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SIGINT&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process_signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;SIGTERM&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;,&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;process_signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;ow&quot;&gt;not&lt;/span&gt; &lt;span class=&quot;n&quot;&gt;got_signal&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+        &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+        &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;looping...&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Ended with signal.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;entry.sh:&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;c&quot;&gt;#!/usr/bin/env bash&lt;/span&gt;
+&lt;span class=&quot;nb&quot;&gt;exec &lt;/span&gt;python ./t.py
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Dockerfile:&lt;/code&gt;&lt;/p&gt;
+
+&lt;div class=&quot;language-docker highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;k&quot;&gt;FROM&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; python:3.7&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;WORKDIR&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; /usr/src/app&lt;/span&gt;
+&lt;span class=&quot;k&quot;&gt;COPY&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; . .&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;CMD&lt;/span&gt;&lt;span class=&quot;s&quot;&gt; [ &quot;./entry.sh&quot; ]&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;div class=&quot;language-sh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;With the &lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt;:
+
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker run &lt;span class=&quot;nt&quot;&gt;--rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; signal
+looping...
+looping...
+looping...
+looping...
+looping...
+looping...
+Ended with signal.
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;
+Without the &lt;span class=&quot;nb&quot;&gt;exec&lt;/span&gt;:
+
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;docker run &lt;span class=&quot;nt&quot;&gt;--rm&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;-t&lt;/span&gt; signal
+looping...
+looping...
+looping...
+looping...
+looping...
+looping...
+&lt;span class=&quot;err&quot;&gt;$&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;Both times, you can run &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker stop&lt;/code&gt; in another window. If the container doesn’t stop within 10 seconds, then it’s killed.&lt;/p&gt;
+
+&lt;p&gt;Most apps do not explicitely handle &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SIGTERM&lt;/code&gt; the way &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;t.py&lt;/code&gt; does. If you replace &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;t.py&lt;/code&gt; with&lt;/p&gt;
+
+&lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;kn&quot;&gt;import&lt;/span&gt; &lt;span class=&quot;nn&quot;&gt;time&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;while&lt;/span&gt; &lt;span class=&quot;bp&quot;&gt;True&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;n&quot;&gt;time&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;.&lt;/span&gt;&lt;span class=&quot;n&quot;&gt;sleep&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+    &lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;looping...&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+
+&lt;span class=&quot;k&quot;&gt;print&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;&quot;Ended with signal.&quot;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
+
+&lt;p&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;SIGINT&lt;/code&gt; will work with keyboard interrupt but &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker stop&lt;/code&gt; does not because of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;PID=1&lt;/code&gt; issue.&lt;/p&gt;
+
+&lt;p&gt;If we run docker with a &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;--init&lt;/code&gt; option to force a non &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;1&lt;/code&gt; PID, the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;docker stop&lt;/code&gt; works whether we use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;exec&lt;/code&gt; in the script or not.&lt;/p&gt;
+
+&lt;p&gt;In order to use this feature with AWS Fargate, make a small change to your &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;AWS::ECS::TaskDefinition&lt;/code&gt; in your cloudformation as shown below&lt;/p&gt;
+
+&lt;div class=&quot;language-yaml highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;na&quot;&gt;ContainerDefinitions&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+    &lt;span class=&quot;pi&quot;&gt;-&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;Name&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;lt;container_name&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;Image&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s&quot;&gt;&amp;lt;container_image&amp;gt;&lt;/span&gt;
+        &lt;span class=&quot;s&quot;&gt;Essential&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;true&quot;&lt;/span&gt;
+        &lt;span class=&quot;na&quot;&gt;linuxParameters&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt;
+            &lt;span class=&quot;na&quot;&gt;initProcessEnabled&lt;/span&gt;&lt;span class=&quot;pi&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;s2&quot;&gt;&quot;&lt;/span&gt;&lt;span class=&quot;s&quot;&gt;true&quot;&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Hashim Colombowala</name></author><category term="docker" /><category term="python" /><category term="docker" /><category term="python" /><summary type="html">When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this</summary></entry><entry><title type="html">Abstract classes using Metaclasses</title><link href="/python/python-metaclasses/" rel="alternate" type="text/html" title="Abstract classes using Metaclasses" /><published>2020-12-27T17:33:40-08:00</published><updated>2020-12-27T17:33:40-08:00</updated><id>/python/python-metaclasses</id><content type="html" xml:base="/python/python-metaclasses/">&lt;h3 id=&quot;type-and-class&quot;&gt;Type and Class&lt;/h3&gt;
 
 &lt;p&gt;In python3 all classes are new style classes, thus it is reasonable to refer to an objects type and its class interchangably&lt;/p&gt;
 
@@ -14,23 +109,23 @@
 &lt;p&gt;Type is a metaclass of which classes are instances&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;Foo&lt;/code&gt; is an instance of metaclass &lt;code class=&quot;highlighter-rouge&quot;&gt;type&lt;/code&gt;&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;type&lt;/code&gt; is an instance of &lt;code class=&quot;highlighter-rouge&quot;&gt;type&lt;/code&gt; as well&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Foo&lt;/code&gt; is an instance of metaclass &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;type&lt;/code&gt;&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;type&lt;/code&gt; is an instance of &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;type&lt;/code&gt; as well&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;type-metaclass&quot;&gt;Type Metaclass&lt;/h3&gt;
 
-&lt;p&gt;A &lt;code class=&quot;highlighter-rouge&quot;&gt;type&lt;/code&gt; metaclass is initialized with 3 arguments&lt;/p&gt;
+&lt;p&gt;A &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;type&lt;/code&gt; metaclass is initialized with 3 arguments&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;name&lt;/code&gt;: name of the class (&lt;strong&gt;name&lt;/strong&gt; attribute)&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;bases&lt;/code&gt;: a tuple of classnames that the class inherits from&lt;/li&gt;
-  &lt;li&gt;&lt;code class=&quot;highlighter-rouge&quot;&gt;namespace&lt;/code&gt;: a dictionary contianing definitions of the class body (&lt;strong&gt;dict&lt;/strong&gt; attribute of the class)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;name&lt;/code&gt;: name of the class (&lt;strong&gt;name&lt;/strong&gt; attribute)&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;bases&lt;/code&gt;: a tuple of classnames that the class inherits from&lt;/li&gt;
+  &lt;li&gt;&lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;namespace&lt;/code&gt;: a dictionary contianing definitions of the class body (&lt;strong&gt;dict&lt;/strong&gt; attribute of the class)&lt;/li&gt;
 &lt;/ul&gt;
 
 &lt;h3 id=&quot;creating-an-abstract-class-manually-with-metaclasses&quot;&gt;Creating an abstract class manually with Metaclasses&lt;/h3&gt;
 
-&lt;p&gt;To understand metaclasses, we create an interface or abstract class implementation. Use &lt;code class=&quot;highlighter-rouge&quot;&gt;from abc import ABC, abstractmethod&lt;/code&gt; when implementing something at work.&lt;/p&gt;
+&lt;p&gt;To understand metaclasses, we create an interface or abstract class implementation. Use &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;from abc import ABC, abstractmethod&lt;/code&gt; when implementing something at work.&lt;/p&gt;
 
 &lt;div class=&quot;language-python highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;
 &lt;span class=&quot;c1&quot;&gt;# test.py
@@ -113,26 +208,26 @@ Init method called from &amp;lt;__main__.TestNetwork object at 0x7fc5e7659350&am
 
 &lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;
 
-&lt;p&gt;When we initialize &lt;code class=&quot;highlighter-rouge&quot;&gt;TestNetwork&lt;/code&gt;, the following happens&lt;/p&gt;
+&lt;p&gt;When we initialize &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TestNetwork&lt;/code&gt;, the following happens&lt;/p&gt;
 
 &lt;ul&gt;
-  &lt;li&gt;The interface init method is called twice. Once when creating the &lt;code class=&quot;highlighter-rouge&quot;&gt;NetworkInterface&lt;/code&gt; and  &lt;code class=&quot;highlighter-rouge&quot;&gt;TestNetwork&lt;/code&gt; class from the metaclass blueprint.&lt;/li&gt;
-  &lt;li&gt;In the &lt;code class=&quot;highlighter-rouge&quot;&gt;Interface&lt;/code&gt; init method, we iterate over the list of abstract methods in the parent class and make sure each one is present in the current class.&lt;/li&gt;
+  &lt;li&gt;The interface init method is called twice. Once when creating the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;NetworkInterface&lt;/code&gt; and  &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;TestNetwork&lt;/code&gt; class from the metaclass blueprint.&lt;/li&gt;
+  &lt;li&gt;In the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Interface&lt;/code&gt; init method, we iterate over the list of abstract methods in the parent class and make sure each one is present in the current class.&lt;/li&gt;
   &lt;li&gt;If we don’t find a method in the class with the same name, we raise an exception&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><category term="python" /><summary type="html">Type and Class</summary></entry><entry><title type="html">The Go Spec</title><link href="http://localhost:4000/go/2020/06/20/the-go-spec.html" rel="alternate" type="text/html" title="The Go Spec" /><published>2020-06-20T16:00:00-07:00</published><updated>2020-06-20T16:00:00-07:00</updated><id>http://localhost:4000/go/2020/06/20/the-go-spec</id><content type="html" xml:base="http://localhost:4000/go/2020/06/20/the-go-spec.html">&lt;h2 id=&quot;go-spec&quot;&gt;Go Spec&lt;/h2&gt;
+&lt;/ul&gt;</content><author><name>Hashim Colombowala</name></author><category term="python" /><summary type="html">Type and Class</summary></entry><entry><title type="html">The Go Spec</title><link href="/go/the-go-spec/" rel="alternate" type="text/html" title="The Go Spec" /><published>2020-06-20T16:00:00-07:00</published><updated>2020-06-20T16:00:00-07:00</updated><id>/go/the-go-spec</id><content type="html" xml:base="/go/the-go-spec/">&lt;h2 id=&quot;go-spec&quot;&gt;Go Spec&lt;/h2&gt;
 
-&lt;p&gt;The Go compiler can compile the Go source go with different go specs. Fo example, if you have installed go 1.14, you can compile your source with &lt;code class=&quot;highlighter-rouge&quot;&gt;Go spec 1.13&lt;/code&gt;.&lt;/p&gt;
+&lt;p&gt;The Go compiler can compile the Go source go with different go specs. Fo example, if you have installed go 1.14, you can compile your source with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;Go spec 1.13&lt;/code&gt;.&lt;/p&gt;
 
 &lt;h3 id=&quot;the-rules-for-which-version-of-the-go-spec-used-during-compilation-appear-to-be&quot;&gt;The rules for which version of the Go spec used during compilation appear to be&lt;/h3&gt;
 
 &lt;ol&gt;
-  &lt;li&gt;If your source code is stored within the &lt;code class=&quot;highlighter-rouge&quot;&gt;GOPATH&lt;/code&gt; (or you have disabled modules with &lt;code class=&quot;highlighter-rouge&quot;&gt;GO111MODULE=off&lt;/code&gt;) then the version of the Go spec used to compile matches the version of the compiler you are using. ie if you have go 1.13 installed then the go spec used will be 1.13&lt;/li&gt;
-  &lt;li&gt;If your source code is outside the &lt;code class=&quot;highlighter-rouge&quot;&gt;GOPATH&lt;/code&gt;(or &lt;code class=&quot;highlighter-rouge&quot;&gt;GO111MODULE=on&lt;/code&gt;), then the go tool will take the version from the &lt;code class=&quot;highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file&lt;/li&gt;
-  &lt;li&gt;If no &lt;code class=&quot;highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file is provided, then same as point 1&lt;/li&gt;
-  &lt;li&gt;If you are in module mode(see point 2) and no version is specified in the &lt;code class=&quot;highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file, then &lt;code class=&quot;highlighter-rouge&quot;&gt;go 1.13&lt;/code&gt; is used by default&lt;/li&gt;
+  &lt;li&gt;If your source code is stored within the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GOPATH&lt;/code&gt; (or you have disabled modules with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GO111MODULE=off&lt;/code&gt;) then the version of the Go spec used to compile matches the version of the compiler you are using. ie if you have go 1.13 installed then the go spec used will be 1.13&lt;/li&gt;
+  &lt;li&gt;If your source code is outside the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GOPATH&lt;/code&gt;(or &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;GO111MODULE=on&lt;/code&gt;), then the go tool will take the version from the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file&lt;/li&gt;
+  &lt;li&gt;If no &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file is provided, then same as point 1&lt;/li&gt;
+  &lt;li&gt;If you are in module mode(see point 2) and no version is specified in the &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;go.mod&lt;/code&gt; file, then &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;go 1.13&lt;/code&gt; is used by default&lt;/li&gt;
 &lt;/ol&gt;
 
-&lt;p&gt;The last point is interesting.&lt;/p&gt;</content><author><name></name></author><category term="go" /><summary type="html">Go Spec</summary></entry><entry><title type="html">The Zen of Python</title><link href="http://localhost:4000/book/2020/04/07/zen-of-python.html" rel="alternate" type="text/html" title="The Zen of Python" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>http://localhost:4000/book/2020/04/07/zen-of-python</id><content type="html" xml:base="http://localhost:4000/book/2020/04/07/zen-of-python.html">&lt;p&gt;Recently I came across &lt;strong&gt;this&lt;/strong&gt;&lt;/p&gt;
+&lt;p&gt;The last point is interesting.&lt;/p&gt;</content><author><name>Hashim Colombowala</name><email>hashim@hey.com</email></author><category term="go" /><summary type="html">Go Spec</summary></entry><entry><title type="html">The Zen of Python</title><link href="/book/zen-of-python/" rel="alternate" type="text/html" title="The Zen of Python" /><published>2020-04-07T18:54:00-07:00</published><updated>2020-04-07T18:54:00-07:00</updated><id>/book/zen-of-python</id><content type="html" xml:base="/book/zen-of-python/">&lt;p&gt;Recently I came across &lt;strong&gt;this&lt;/strong&gt;&lt;/p&gt;
 &lt;div class=&quot;language-zsh highlighter-rouge&quot;&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre class=&quot;highlight&quot;&gt;&lt;code&gt;&lt;span class=&quot;o&quot;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; import this
 The Zen of Python, by Tim Peters
 
@@ -155,17 +250,17 @@ Although never is often better than &lt;span class=&quot;k&quot;&gt;*&lt;/span&g
 If the implementation is hard to explain, it&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;s a bad idea.
 If the implementation is easy to explain, it may be a good idea.
 Namespaces are one honking great idea &lt;span class=&quot;nt&quot;&gt;--&lt;/span&gt; &lt;span class=&quot;nb&quot;&gt;let&lt;/span&gt;&lt;span class=&quot;se&quot;&gt;\'&lt;/span&gt;s &lt;span class=&quot;k&quot;&gt;do &lt;/span&gt;more of those!
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name></name></author><category term="book" /><summary type="html">Recently I came across this ```zsh import this The Zen of Python, by Tim Peters</summary></entry><entry><title type="html">Python decorator common use cases</title><link href="http://localhost:4000/python/decorator/2020/04/04/python-decorator-use-cases.html" rel="alternate" type="text/html" title="Python decorator common use cases" /><published>2020-04-04T15:54:35-07:00</published><updated>2020-04-04T15:54:35-07:00</updated><id>http://localhost:4000/python/decorator/2020/04/04/python-decorator-use-cases</id><content type="html" xml:base="http://localhost:4000/python/decorator/2020/04/04/python-decorator-use-cases.html">&lt;ul&gt;
-  &lt;li&gt;Timing functions. Almost always the first example on StackOverflow. (You can always use a Context Manager for these too, writing them is a good way to learn those and their &lt;code class=&quot;highlighter-rouge&quot;&gt;__enter__&lt;/code&gt; and &lt;code class=&quot;highlighter-rouge&quot;&gt;__exit__&lt;/code&gt; dunders.)&lt;/li&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/div&gt;</content><author><name>Hashim Colombowala</name><email>hashim@hey.com</email></author><category term="book" /><summary type="html">Recently I came across this ```zsh import this The Zen of Python, by Tim Peters</summary></entry><entry><title type="html">Python decorator common use cases</title><link href="/python/decorator/python-decorator-use-cases/" rel="alternate" type="text/html" title="Python decorator common use cases" /><published>2020-04-04T15:54:35-07:00</published><updated>2020-04-04T15:54:35-07:00</updated><id>/python/decorator/python-decorator-use-cases</id><content type="html" xml:base="/python/decorator/python-decorator-use-cases/">&lt;ul&gt;
+  &lt;li&gt;Timing functions. Almost always the first example on StackOverflow. (You can always use a Context Manager for these too, writing them is a good way to learn those and their &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__enter__&lt;/code&gt; and &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;__exit__&lt;/code&gt; dunders.)&lt;/li&gt;
   &lt;li&gt;Retrying functions. Bonus points for having longer times between tries per try.&lt;/li&gt;
   &lt;li&gt;Setting a maximum time for a function to finish executing, if the function is amenable to it (e.g. it runs in a loop)&lt;/li&gt;
   &lt;li&gt;Logging functions. There are tons of different types of these (and some PyPI packages that are based on this), because there are tons of different use cases for logging. They generally require a decorator factory or class, because they require parameters (such as the logger instance).&lt;/li&gt;
   &lt;li&gt;Simple debugging, sending a function’s inputs and outputs to a log or just stdout
-Validating function inputs. Python is EAFP rather than LBYL, but it’s still useful to validate inputs sometimes depending on use case. I’ve written classes that use the same decorator with a bunch of different methods. It’s also handy to CHANGE inputs if they’re in the wrong format, e.g. if the user forgets to start a url with &lt;code class=&quot;highlighter-rouge&quot;&gt;http://&lt;/code&gt;, you can add it.&lt;/li&gt;
+Validating function inputs. Python is EAFP rather than LBYL, but it’s still useful to validate inputs sometimes depending on use case. I’ve written classes that use the same decorator with a bunch of different methods. It’s also handy to CHANGE inputs if they’re in the wrong format, e.g. if the user forgets to start a url with &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;http://&lt;/code&gt;, you can add it.&lt;/li&gt;
   &lt;li&gt;Validating function outputs, for example setting a max/min.&lt;/li&gt;
   &lt;li&gt;Waiting/rate-limiting. Don’t want that web service to ban you for pinging them too frequently!&lt;/li&gt;
-  &lt;li&gt;Caching/memoization. If you’ve got an pure/idempotent (i.e. a functional programming pagradigm functions) that’s also expensive (big O/long running time) that you run several times, sometimes with the same inputs, why not cache the results so you don’t have to recalculate from scratch? Eg: &lt;code class=&quot;highlighter-rouge&quot;&gt;functools.lru_cache&lt;/code&gt;.&lt;/li&gt;
+  &lt;li&gt;Caching/memoization. If you’ve got an pure/idempotent (i.e. a functional programming pagradigm functions) that’s also expensive (big O/long running time) that you run several times, sometimes with the same inputs, why not cache the results so you don’t have to recalculate from scratch? Eg: &lt;code class=&quot;language-plaintext highlighter-rouge&quot;&gt;functools.lru_cache&lt;/code&gt;.&lt;/li&gt;
   &lt;li&gt;Gracefully handling database transactions, e.g. rolling back if there’s an Exception (although many DB-API packages come with their own ways to set this up)&lt;/li&gt;
   &lt;li&gt;Synchronization, i.e. acquiring and releasing locks in multithreading/multiprocessing applications&lt;/li&gt;
   &lt;li&gt;Authentication (this is what some web framework decorators do, i.e. make sure a user is logged in before they are allowed to do some task/access some resource)&lt;/li&gt;
-&lt;/ul&gt;</content><author><name></name></author><category term="python" /><category term="decorator" /><summary type="html">Timing functions. Almost always the first example on StackOverflow. (You can always use a Context Manager for these too, writing them is a good way to learn those and their __enter__ and __exit__ dunders.) Retrying functions. Bonus points for having longer times between tries per try. Setting a maximum time for a function to finish executing, if the function is amenable to it (e.g. it runs in a loop) Logging functions. There are tons of different types of these (and some PyPI packages that are based on this), because there are tons of different use cases for logging. They generally require a decorator factory or class, because they require parameters (such as the logger instance). Simple debugging, sending a function’s inputs and outputs to a log or just stdout Validating function inputs. Python is EAFP rather than LBYL, but it’s still useful to validate inputs sometimes depending on use case. I’ve written classes that use the same decorator with a bunch of different methods. It’s also handy to CHANGE inputs if they’re in the wrong format, e.g. if the user forgets to start a url with http://, you can add it. Validating function outputs, for example setting a max/min. Waiting/rate-limiting. Don’t want that web service to ban you for pinging them too frequently! Caching/memoization. If you’ve got an pure/idempotent (i.e. a functional programming pagradigm functions) that’s also expensive (big O/long running time) that you run several times, sometimes with the same inputs, why not cache the results so you don’t have to recalculate from scratch? Eg: functools.lru_cache. Gracefully handling database transactions, e.g. rolling back if there’s an Exception (although many DB-API packages come with their own ways to set this up) Synchronization, i.e. acquiring and releasing locks in multithreading/multiprocessing applications Authentication (this is what some web framework decorators do, i.e. make sure a user is logged in before they are allowed to do some task/access some resource)</summary></entry></feed>
+&lt;/ul&gt;</content><author><name>Hashim Colombowala</name><email>hashim@hey.com</email></author><category term="python" /><category term="decorator" /><summary type="html">Timing functions. Almost always the first example on StackOverflow. (You can always use a Context Manager for these too, writing them is a good way to learn those and their __enter__ and __exit__ dunders.) Retrying functions. Bonus points for having longer times between tries per try. Setting a maximum time for a function to finish executing, if the function is amenable to it (e.g. it runs in a loop) Logging functions. There are tons of different types of these (and some PyPI packages that are based on this), because there are tons of different use cases for logging. They generally require a decorator factory or class, because they require parameters (such as the logger instance). Simple debugging, sending a function’s inputs and outputs to a log or just stdout Validating function inputs. Python is EAFP rather than LBYL, but it’s still useful to validate inputs sometimes depending on use case. I’ve written classes that use the same decorator with a bunch of different methods. It’s also handy to CHANGE inputs if they’re in the wrong format, e.g. if the user forgets to start a url with http://, you can add it. Validating function outputs, for example setting a max/min. Waiting/rate-limiting. Don’t want that web service to ban you for pinging them too frequently! Caching/memoization. If you’ve got an pure/idempotent (i.e. a functional programming pagradigm functions) that’s also expensive (big O/long running time) that you run several times, sometimes with the same inputs, why not cache the results so you don’t have to recalculate from scratch? Eg: functools.lru_cache. Gracefully handling database transactions, e.g. rolling back if there’s an Exception (although many DB-API packages come with their own ways to set this up) Synchronization, i.e. acquiring and releasing locks in multithreading/multiprocessing applications Authentication (this is what some web framework decorators do, i.e. make sure a user is logged in before they are allowed to do some task/access some resource)</summary></entry></feed>

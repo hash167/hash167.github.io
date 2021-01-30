@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: posts
 title:  "Python decorator common use cases"
 date:   2020-04-04 15:54:35 -0700
 categories: python decorator

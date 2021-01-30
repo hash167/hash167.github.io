@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: posts
 title:  "The Zen of Python"
 date:   2020-04-07 18:54:00 -0700
 categories: book

@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: posts
 title:  "The Go Spec"
 date:   2020-06-20 16:00:00 -0700
 categories: go

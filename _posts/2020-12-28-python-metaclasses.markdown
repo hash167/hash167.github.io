@@ -1,5 +1,5 @@
 ---
-layout: post
+layout: posts
 meta_description: abstract classes
 author: Hashim Colombowala
 date: 2020-12-28 01:33:40
