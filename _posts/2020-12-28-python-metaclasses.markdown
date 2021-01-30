@@ -1,7 +1,10 @@
 ---
 layout: post
+meta_description: abstract classes
+author: Hashim Colombowala
+date: 2020-12-28 01:33:40
+intro_paragraph: Abstract classes using Metaclasses
 title:  "Abstract classes using Metaclasses"
-date:   2020-12-28 17:00:00 -0700
 categories: python
 ---
 
