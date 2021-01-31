@@ -95,7 +95,7 @@ analytics:
 author:
   name             : "Hashim Colombowala"
   avatar           : "/assets/me.jpg" # path of avatar image, e.g. "/assets/images/bio-photo.jpg"
-  bio              : "Learning to make cloud tools."
+  bio              : "Learning to make cloud tools and production ready services using Django and docker."
   location         : "Redwood City"
   email            : "hashim@hey.com"
   links:
