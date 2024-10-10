@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" 
+  xmlns:content="http://purl.org/rss/1.0/modules/content/" 
+  xmlns:dc="http://purl.org/dc/elements/1.1/" 
+  xmlns:atom="http://www.w3.org/2005/Atom" 
+  xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" 
+  xmlns:media="http://search.yahoo.com/mrss/">
+  <channel>
+    <title>Resume on Home</title>
+    <link>http://localhost:1313/tags/resume/</link>
+    <description>Recent content in Resume on Home</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en</language>
+    <managingEditor>hashim@hey.com (Hashim Colombowala)</managingEditor>
+    <webMaster>hashim@hey.com (Hashim Colombowala)</webMaster>
+    <copyright>©2024, All Rights Reserved</copyright>
+    <lastBuildDate>Wed, 27 Jan 2021 01:33:40 +0000</lastBuildDate>
+    
+        <atom:link href="http://localhost:1313/tags/resume/index.xml" rel="self" type="application/rss+xml" />
+    
+
+      
+      <item>
+        <title>Resume</title>
+        <link>http://localhost:1313/resume/</link>
+        <pubDate>Wed, 27 Jan 2021 01:33:40 +0000</pubDate>
+        <author>hashim@hey.com (Hashim Colombowala)</author>
+        <atom:modified>Wed, 27 Jan 2021 01:33:40 +0000</atom:modified>
+        <guid>http://localhost:1313/resume/</guid>
+        <description>&lt;h1 id=&#34;hashim-colombowala&#34;&gt;Hashim Colombowala&lt;/h1&gt;
+&lt;h2 id=&#34;core-experience&#34;&gt;Core experience&lt;/h2&gt;
+&lt;ul&gt;
+&lt;li&gt;Building and deploying containerized applications to AWS EKS/Fargate. Core knowledge of AWS services and infrastructure.&lt;/li&gt;
+&lt;li&gt;Observability Systems: Logging (ELK), Metrics(Prometheus) and Tracing(OTEL). Library support for python and kotlin services with web, rpc, celery, batch and kafka components. Deployment to AWS EKS Kubernetes.&lt;/li&gt;
+&lt;li&gt;Building scalable APIs and data models&lt;/li&gt;
+&lt;li&gt;Experience with software release management.&lt;/li&gt;
+&lt;li&gt;Highly knowledgeable with CI/CD systems like Buildkite, Jenkins and Drone.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;technical-skills&#34;&gt;Technical Skills&lt;/h2&gt;
+&lt;h3 id=&#34;toolset&#34;&gt;Toolset&lt;/h3&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Languages: Python, Kotlin, Golang, Bash, Groovy&lt;/p&gt;</description>
+        
+        <dc:creator>Hashim Colombowala</dc:creator>
+        
+        
+        
+        
+          
+            
+              <category>resume</category>
+            
+          
+        
+        
+        
+      </item>
+      
+
+    
+  </channel>
+</rss>
