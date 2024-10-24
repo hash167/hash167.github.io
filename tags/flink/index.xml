@@ -1,1 +1,89 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>Flink on Home</title><link>https://hashimcolombowala.com/tags/flink/</link><description>Recent content in Flink on Home</description><generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>hashim@hey.com (Hashim Colombowala)</managingEditor><webMaster>hashim@hey.com (Hashim Colombowala)</webMaster><copyright>©2024, All Rights Reserved</copyright><lastBuildDate>Mon, 07 Oct 2024 23:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/flink/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/posts/2024-10-08-kafka-flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><author>hashim@hey.com (Hashim Colombowala)</author><atom:modified>Mon, 07 Oct 2024 23:00:00 -0700</atom:modified><guid>https://hashimcolombowala.com/posts/2024-10-08-kafka-flink/</guid><description>&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p></description><dc:creator>Hashim Colombowala</dc:creator><category>flink</category><category>kotlin</category></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Flink on Hashim Colombowala</title>
+        <link>http://localhost:62050/tags/flink/</link>
+        <description>Recent content in Flink on Hashim Colombowala</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Mon, 07 Oct 2024 23:00:00 -0700</lastBuildDate><atom:link href="http://localhost:62050/tags/flink/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>What is flink and why should we care about it</title>
+        <link>http://localhost:62050/p/flink/</link>
+        <pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:62050/p/flink/</guid>
+        <description>&lt;img src="http://localhost:62050/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" /&gt;&lt;p&gt;Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Daily and monthly latency aggregations&lt;/li&gt;
+&lt;li&gt;Support for various quantiles&lt;/li&gt;
+&lt;li&gt;A reasonable data delay SLO (24 hours)&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;and more. For the purpose of this blog, we will focus on the data processing aspect. We needed a system that could read latency data from a Kafka stream, partition the data by various attributes such as endpoints, and precompute hourly, daily, and weekly quantiles (e.g., p50, p99).&lt;/p&gt;
+&lt;h2 id=&#34;why-did-we-choose-flink&#34;&gt;Why did we choose Flink?
+&lt;/h2&gt;&lt;p&gt;We chose Flink because of several key features:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Stateful processing&lt;/strong&gt;: It allows us to maintain state across events.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Built-in windowing support&lt;/strong&gt;: Flink offers windowing functions (e.g., tumbling, sliding) that divide the data stream into finite subsets (windows) based on time or count.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scalability&lt;/strong&gt;: It can handle high-throughput data streams, such as those from Kafka.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Fault tolerance&lt;/strong&gt;: Through state snapshots and checkpointing, Flink ensures resilience.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h2 id=&#34;flink-playground&#34;&gt;Flink Playground
+&lt;/h2&gt;&lt;p&gt;Naturally, besides going through the flink documentation [insert link], I decided go to my usual playground of choice. Docker. Below is the architecture. Checkout the &lt;a class=&#34;link&#34; href=&#34;https://github.com/hash167/flink_kafka_playground/blob/1dc2292f4ce0fa64fc3a41803c06ff5008955d11/README.md&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;code&lt;/a&gt; and &lt;a class=&#34;link&#34; href=&#34;https://github.com/hash167/flink_kafka_playground/blob/1dc2292f4ce0fa64fc3a41803c06ff5008955d11/docker-compose.yml#L1&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;docker-compose.yml&lt;/a&gt; for more information. Below is the basic architecture.&lt;/p&gt;
+&lt;script type=&#34;module&#34;&gt;
+    import mermaid from &#39;https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs&#39;;
+    mermaid.initialize({ startOnLoad: true });
+  &lt;/script&gt;
+  &lt;div class=&#34;mermaid&#34;&gt;
+  
+graph TD;
+    P[&#34;Python App (produces latency data)&#34;] --&gt; A[&#34;Kafka Broker (latency topic)&#34;]
+    %% Python app produces random latency data and sends it to the Kafka broker
+    A --&gt; B[&#34;Flink Pipeline&#34;]
+    %% Kafka Broker receives latency messages produced by the Python app, which are consumed by the Flink pipeline for processing
+    B --&gt; C[&#34;1-Minute Tumbling Window&#34;]
+    %% The Flink Pipeline splits the data stream into a 1-minute tumbling window for short-term aggregation
+    B --&gt; D[&#34;1-Hour Tumbling Window&#34;]
+    %% The Flink Pipeline also splits the data stream into a 1-hour tumbling window for long-term aggregation
+    C --&gt; E[&#34;P50/P99 Aggregation&#34;]
+    %% Once the 1-minute window is over, the data is processed to calculate P50 and P99 latency metrics
+    D --&gt; F[&#34;P50/P99 Aggregation&#34;]
+    %% Once the 1-hour window is over, the data is also processed to calculate P50 and P99 latency metrics
+    E --&gt; G[&#34;Storage System (P50/P99 results)&#34;]
+    %% The aggregated results from the 1-minute window are sent to a storage system for further use
+    F --&gt; G[&#34;Storage System (P50/P99 results)&#34;]
+    %% The aggregated results from the 1-hour window are also sent to a storage system for further use
+
+  &lt;/div&gt;
+&lt;h2 id=&#34;so-what-impressed-me&#34;&gt;So what impressed me?
+&lt;/h2&gt;&lt;p&gt;Flink&amp;rsquo;s brilliance lies in its ability to effortlessly handle the complexity of distributed stream processing with concise, expressive code. take this one line for example&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-kotlin&#34; data-lang=&#34;kotlin&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;val&lt;/span&gt; &lt;span class=&#34;py&#34;&gt;oneMinuteWindows&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;latencyStream&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;keyBy&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;({&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;it&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;timestamp&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;/&lt;/span&gt; &lt;span class=&#34;m&#34;&gt;60000&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;},&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;TypeInformation&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;of&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;object&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;: &lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;TypeHint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Long&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{}))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;window&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;TumblingProcessingTimeWindows&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;of&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;Time&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;minutes&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;m&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;process&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;LatencyAggregateProcessFunction&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;())&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;returns&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;TypeInformation&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;of&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;object&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;: &lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;TypeHint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;AggregateResult&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;&amp;gt;()&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;{}))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;Flink simplifies real-time data processing by abstracting away many low-level concerns while giving developers precise control over time, state, and computation. In this single line, Flink allows us to:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Partition the stream&lt;/strong&gt;: The keyBy function logically partitions the incoming latencyStream based on timestamps, so each partition processes its events independently, enabling scalability in distributed environments.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Windowing&lt;/strong&gt;: Using TumblingProcessingTimeWindows.of(Time.minutes(1)), Flink groups the data into 1-minute windows based on event processing time, making it easy to aggregate data over defined time intervals.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Custom processing&lt;/strong&gt;: The process function applies a user-defined LatencyAggregateProcessFunction for calculating latency metrics, allowing custom logic to be executed for each window.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Type safety and efficiency&lt;/strong&gt;: Using Flink’s TypeHint, we ensure type safety and help optimize serialization and deserialization in distributed environments, which enhances performance.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;This one-liner hides a ton of complexity — from fault tolerance to scaling — and Flink’s ability to marry simplicity with powerful distributed processing is where it shines. In just a few lines of code, you have a resilient, scalable, and efficient stream processing pipeline!&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

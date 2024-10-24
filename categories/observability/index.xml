@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Observability on Hashim Colombowala</title>
+        <link>http://localhost:62050/categories/observability/</link>
+        <description>Recent content in Observability on Hashim Colombowala</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Wed, 09 Oct 2024 21:00:00 -0700</lastBuildDate><atom:link href="http://localhost:62050/categories/observability/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Another Off-by-One (Mostly) Problem and Prometheus Counter Spikes</title>
+        <link>http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/</link>
+        <pubDate>Wed, 09 Oct 2024 21:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/</guid>
+        <description>&lt;h3 id=&#34;the-problem&#34;&gt;The Problem
+&lt;/h3&gt;&lt;p&gt;We have observed several Prometheus counters showing false spikes (i.e., no matching increase in logs) that could correlate with nodes experiencing kernel panics and reboots.&lt;/p&gt;
+&lt;h3 id=&#34;why-do-counters-spike&#34;&gt;Why Do Counters Spike?
+&lt;/h3&gt;&lt;p&gt;In Prometheus, counters are expected to be monotonic: they can never decrease. The only time a counter timeseries can decrease is if it is reset to zero (e.g., when a container restarts).&lt;/p&gt;
+&lt;p&gt;The PromQL functions &lt;code&gt;increase()&lt;/code&gt; and &lt;code&gt;rate()&lt;/code&gt; have special logic to handle counter resets like this. If a counter has a value of 100 and the next data point is 99, it is assumed that the timeseries was first reset to 0 and then incremented 99 more times. This would cause a jump of 99 in most graphs.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph.png&#34;
+	width=&#34;1492&#34;
+	height=&#34;513&#34;
+	srcset=&#34;http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu10347298088471375106.png 480w, http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu2622312036944885573.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Graph&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;290&#34;
+		data-flex-basis=&#34;698px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;background&#34;&gt;Background
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Our Python app is running on a Gunicorn server with multiple workers. This means multiple Python processes are serving requests because Python&amp;rsquo;s threading is restricted by the Global Interpreter Lock (GIL). Using multiprocessing is a good workaround.&lt;/li&gt;
+&lt;li&gt;The app is running on a pod on a Kubernetes node.&lt;/li&gt;
+&lt;li&gt;This app is instrumented with the Prometheus Python client in multiprocessing mode because each worker process runs independently and maintains separate metrics. Multiprocessing mode aggregates these metrics across all workers, ensuring that Prometheus scrapes produce accurate, unified data across the entire application, reflecting all requests handled by all workers.&lt;/li&gt;
+&lt;li&gt;In multiprocessing mode, each process writes its metrics to a separate &lt;a class=&#34;link&#34; href=&#34;https://github.com/prometheus/client_python/blob/v0.12.0/prometheus_client/mmap_dict.py#L61-L69&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;set of mmapped files&lt;/a&gt;. On scrape, the exporter web server reads all of these files and merges them (i.e., counters from process A and B are summed). In our Kubernetes setup, these files are stored in &lt;code&gt;/tmp&lt;/code&gt;, which is mounted as a Kubernetes &lt;code&gt;emptyDir&lt;/code&gt; volume in most of our workloads.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;how-are-reboots-causing-spikes&#34;&gt;How Are Reboots Causing Spikes?
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/concepts/storage/volumes/#emptydir&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;It turns out the &lt;code&gt;emptyDir&lt;/code&gt; mounted to &lt;code&gt;/tmp&lt;/code&gt; persists across container crashes&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We were able to exec into a pod that experienced a node reboot and confirmed that the filesystem timestamps in the metric files predated the node reboot by several days.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell.png&#34;
+	width=&#34;1600&#34;
+	height=&#34;1303&#34;
+	srcset=&#34;http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu13800648201417889505.png 480w, http://localhost:62050/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu6015823213156503612.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Shell&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;122&#34;
+		data-flex-basis=&#34;294px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;This means that after a reboot, pods are coming back with their old counter values&lt;/strong&gt;. This would normally be fine as long as the node is not down for too long—the counter would just resume at the previous value and see no reset, as long as it hasn&amp;rsquo;t fallen out of the backend aggregator&amp;rsquo;s buffer (which has a 10-minute window in our setup).&lt;/p&gt;
+&lt;p&gt;In the backend, we drilled into the raw data points for the counter during one of the spikes and noticed it was incrementing and then decrementing by exactly one:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;TIMESTAMP&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;VALUE&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:05:05.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72929&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:05:35.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72929&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:06:05.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72930&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:06:35.371-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72930&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:07:05.371-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:07:35.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:08:05.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72933&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:10:59.487-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932 &lt;code&gt;(decrease in counter)&lt;/code&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:11:29.496-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:11:59.5-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:12:29.489-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;sequence-of-events&#34;&gt;Sequence of Events
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;The application process increments a counter from &lt;em&gt;n&lt;/em&gt; to &lt;em&gt;n+1&lt;/em&gt; and writes the value to the mmapped file. This writes to the Linux kernel&amp;rsquo;s page cache (and is not immediately flushed to disk).&lt;/li&gt;
+&lt;li&gt;A scrape occurs. The multiprocess exporter opens and reads all files. The kernel sees some of the files are already in the page cache and skips reading them from disk. The scrape exports the counter as &lt;em&gt;n+1&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;A kernel panic happens before the page cache is flushed to disk. The counter increment is lost.&lt;/li&gt;
+&lt;li&gt;The node encounters a kernel panic and reboots. Since the shutdown was not graceful, pods remain assigned to the node, so after startup containers are restarted with the same pod names, etc. Since the pod name is the same, the &lt;code&gt;emptyDir&lt;/code&gt; volume is reused, and the pod keeps the last counter value that was flushed to disk (&lt;em&gt;n&lt;/em&gt;).&lt;/li&gt;
+&lt;li&gt;A scrape occurs, and we export the counter with a value of &lt;em&gt;n&lt;/em&gt;. Prometheus queries run &lt;code&gt;increase([..., n+1, n])&lt;/code&gt;, which is interpreted as an increase of &lt;em&gt;n&lt;/em&gt;, causing a spike.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;However, we have not attempted to reproduce this behavior to confirm this theory. Since this depends on the timing of the kernel writing the dirty page to disk and the kernel panic, it also makes sense that we would not see this behavior consistently with node restarts.&lt;/p&gt;
+&lt;h3 id=&#34;how-can-we-fix-it&#34;&gt;How Can We Fix It?
+&lt;/h3&gt;&lt;p&gt;While a fix for the node reboot issue has been identified, we can be more robust here. The simplest solution is to clear out the metric files in &lt;code&gt;/tmp&lt;/code&gt; on startup. Prometheus is designed for this—counter resets are normal.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;We could set the Prometheus multiproc directory to a memory-backed &lt;code&gt;emptyDir&lt;/code&gt; volume (&lt;code&gt;emptyDir.medium: Memory&lt;/code&gt;). This would naturally be cleared on node restart. This would make writes count against container memory instead.&lt;/li&gt;
+&lt;li&gt;We could add an init container that runs &lt;code&gt;rm $PROMETHEUS_MULTIPROC_DIR/*.db&lt;/code&gt; on startup. This might impact pod start time slightly but is the simplest solution.&lt;/li&gt;
+&lt;li&gt;We could make the application delete &lt;code&gt;$PROMETHEUS_MULTIPROC_DIR/*.db&lt;/code&gt; on startup.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;conclusion&#34;&gt;Conclusion
+&lt;/h3&gt;&lt;p&gt;So here we have it. An off-by-one (decrement to the count) can lead to an increment of 99. Who would have thought.&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Designing a metrics system notes</title>
+        <link>http://localhost:62050/p/designing-a-metrics-system-notes/</link>
+        <pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate>
+        
+        <guid>http://localhost:62050/p/designing-a-metrics-system-notes/</guid>
+        <description>&lt;p&gt;To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p&gt;
+&lt;h3 id=&#34;requirements-for-a-metrics-system&#34;&gt;Requirements for a Metrics System
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Multidimensional Data Model&lt;/strong&gt;: The metrics system should support a multidimensional data model that can be sliced and diced along different dimensions as defined by the service (e.g., instance, service, endpoint, method).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Operational Simplicity&lt;/strong&gt;: The system should be easy to operate and maintain, minimizing overhead and complexity.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scalable Data Collection&lt;/strong&gt;: The system must support scalable data collection and offer a decentralized architecture, allowing independent teams to set up their own monitoring servers.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Powerful Query Language&lt;/strong&gt;: A powerful query language should be available to leverage the data model for alerting and graphing, enabling precise insights into system performance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;client-libraries&#34;&gt;Client Libraries
+&lt;/h3&gt;&lt;p&gt;Client libraries play an essential role in the metrics system:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;They handle details like thread safety, bookkeeping, and producing the Prometheus text exposition format in response to HTTP requests.&lt;/li&gt;
+&lt;li&gt;Since metrics-based monitoring doesn&amp;rsquo;t track individual events, client library memory usage doesn&amp;rsquo;t increase with more events. Instead, memory usage depends on the number of metrics being tracked.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;instrumentation&#34;&gt;Instrumentation
+&lt;/h3&gt;&lt;p&gt;To effectively monitor different types of services, appropriate instrumentation methods must be used. Here are three common types of services and how they should be instrumented:&lt;/p&gt;
+&lt;h4 id=&#34;online-serving-systems&#34;&gt;Online-Serving Systems
+&lt;/h4&gt;&lt;p&gt;For online-serving systems, such as web services, the &lt;strong&gt;RED Method&lt;/strong&gt; is used. This method involves tracking:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Requests&lt;/strong&gt;: The count of incoming requests.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Errors&lt;/strong&gt;: The count of failed requests.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Duration&lt;/strong&gt;: The latency or response time of requests.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For example, a cache might track these metrics for both overall performance and for cache misses that need to be recalculated or fetched from a backend.&lt;/p&gt;
+&lt;h4 id=&#34;offline-serving-systems&#34;&gt;Offline-Serving Systems
+&lt;/h4&gt;&lt;p&gt;Offline-serving systems, such as log processors, usually batch up work and consist of multiple stages in a pipeline with queues in between. These systems run continuously, which distinguishes them from batch jobs. The &lt;strong&gt;USE Method&lt;/strong&gt; is used for these types of systems:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Utilization&lt;/strong&gt;: How much of the system&amp;rsquo;s capacity is in use (e.g., how much work is in progress).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Saturation&lt;/strong&gt;: The amount of queued work and how much work is currently being processed.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Errors&lt;/strong&gt;: Any errors encountered during processing.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;batch-jobs&#34;&gt;Batch Jobs
+&lt;/h4&gt;&lt;p&gt;Batch jobs are processes that run at scheduled intervals. The key metrics for batch jobs include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Run Time&lt;/strong&gt;: How long it took for the job to complete.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stage Duration&lt;/strong&gt;: How long each stage of the job took to complete.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Success Time&lt;/strong&gt;: The time at which the job last succeeded.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Alerts can be set for when the job hasn&amp;rsquo;t succeeded within a certain time frame.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Idempotency for Batch Jobs&lt;/strong&gt;: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

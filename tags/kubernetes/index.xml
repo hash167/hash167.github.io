@@ -1,1 +1,122 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:sy="http://purl.org/rss/1.0/modules/syndication/" xmlns:media="http://search.yahoo.com/mrss/"><channel><title>Kubernetes on Home</title><link>https://hashimcolombowala.com/tags/kubernetes/</link><description>Recent content in Kubernetes on Home</description><generator>Hugo -- gohugo.io</generator><language>en</language><managingEditor>hashim@hey.com (Hashim Colombowala)</managingEditor><webMaster>hashim@hey.com (Hashim Colombowala)</webMaster><copyright>©2024, All Rights Reserved</copyright><lastBuildDate>Sat, 12 Oct 2024 23:00:35 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/kubernetes/index.xml" rel="self" type="application/rss+xml"/><item><title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title><link>https://hashimcolombowala.com/posts/2024-10-12-k8s-controller-1/</link><pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate><author>hashim@hey.com (Hashim Colombowala)</author><atom:modified>Sat, 12 Oct 2024 23:00:35 -0700</atom:modified><guid>https://hashimcolombowala.com/posts/2024-10-12-k8s-controller-1/</guid><description>&lt;p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&amp;rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.&lt;/p></description><dc:creator>Hashim Colombowala</dc:creator><category>kubernetes</category><category>controllers-1</category></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Kubernetes on Hashim Colombowala</title>
+        <link>http://localhost:62050/tags/kubernetes/</link>
+        <description>Recent content in Kubernetes on Hashim Colombowala</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Sat, 12 Oct 2024 23:00:35 -0700</lastBuildDate><atom:link href="http://localhost:62050/tags/kubernetes/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title>
+        <link>http://localhost:62050/p/custom-resource-definitions-crds-and-extending-kubernetes/</link>
+        <pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate>
+        
+        <guid>http://localhost:62050/p/custom-resource-definitions-crds-and-extending-kubernetes/</guid>
+        <description>&lt;p&gt;Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&amp;rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.&lt;/p&gt;
+&lt;p&gt;By defining a CRD, we essentially added a new table to Kubernetes&amp;rsquo; internal document store via the API server (etcd). This resource could now be interacted with just like any built-in Kubernetes object. Using tools like &lt;code&gt;kubectl&lt;/code&gt;, we could create, update, and delete instances of this new resource, seamlessly integrating it with existing workflows.&lt;/p&gt;
+&lt;p&gt;By using CRDs and controllers, we can offer reusable services to our teams while avoiding the overhead of developing new APIs from scratch. The built-in Kubernetes ecosystem provides authentication, authorization, and even CLI tooling for free, significantly reducing development time and complexity.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Why Use CRDs?&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Kubernetes controllers reconcile the desired state of resources with their actual state, and we can create custom controllers using tools as simple as Bash.&lt;/li&gt;
+&lt;li&gt;Custom Resource Definitions (CRDs) allow you to extend Kubernetes to meet your organization&amp;rsquo;s specific needs, making it a powerful platform not just for containers, but for custom orchestration tasks.&lt;/li&gt;
+&lt;li&gt;Instead of building new microservices, leveraging Kubernetes CRDs and controllers lets you create powerful, integrated solutions that are already compatible with Kubernetes&amp;rsquo; tooling and infrastructure.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Consistency&lt;/strong&gt;: Using CRDs means everything—even your own internal processes—can be treated like a Kubernetes resource, managed consistently with the rest of your cluster.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tooling Integration&lt;/strong&gt;: CRDs get the same benefits as built-in Kubernetes objects. You can use &lt;code&gt;kubectl&lt;/code&gt; to interact with them, and they integrate seamlessly with Kubernetes&amp;rsquo; authentication, authorization, and RBAC policies.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Modular Infrastructure&lt;/strong&gt;: By using custom resources, you can create more modular infrastructure, which makes scaling easier. Your &lt;code&gt;LoadTest&lt;/code&gt; or &lt;code&gt;CronTask&lt;/code&gt; controller can run independently of your other services.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;how-crds-work&#34;&gt;How CRDs Work
+&lt;/h3&gt;&lt;p&gt;CRDs work by allowing you to register new types of resources with the Kubernetes API server. The Kubernetes API server is the brain behind Kubernetes. It stores information about the cluster&amp;rsquo;s state, using etcd as an internal document store, and ensures that whatever you&amp;rsquo;ve defined—a number of Pods running, a particular service being exposed—matches reality. etcd functions as a distributed key-value store where all the cluster&amp;rsquo;s state information, including your custom resources, is stored. With CRDs, you get to extend the brain to understand new resources that you define.&lt;/p&gt;
+&lt;p&gt;The process is straightforward:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;strong&gt;Define Your Custom Resource&lt;/strong&gt;: You describe what your new resource looks like. This could include fields like &lt;code&gt;method&lt;/code&gt; and &lt;code&gt;endpoint&lt;/code&gt; for a &lt;code&gt;LoadTest&lt;/code&gt; resource.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Register It with the API Server&lt;/strong&gt;: Using a YAML or JSON file, you apply your CRD to the Kubernetes cluster. This lets the API server know about your new resource type.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Write Controllers&lt;/strong&gt;: Controllers are programs that watch your resources and ensure the state matches what you&amp;rsquo;ve defined. For your &lt;code&gt;LoadTest&lt;/code&gt;, this could mean watching for new requests and kicking off an actual load test when one appears.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;Once you&amp;rsquo;ve done this, your Kubernetes cluster now understands this new type of resource—and you can manage these resources using the same tools and commands as any other part of Kubernetes.&lt;/p&gt;
+&lt;h3 id=&#34;a-simple-example-load-testing-as-a-crd&#34;&gt;A Simple Example: Load Testing as a CRD
+&lt;/h3&gt;&lt;p&gt;Imagine you want a way for your developers to request a load test easily—no extra tooling, no separate scripts, just a simple definition. You could define a &lt;code&gt;LoadTest&lt;/code&gt; custom resource, which has fields for the test duration, endpoint to test, and type of HTTP request. Checkout this [Github repo](&lt;a class=&#34;link&#34; href=&#34;https://github.com/hash167/kubernetes_controller&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;https://github.com/hash167/kubernetes_controller&lt;/a&gt;) for a controller written in bash which watches for events about the CRD.&lt;/p&gt;
+&lt;p&gt;Here&amp;rsquo;s a simple &lt;code&gt;LoadTest&lt;/code&gt; definition:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
+&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
+&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
+&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
+&lt;td class=&#34;lntd&#34;&gt;
+&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;apiVersion&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;apiextensions.k8s.io/v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;CustomResourceDefinition&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;metadata&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;loadtests.platform.mycompany.com&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;group&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;platform.mycompany.com&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;versions&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;v1&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;served&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;storage&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;kc&#34;&gt;true&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;schema&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;openAPIV3Schema&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;object&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;          &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;properties&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;spec&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;object&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;              &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;properties&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;endpoint&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;string&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;duration&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;string&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;method&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;                  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;string&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;scope&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;Namespaced&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;names&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;plural&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;loadtests&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;singular&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;loadtest&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;kind&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;LoadTest&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;shortNames&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;lt&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
+&lt;/div&gt;
+&lt;/div&gt;&lt;p&gt;The updated CRD definition can also be found in the GitHub repository &lt;a class=&#34;link&#34; href=&#34;https://github.com/hash167/kubernetes_controller/blob/main/k8s/crd.yaml&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;After defining this CRD and applying it, your developers can create &lt;code&gt;LoadTest&lt;/code&gt; resources just like they create Pods or Deployments. A controller you build (or use off the shelf) would then watch for &lt;code&gt;LoadTest&lt;/code&gt; resources and initiate the load test accordingly.&lt;/p&gt;
+&lt;h3 id=&#34;why-use-crds&#34;&gt;Why Use CRDs?
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Consistency&lt;/strong&gt;: Using CRDs means everything—even your own internal processes—can be treated like a Kubernetes resource, managed consistently with the rest of your cluster.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Tooling Integration&lt;/strong&gt;: CRDs get the same benefits as built-in Kubernetes objects. You can use &lt;code&gt;kubectl&lt;/code&gt; to interact with them, and they integrate seamlessly with Kubernetes&amp;rsquo; authentication, authorization, and RBAC policies.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Modular Infrastructure&lt;/strong&gt;: By using custom resources, you can create more modular infrastructure, which makes scaling easier. Your &lt;code&gt;LoadTest&lt;/code&gt; or &lt;code&gt;CronTask&lt;/code&gt; controller can run independently of your other services.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;wrap-up&#34;&gt;Wrap-Up
+&lt;/h3&gt;&lt;p&gt;CRDs let you harness the full power of Kubernetes beyond managing containers. By integrating custom resources into the Kubernetes API, you bring consistency, power, and scalability to your workflows.&lt;/p&gt;
+&lt;p&gt;The best way to understand CRDs is to experiment—try extending Kubernetes with something that matches your team&amp;rsquo;s needs. And remember, Kubernetes is a platform that can grow with you—so don&amp;rsquo;t be afraid to push its boundaries.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
