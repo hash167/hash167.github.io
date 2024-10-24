@@ -1,691 +1,611 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>Python on Hashim Colombowala</title>
-        <link>http://localhost:62050/tags/python/</link>
-        <description>Recent content in Python on Hashim Colombowala</description>
-        <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
-        <lastBuildDate>Sat, 02 Jul 2022 14:30:00 +0000</lastBuildDate><atom:link href="http://localhost:62050/tags/python/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Learning Generics by extending the prometheus python client</title>
-        <link>http://localhost:62050/p/learning-generics-by-extending-the-prometheus-python-client/</link>
-        <pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate>
-        
-        <guid>http://localhost:62050/p/learning-generics-by-extending-the-prometheus-python-client/</guid>
-        <description>&lt;p&gt;Imagine you&amp;rsquo;re writing a library to extend the &lt;a class=&#34;link&#34; href=&#34;https://github.com/prometheus/client_python&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;prometheus python client&lt;/a&gt; and you needed to add some dynamic labels specific to the environment. Ideally you would add most of your labels at the collector end and avoid writing extensions.&lt;/p&gt;
-&lt;p&gt;Say you need to inject some dynamic labels and you will need to at some point, we may want to extend the client.&lt;/p&gt;
-&lt;h2 id=&#34;what-are-generics-and-why-do-we-use-them-in-python&#34;&gt;What are Generics? and why do we use them in python?
-&lt;/h2&gt;&lt;p&gt;Without sacrificing the inherent safety of a statically typed language, generic programming gives us primitives to declare “placeholder types” that allow us to focus less on the specific types that may be used or declared by other portions of the codebase, but rather focus on these higher-level patterns that can be consolidated into simpler declarations.&lt;/p&gt;
-&lt;p&gt;Python has no built-in type checking. As long as a given Python program is syntactically valid, it will run, and issues like incompatible types will only surface at runtime. This forces the developer to ensure there is error handling in place to deal with such errors, and even with this, a common best practice is to use &lt;a class=&#34;link&#34; href=&#34;https://docs.python.org/3/library/typing.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;type hints&lt;/a&gt; combined with third-party linting tools to try to stay on top of issues like this.&lt;/p&gt;
-&lt;p&gt;Generics in my opinion is a programming stype for statically typed languages brought into python via type hints.&lt;/p&gt;
-&lt;h2 id=&#34;some-code-with-comments&#34;&gt;Some code with comments
-&lt;/h2&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;from prometheus_client import Counter as _PromCounter
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;from prometheus_client import Histogram as _PromHistogram
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;from typing import TypeVar, Generics
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# a new generic type, bound to two types
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;_MetricsTypeT = TypeVar(&amp;#39;_MetricsTypeT&amp;#39;, bound=[_PromCounter, _PromHistogram])
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# base class of type generic(child class to pass type in)
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;class _MetricsBase(Generic[_MetricsTypeT]):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    def __init__(self, label_names: Iterable[str]):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        self.default_labels: Dict[str] = get_default_labels()
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        self.all_label_names: list = list(label_names) + list(self.default_labels.keys())
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        self._parent_metric: _MetricsTypeT = None
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    # Provides the label functionality
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    def labels(self, *labelargs, **labelkwargs) -&amp;gt; _MetricsTypeT:            
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        if labelargs:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            labelargs += tuple(self.default_labels.values())
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            return cast(_MetricsTypeT, self._parent_metric.labels(*labelargs))
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        labelkwargs.update(self.default_labels)
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        return cast(_MetricsTypeT, self._parent_metric.labels(**labelkwargs))
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;# child class passing in type to base class via generics
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;class Counter(_MetricsBase[_PromCounter]):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    def __init__(self, name, documentation, labelnames=()):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        super().__init__(label_names=labelnames)
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        self._parent_metric = _PromCounter(
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            name=name, documentation=documentation,
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            labelnames=self.all_label_names)
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;Complete code &lt;a class=&#34;link&#34; href=&#34;https://github.com/hash167/prom_client_generics/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;here&lt;/a&gt;&lt;/p&gt;
-&lt;h2 id=&#34;the-final-world&#34;&gt;The final world
-&lt;/h2&gt;&lt;p&gt;In my project, I used generics programing to type my base class. My base clase _MetricsBase accepts a Generic type, passed in by classes(Counter, Histogram) inheritering from it. The common method label returns the generic type passed in from the child class. When we use third party linters like &lt;a class=&#34;link&#34; href=&#34;https://github.com/python/mypy&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;mypy&lt;/a&gt;, we get some of the controll of statically typed languages with python&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>Designing a metrics system notes</title>
-        <link>http://localhost:62050/p/designing-a-metrics-system-notes/</link>
-        <pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate>
-        
-        <guid>http://localhost:62050/p/designing-a-metrics-system-notes/</guid>
-        <description>&lt;p&gt;To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p&gt;
-&lt;h3 id=&#34;requirements-for-a-metrics-system&#34;&gt;Requirements for a Metrics System
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Multidimensional Data Model&lt;/strong&gt;: The metrics system should support a multidimensional data model that can be sliced and diced along different dimensions as defined by the service (e.g., instance, service, endpoint, method).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Operational Simplicity&lt;/strong&gt;: The system should be easy to operate and maintain, minimizing overhead and complexity.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Scalable Data Collection&lt;/strong&gt;: The system must support scalable data collection and offer a decentralized architecture, allowing independent teams to set up their own monitoring servers.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Powerful Query Language&lt;/strong&gt;: A powerful query language should be available to leverage the data model for alerting and graphing, enabling precise insights into system performance.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;client-libraries&#34;&gt;Client Libraries
-&lt;/h3&gt;&lt;p&gt;Client libraries play an essential role in the metrics system:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;They handle details like thread safety, bookkeeping, and producing the Prometheus text exposition format in response to HTTP requests.&lt;/li&gt;
-&lt;li&gt;Since metrics-based monitoring doesn&amp;rsquo;t track individual events, client library memory usage doesn&amp;rsquo;t increase with more events. Instead, memory usage depends on the number of metrics being tracked.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;instrumentation&#34;&gt;Instrumentation
-&lt;/h3&gt;&lt;p&gt;To effectively monitor different types of services, appropriate instrumentation methods must be used. Here are three common types of services and how they should be instrumented:&lt;/p&gt;
-&lt;h4 id=&#34;online-serving-systems&#34;&gt;Online-Serving Systems
-&lt;/h4&gt;&lt;p&gt;For online-serving systems, such as web services, the &lt;strong&gt;RED Method&lt;/strong&gt; is used. This method involves tracking:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Requests&lt;/strong&gt;: The count of incoming requests.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Errors&lt;/strong&gt;: The count of failed requests.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Duration&lt;/strong&gt;: The latency or response time of requests.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;For example, a cache might track these metrics for both overall performance and for cache misses that need to be recalculated or fetched from a backend.&lt;/p&gt;
-&lt;h4 id=&#34;offline-serving-systems&#34;&gt;Offline-Serving Systems
-&lt;/h4&gt;&lt;p&gt;Offline-serving systems, such as log processors, usually batch up work and consist of multiple stages in a pipeline with queues in between. These systems run continuously, which distinguishes them from batch jobs. The &lt;strong&gt;USE Method&lt;/strong&gt; is used for these types of systems:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Utilization&lt;/strong&gt;: How much of the system&amp;rsquo;s capacity is in use (e.g., how much work is in progress).&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Saturation&lt;/strong&gt;: The amount of queued work and how much work is currently being processed.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Errors&lt;/strong&gt;: Any errors encountered during processing.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h4 id=&#34;batch-jobs&#34;&gt;Batch Jobs
-&lt;/h4&gt;&lt;p&gt;Batch jobs are processes that run at scheduled intervals. The key metrics for batch jobs include:&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Run Time&lt;/strong&gt;: How long it took for the job to complete.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Stage Duration&lt;/strong&gt;: How long each stage of the job took to complete.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Success Time&lt;/strong&gt;: The time at which the job last succeeded.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;Alerts can be set for when the job hasn&amp;rsquo;t succeeded within a certain time frame.&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;Idempotency for Batch Jobs&lt;/strong&gt;: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>Comparing Session-Based and Token-Based Authentication</title>
-        <link>http://localhost:62050/p/comparing-session-based-and-token-based-authentication/</link>
-        <pubDate>Fri, 18 Jun 2021 12:33:40 +0000</pubDate>
-        
-        <guid>http://localhost:62050/p/comparing-session-based-and-token-based-authentication/</guid>
-        <description>&lt;p&gt;This post will briefly compare and contrast the two most common authentication techniques: session-based and token-based authentication. Understanding the differences between these methods is crucial for selecting the right approach for your application&amp;rsquo;s needs.&lt;/p&gt;
-&lt;h2 id=&#34;session-based-authentication&#34;&gt;Session-Based Authentication
-&lt;/h2&gt;&lt;p&gt;In session-based authentication, the server creates a session for the user after the user logs in. The server generates a &lt;code&gt;session id&lt;/code&gt; that is stored in memory or an external cache for horizontal scaling. The client stores the session ID in a &lt;code&gt;cookie&lt;/code&gt; and sends it in the request header for every subsequent request.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Cookie: &lt;span class=&#34;nv&#34;&gt;JSESSIONID&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;ABAD1D
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;The server can verify the user by comparing the session ID in the cookie against the session information stored in cache and respond accordingly.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:62050/p/comparing-session-based-and-token-based-authentication/auth/session_auth.png&#34;
-	width=&#34;576&#34;
-	height=&#34;323&#34;
-	srcset=&#34;http://localhost:62050/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu6257918187294685625.png 480w, http://localhost:62050/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu7317305386953131357.png 1024w&#34;
-	loading=&#34;lazy&#34;
-	
-		alt=&#34;Session Auth&#34;
-	
-	
-		class=&#34;gallery-image&#34; 
-		data-flex-grow=&#34;178&#34;
-		data-flex-basis=&#34;427px&#34;
-	
-&gt;&lt;/p&gt;
-&lt;h2 id=&#34;token-based-authentication&#34;&gt;Token-Based Authentication
-&lt;/h2&gt;&lt;p&gt;In token-based authentication, the server generates a &lt;a class=&#34;link&#34; href=&#34;https://en.wikipedia.org/wiki/JSON_Web_Token&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;JWT (JSON Web Token)&lt;/a&gt; with a secret and sends it to the client. The client stores the JWT in a cookie or local browser memory. Subsequent requests made to the server include the JWT in the header:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Authorization: Bearer eyJhbGciOiJIUzI1NiIXVCJ9TJV
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;The server validates the JWT to verify the user and respond accordingly.&lt;/p&gt;
-&lt;p&gt;&lt;img src=&#34;http://localhost:62050/p/comparing-session-based-and-token-based-authentication/auth/token_auth.png&#34;
-	width=&#34;1186&#34;
-	height=&#34;885&#34;
-	srcset=&#34;http://localhost:62050/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu17119966753451935353.png 480w, http://localhost:62050/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu3468419247374115684.png 1024w&#34;
-	loading=&#34;lazy&#34;
-	
-		alt=&#34;Token Auth&#34;
-	
-	
-		class=&#34;gallery-image&#34; 
-		data-flex-grow=&#34;134&#34;
-		data-flex-basis=&#34;321px&#34;
-	
-&gt;&lt;/p&gt;
-&lt;h2 id=&#34;session-vs-token-authentication&#34;&gt;Session vs. Token Authentication
-&lt;/h2&gt;&lt;h3 id=&#34;tokens-jwt&#34;&gt;Tokens (JWT)
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;Can work cross-origin across different domains. Downstream services can share tokens.&lt;/li&gt;
-&lt;li&gt;JWT-based authentication scales well horizontally because tokens are stored on the client side.&lt;/li&gt;
-&lt;li&gt;Provides integrity protection using a signature or MAC.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;sessions&#34;&gt;Sessions
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;Offers more control over sessions, as they are easier to invalidate. JWTs remain valid until their expiration date is reached.&lt;/li&gt;
-&lt;li&gt;If a JWT contains a lot of data, it can slow down client requests. Session IDs are lightweight strings, making them more efficient. OAuth2 solves this issue by using short-lived access tokens and long-lived refresh tokens.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h2 id=&#34;conclusion&#34;&gt;Conclusion
-&lt;/h2&gt;&lt;p&gt;Most production services can work with either authentication model, so the choice depends on the use case. In fact, many systems use a hybrid model that combines both types of authentication, with the JWT being associated with a user session for user tracking.&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>Signalling docker containers</title>
-        <link>http://localhost:62050/p/signalling-docker-containers/</link>
-        <pubDate>Wed, 27 Jan 2021 01:33:40 +0000</pubDate>
-        
-        <guid>http://localhost:62050/p/signalling-docker-containers/</guid>
-        <description>&lt;p&gt;When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;set&lt;/span&gt; -o nounset
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;set&lt;/span&gt; -x
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;gunicorn --config config/gunicorn/&lt;span class=&#34;nv&#34;&gt;$GUNICORN_CONFIG&lt;/span&gt;.py config.wsgi
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;Here we are executing the gunicorn service with PID 1 when the container is deployed. Suppose we want to terminate the container with a &lt;code&gt;docker stop &amp;lt;container_id&amp;gt;&lt;/code&gt;, the command will send a &lt;code&gt;SIGTERM&lt;/code&gt; to the container. As the gunicorn process is PID 1, this signal is ignored.&lt;/p&gt;
-&lt;p&gt;The way to resolve this issue is to use &lt;code&gt;exec&lt;/code&gt; before the command to start your application. The last line of the above shell script should be  &lt;code&gt;gunicorn --config config/gunicorn/$GUNICORN_CONFIG.py config.wsgi&lt;/code&gt;. A simple example is shown below&lt;/p&gt;
-&lt;p&gt;&lt;code&gt;t.py:&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;signal&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;time&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;got_signal&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;False&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;process_signal&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;signum&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;frame&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;global&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;got_signal&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;got_signal&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;True&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;signal&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;signal&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;signal&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SIGINT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;process_signal&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;signal&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;signal&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;signal&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;SIGTERM&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;process_signal&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;got_signal&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sleep&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;looping...&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Ended with signal.&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;code&gt;entry.sh:&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;#!/usr/bin/env bash
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;cp&#34;&gt;&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;exec&lt;/span&gt; python ./t.py
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;code&gt;Dockerfile:&lt;/code&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-docker&#34; data-lang=&#34;docker&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;FROM&lt;/span&gt;&lt;span class=&#34;s&#34;&gt; python:3.7&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;WORKDIR&lt;/span&gt;&lt;span class=&#34;s&#34;&gt; /usr/src/app&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;COPY&lt;/span&gt; . .&lt;span class=&#34;err&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;err&#34;&gt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;CMD&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[&lt;/span&gt; &lt;span class=&#34;s2&#34;&gt;&amp;#34;./entry.sh&amp;#34;&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-sh&#34; data-lang=&#34;sh&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;With the exec:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ docker run --rm -t signal
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Ended with signal.
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ 
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Without the exec:
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$ docker run --rm -t signal
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;looping...
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;$
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;Both times, you can run &lt;code&gt;docker stop&lt;/code&gt; in another window. If the container doesn’t stop within 10 seconds, then it’s killed.&lt;/p&gt;
-&lt;p&gt;Most apps do not explicitely handle &lt;code&gt;SIGTERM&lt;/code&gt; the way &lt;code&gt;t.py&lt;/code&gt; does. If you replace &lt;code&gt;t.py&lt;/code&gt; with&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;7
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;time&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;while&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;True&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;sleep&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;mi&#34;&gt;1&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;looping...&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Ended with signal.&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;&lt;code&gt;SIGINT&lt;/code&gt; will work with keyboard interrupt but &lt;code&gt;docker stop&lt;/code&gt; does not because of &lt;code&gt;PID=1&lt;/code&gt; issue.&lt;/p&gt;
-&lt;p&gt;If we run docker with a &lt;code&gt;--init&lt;/code&gt; option to force a non &lt;code&gt;1&lt;/code&gt; PID, the &lt;code&gt;docker stop&lt;/code&gt; works whether we use &lt;code&gt;exec&lt;/code&gt; in the script or not.&lt;/p&gt;
-&lt;p&gt;In order to use this feature with AWS Fargate, make a small change to your &lt;code&gt;AWS::ECS::TaskDefinition&lt;/code&gt; in your cloudformation as shown below&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;ContainerDefinitions&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;- &lt;span class=&#34;nt&#34;&gt;Name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;&amp;lt;container_name&amp;gt;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;Image&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;&amp;lt;container_image&amp;gt;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;Essential&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;true&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;        &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;linuxParameters&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;            &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;initProcessEnabled&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;true&amp;#34;&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;</description>
-        </item>
-        <item>
-        <title>Abstract classes using Metaclasses</title>
-        <link>http://localhost:62050/p/abstract-classes-using-metaclasses/</link>
-        <pubDate>Mon, 28 Dec 2020 01:33:40 +0000</pubDate>
-        
-        <guid>http://localhost:62050/p/abstract-classes-using-metaclasses/</guid>
-        <description>&lt;p&gt;In python3 all classes are new style classes, thus it is reasonable to refer to an objects type and its class interchangably&lt;/p&gt;
-&lt;h3 id=&#34;type-and-class&#34;&gt;Type and Class
-&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;6
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Foo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;pass&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Foo&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;Type is a metaclass of which classes are instances&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;Foo&lt;/code&gt; is an instance of metaclass &lt;code&gt;type&lt;/code&gt;&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;type&lt;/code&gt; is an instance of &lt;code&gt;type&lt;/code&gt; as well&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;type-metaclass&#34;&gt;Type Metaclass
-&lt;/h3&gt;&lt;p&gt;A &lt;code&gt;type&lt;/code&gt; metaclass is initialized with 3 arguments&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;&lt;code&gt;name&lt;/code&gt;: name of the class (&lt;strong&gt;name&lt;/strong&gt; attribute)&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;bases&lt;/code&gt;: a tuple of classnames that the class inherits from&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;namespace&lt;/code&gt;: a dictionary contianing definitions of the class body (&lt;strong&gt;dict&lt;/strong&gt; attribute of the class)&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;creating-an-abstract-class-manually-with-metaclasses&#34;&gt;Creating an abstract class manually with Metaclasses
-&lt;/h3&gt;&lt;p&gt;To understand metaclasses, we create an interface or abstract class implementation. Use &lt;code&gt;from abc import ABC, abstractmethod&lt;/code&gt; when implementing something at work.&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt; 1
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 2
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 3
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 4
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 5
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 6
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 7
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 8
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt; 9
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;10
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;11
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;12
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;13
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;14
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;15
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;16
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;17
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;18
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;19
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;20
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;21
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;22
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;23
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;24
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;25
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;26
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;27
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;28
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;29
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;30
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;31
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;32
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;33
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;34
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;35
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;36
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;37
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;38
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;39
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;40
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;41
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;42
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;43
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;44
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;45
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;46
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;47
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;48
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;49
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;50
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;51
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;52
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;53
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;54
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;55
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;56
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;57
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;58
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;59
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;60
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;61
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;62
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;63
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;64
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;65
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;66
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;67
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;68
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;69
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;70
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;71
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;72
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;73
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;74
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;75
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;76
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;77
-&lt;/span&gt;&lt;span class=&#34;lnt&#34;&gt;78
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# test.py&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Decorator to add attribute to function&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;abstract_func&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;func&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;func&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;__isabstract__&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;True&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;func&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# This is the metaclass inheriting from `type`&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Interface&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;type&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__init__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bases&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;sa&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Init method initialized from &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;class_methods&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;getattr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;all_methods&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;base&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bases&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;required_methods&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;getattr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;base&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;abstract_methods&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;required_methods&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;not&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;class_methods&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                    &lt;span class=&#34;n&#34;&gt;msg&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;sa&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&amp;#34;&amp;#34;Can&amp;#39;t create abstract class &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;!
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;s2&#34;&gt;&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt; must implement abstract method &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;method&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt; of class &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;base&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;!&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                    &lt;span class=&#34;k&#34;&gt;raise&lt;/span&gt; &lt;span class=&#34;ne&#34;&gt;TypeError&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;msg&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__new__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;cls&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bases&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;abstract_methods&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Interface&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_get_abstract_methods&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;all_methods&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Interface&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_get_all_methods&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;bp&#34;&gt;cls&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;super&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;fm&#34;&gt;__new__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;cls&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;bases&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;bp&#34;&gt;cls&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;_get_abstract_methods&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;val&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;():&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;callable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;val&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;and&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;getattr&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;val&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;__isabstract__&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;False&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;append&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;_get_all_methods&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;[]&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;for&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;val&lt;/span&gt; &lt;span class=&#34;ow&#34;&gt;in&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;namespace&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;items&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;():&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;callable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;val&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;                &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;append&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;ret&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# the __calls__() function calls the __new__() and __init__() methods of the metaclass&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;NetworkInterface&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;metaclass&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Interface&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nd&#34;&gt;@abstract_func&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;connect&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;pass&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nd&#34;&gt;@abstract_func&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;transfer&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;pass&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# The object of this class will not be created &lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# because of missing abstract method&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;TestNetwork&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;NetworkInterface&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__init__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nb&#34;&gt;print&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;sa&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Init method initialized from &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;connect&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;pass&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;# def transfer(self):&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;#     pass&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;c&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TestNetwork&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;ne&#34;&gt;TypeError&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Can&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;t create abstract class TestNetwork!&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;TestNetwork&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;must&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;implement&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;abstract&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;transfer&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;of&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;s1&#34;&gt;&amp;#39;__main__.NetworkInterface&amp;#39;&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;!&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;After&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;uncommenting&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;the&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;python3&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;test&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;py&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;Init&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;initialized&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;__main__&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;NetworkInterface&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;Init&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;initialized&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;err&#34;&gt;&amp;#39;&lt;/span&gt;&lt;span class=&#34;nc&#34;&gt;__main__&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TestNetwork&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;Init&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;method&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;called&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;&amp;lt;&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;__main__&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;TestNetwork&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;object&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;at&lt;/span&gt; &lt;span class=&#34;mh&#34;&gt;0x7fc5e7659350&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;When we initialize &lt;code&gt;TestNetwork&lt;/code&gt;, the following happens&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;The interface init method is called twice. Once when creating the &lt;code&gt;NetworkInterface&lt;/code&gt; and  &lt;code&gt;TestNetwork&lt;/code&gt; class from the metaclass blueprint.&lt;/li&gt;
-&lt;li&gt;In the &lt;code&gt;Interface&lt;/code&gt; init method, we iterate over the list of abstract methods in the parent class and make sure each one is present in the current class.&lt;/li&gt;
-&lt;li&gt;If we don&amp;rsquo;t find a method in the class with the same name, we raise an exception&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        </item>
-        <item>
-        <title>The Zen of Python</title>
-        <link>http://localhost:62050/p/the-zen-of-python/</link>
-        <pubDate>Tue, 07 Apr 2020 18:54:00 -0700</pubDate>
-        
-        <guid>http://localhost:62050/p/the-zen-of-python/</guid>
-        <description>&lt;p&gt;Every once in a while, it&amp;rsquo;s good to revisit the principles that guide Python&amp;rsquo;s design and philosophy. One of the most iconic expressions of these principles is &amp;ldquo;The Zen of Python&amp;rdquo; by Tim Peters. If you haven&amp;rsquo;t read it in a while, it might be worth taking a moment to appreciate the simplicity and wisdom it contains.&lt;/p&gt;
-&lt;p&gt;To view &amp;ldquo;The Zen of Python,&amp;rdquo; open a Python interpreter and enter:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
-&lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code&gt;&lt;span class=&#34;lnt&#34;&gt;1
-&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;
-&lt;td class=&#34;lntd&#34;&gt;
-&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;o&#34;&gt;&amp;gt;&amp;gt;&amp;gt;&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;this&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
-&lt;/div&gt;
-&lt;/div&gt;&lt;p&gt;Here&amp;rsquo;s what you&amp;rsquo;ll see:&lt;/p&gt;
-&lt;p&gt;&lt;strong&gt;The Zen of Python, by Tim Peters&lt;/strong&gt;&lt;/p&gt;
-&lt;ul&gt;
-&lt;li&gt;Beautiful is better than ugly.&lt;/li&gt;
-&lt;li&gt;Explicit is better than implicit.&lt;/li&gt;
-&lt;li&gt;Simple is better than complex.&lt;/li&gt;
-&lt;li&gt;Complex is better than complicated.&lt;/li&gt;
-&lt;li&gt;Flat is better than nested.&lt;/li&gt;
-&lt;li&gt;Sparse is better than dense.&lt;/li&gt;
-&lt;li&gt;Readability counts.&lt;/li&gt;
-&lt;li&gt;Special cases aren&amp;rsquo;t special enough to break the rules.&lt;/li&gt;
-&lt;li&gt;Although practicality beats purity.&lt;/li&gt;
-&lt;li&gt;Errors should never pass silently.&lt;/li&gt;
-&lt;li&gt;Unless explicitly silenced.&lt;/li&gt;
-&lt;li&gt;In the face of ambiguity, refuse the temptation to guess.&lt;/li&gt;
-&lt;li&gt;There should be one—and preferably only one—obvious way to do it.&lt;/li&gt;
-&lt;li&gt;Although that way may not be obvious at first unless you&amp;rsquo;re Dutch.&lt;/li&gt;
-&lt;li&gt;Now is better than never.&lt;/li&gt;
-&lt;li&gt;Although never is often better than &lt;em&gt;right&lt;/em&gt; now.&lt;/li&gt;
-&lt;li&gt;If the implementation is hard to explain, it&amp;rsquo;s a bad idea.&lt;/li&gt;
-&lt;li&gt;If the implementation is easy to explain, it may be a good idea.&lt;/li&gt;
-&lt;li&gt;Namespaces are one honking great idea—let&amp;rsquo;s do more of those!&lt;/li&gt;
-&lt;/ul&gt;
-&lt;p&gt;The Zen of Python encapsulates the values that make Python such a delightful programming language. It&amp;rsquo;s about simplicity, clarity, and pragmatism. Whether you&amp;rsquo;re new to Python or a seasoned developer, keeping these principles in mind can help guide you to write better, more maintainable code.&lt;/p&gt;
-</description>
-        </item>
-        <item>
-        <title>Python decorator common use cases</title>
-        <link>http://localhost:62050/p/python-decorator-common-use-cases/</link>
-        <pubDate>Sat, 04 Apr 2020 15:54:35 -0700</pubDate>
-        
-        <guid>http://localhost:62050/p/python-decorator-common-use-cases/</guid>
-        <description>&lt;p&gt;Python decorators are a powerful feature that allow you to extend the functionality of existing functions or methods in a reusable and elegant way. They are especially useful for tasks that you may need to apply repeatedly to different functions. Below are some common use cases for Python decorators.&lt;/p&gt;
-&lt;h3 id=&#34;1-timing-functions&#34;&gt;1. Timing Functions
-&lt;/h3&gt;&lt;p&gt;Timing functions are a classic example of using decorators, often featured as the first example on StackOverflow. These decorators help measure how long a function takes to execute, making it easy to identify performance bottlenecks. You can also use a context manager to time functions, which is a good way to learn how &lt;code&gt;__enter__&lt;/code&gt; and &lt;code&gt;__exit__&lt;/code&gt; methods work in Python.&lt;/p&gt;
-&lt;h3 id=&#34;2-retrying-functions&#34;&gt;2. Retrying Functions
-&lt;/h3&gt;&lt;p&gt;Sometimes, a function may fail due to transient errors (e.g., network issues). A retrying decorator can be used to attempt the function again after a failure, with optional exponential backoff to increase the wait time between retries. Bonus points if you implement increasing wait times to avoid overwhelming the system.&lt;/p&gt;
-&lt;h3 id=&#34;3-setting-a-maximum-execution-time&#34;&gt;3. Setting a Maximum Execution Time
-&lt;/h3&gt;&lt;p&gt;If you have a function that runs in a loop or is amenable to timeout, a decorator can enforce a maximum execution time. This can be useful when you want to avoid infinite loops or long-running operations that may block other processes.&lt;/p&gt;
-&lt;h3 id=&#34;4-logging-functions&#34;&gt;4. Logging Functions
-&lt;/h3&gt;&lt;p&gt;Logging is an essential part of debugging and monitoring applications. There are numerous types of logging decorators, each serving different purposes. Often, these decorators require a decorator factory or class to accommodate parameters like a logger instance. You can use decorators to log function calls, inputs, outputs, and exceptions.&lt;/p&gt;
-&lt;h3 id=&#34;5-simple-debugging&#34;&gt;5. Simple Debugging
-&lt;/h3&gt;&lt;p&gt;A simple debugging decorator can print the function&amp;rsquo;s inputs and outputs, either to a log file or just to the console. This is especially useful during development when trying to trace issues in code.&lt;/p&gt;
-&lt;h3 id=&#34;6-validating-function-inputs&#34;&gt;6. Validating Function Inputs
-&lt;/h3&gt;&lt;p&gt;Python is typically &amp;ldquo;Easier to Ask for Forgiveness than Permission&amp;rdquo; (EAFP), but there are times when input validation is necessary. A decorator can validate function inputs, ensuring they meet certain criteria. You can also use this to modify inputs—for instance, adding &lt;code&gt;http://&lt;/code&gt; to a URL if the user forgets to include it.&lt;/p&gt;
-&lt;h3 id=&#34;7-validating-function-outputs&#34;&gt;7. Validating Function Outputs
-&lt;/h3&gt;&lt;p&gt;In addition to input validation, decorators can also validate function outputs. For example, you can enforce output constraints, such as ensuring the value is within a specific range.&lt;/p&gt;
-&lt;h3 id=&#34;8-waitingrate-limiting&#34;&gt;8. Waiting/Rate-Limiting
-&lt;/h3&gt;&lt;p&gt;When interacting with a web service, it&amp;rsquo;s often crucial to rate-limit your requests to avoid being banned or overwhelming the server. A waiting or rate-limiting decorator can add delays between function calls, ensuring compliance with rate limits.&lt;/p&gt;
-&lt;h3 id=&#34;9-cachingmemoization&#34;&gt;9. Caching/Memoization
-&lt;/h3&gt;&lt;p&gt;If you have a pure or idempotent function that&amp;rsquo;s computationally expensive and runs multiple times with the same inputs, a caching decorator (e.g., &lt;code&gt;functools.lru_cache&lt;/code&gt;) can save results for future use. This is particularly useful in functional programming paradigms to improve efficiency by avoiding redundant calculations.&lt;/p&gt;
-&lt;h3 id=&#34;10-handling-database-transactions-gracefully&#34;&gt;10. Handling Database Transactions Gracefully
-&lt;/h3&gt;&lt;p&gt;When working with databases, it&amp;rsquo;s important to handle transactions properly. A decorator can ensure that transactions are committed when successful or rolled back when an exception occurs. Although many DB-API libraries offer built-in ways to manage transactions, a decorator can provide a consistent and reusable approach.&lt;/p&gt;
-&lt;h3 id=&#34;11-synchronization&#34;&gt;11. Synchronization
-&lt;/h3&gt;&lt;p&gt;In multithreading or multiprocessing applications, decorators can be used for synchronization—acquiring and releasing locks. This helps prevent race conditions by ensuring only one thread or process can access a critical section at a time.&lt;/p&gt;
-&lt;h3 id=&#34;12-authentication&#34;&gt;12. Authentication
-&lt;/h3&gt;&lt;p&gt;Authentication is a common use case in web frameworks, where decorators are used to ensure that a user is logged in before they can access a certain resource or perform an action. This is a convenient way to add access control across multiple endpoints in a web application.&lt;/p&gt;
-&lt;h3 id=&#34;conclusion&#34;&gt;Conclusion
-&lt;/h3&gt;&lt;p&gt;Decorators offer a powerful, reusable, and elegant way to extend the behavior of your functions. From timing functions and retry mechanisms to logging and input validation, decorators help reduce repetitive code while maintaining consistency across your application.&lt;/p&gt;
-</description>
-        </item>
-        
-    </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Python on Hashim Colombowala</title><link>https://hashimcolombowala.com/tags/python/</link><description>Recent content in Python on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 02 Jul 2022 14:30:00 +0000</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/python/index.xml" rel="self" type="application/rss+xml"/><item><title>Learning Generics by extending the prometheus python client</title><link>https://hashimcolombowala.com/p/learning-generics-by-extending-the-prometheus-python-client/</link><pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate><guid>https://hashimcolombowala.com/p/learning-generics-by-extending-the-prometheus-python-client/</guid><description>&lt;p>Imagine you&amp;rsquo;re writing a library to extend the &lt;a class="link" href="https://github.com/prometheus/client_python" target="_blank" rel="noopener"
+>prometheus python client&lt;/a> and you needed to add some dynamic labels specific to the environment. Ideally you would add most of your labels at the collector end and avoid writing extensions.&lt;/p>
+&lt;p>Say you need to inject some dynamic labels and you will need to at some point, we may want to extend the client.&lt;/p>
+&lt;h2 id="what-are-generics-and-why-do-we-use-them-in-python">What are Generics? and why do we use them in python?
+&lt;/h2>&lt;p>Without sacrificing the inherent safety of a statically typed language, generic programming gives us primitives to declare “placeholder types” that allow us to focus less on the specific types that may be used or declared by other portions of the codebase, but rather focus on these higher-level patterns that can be consolidated into simpler declarations.&lt;/p>
+&lt;p>Python has no built-in type checking. As long as a given Python program is syntactically valid, it will run, and issues like incompatible types will only surface at runtime. This forces the developer to ensure there is error handling in place to deal with such errors, and even with this, a common best practice is to use &lt;a class="link" href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener"
+>type hints&lt;/a> combined with third-party linting tools to try to stay on top of issues like this.&lt;/p>
+&lt;p>Generics in my opinion is a programming stype for statically typed languages brought into python via type hints.&lt;/p>
+&lt;h2 id="some-code-with-comments">Some code with comments
+&lt;/h2>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">from prometheus_client import Counter as _PromCounter
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">from prometheus_client import Histogram as _PromHistogram
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">from typing import TypeVar, Generics
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># a new generic type, bound to two types
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">_MetricsTypeT = TypeVar(&amp;#39;_MetricsTypeT&amp;#39;, bound=[_PromCounter, _PromHistogram])
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># base class of type generic(child class to pass type in)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">class _MetricsBase(Generic[_MetricsTypeT]):
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> def __init__(self, label_names: Iterable[str]):
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self.default_labels: Dict[str] = get_default_labels()
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self.all_label_names: list = list(label_names) + list(self.default_labels.keys())
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self._parent_metric: _MetricsTypeT = None
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> # Provides the label functionality
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> def labels(self, *labelargs, **labelkwargs) -&amp;gt; _MetricsTypeT:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if labelargs:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> labelargs += tuple(self.default_labels.values())
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return cast(_MetricsTypeT, self._parent_metric.labels(*labelargs))
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> labelkwargs.update(self.default_labels)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return cast(_MetricsTypeT, self._parent_metric.labels(**labelkwargs))
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># child class passing in type to base class via generics
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">class Counter(_MetricsBase[_PromCounter]):
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> def __init__(self, name, documentation, labelnames=()):
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> super().__init__(label_names=labelnames)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self._parent_metric = _PromCounter(
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> name=name, documentation=documentation,
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> labelnames=self.all_label_names)
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Complete code &lt;a class="link" href="https://github.com/hash167/prom_client_generics/" target="_blank" rel="noopener"
+>here&lt;/a>&lt;/p>
+&lt;h2 id="the-final-world">The final world
+&lt;/h2>&lt;p>In my project, I used generics programing to type my base class. My base clase _MetricsBase accepts a Generic type, passed in by classes(Counter, Histogram) inheritering from it. The common method label returns the generic type passed in from the child class. When we use third party linters like &lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
+>mypy&lt;/a>, we get some of the controll of statically typed languages with python&lt;/p></description></item><item><title>Designing a metrics system notes</title><link>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</link><pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</guid><description>&lt;p>To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p>
+&lt;h3 id="requirements-for-a-metrics-system">Requirements for a Metrics System
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Multidimensional Data Model&lt;/strong>: The metrics system should support a multidimensional data model that can be sliced and diced along different dimensions as defined by the service (e.g., instance, service, endpoint, method).&lt;/li>
+&lt;li>&lt;strong>Operational Simplicity&lt;/strong>: The system should be easy to operate and maintain, minimizing overhead and complexity.&lt;/li>
+&lt;li>&lt;strong>Scalable Data Collection&lt;/strong>: The system must support scalable data collection and offer a decentralized architecture, allowing independent teams to set up their own monitoring servers.&lt;/li>
+&lt;li>&lt;strong>Powerful Query Language&lt;/strong>: A powerful query language should be available to leverage the data model for alerting and graphing, enabling precise insights into system performance.&lt;/li>
+&lt;/ul>
+&lt;h3 id="client-libraries">Client Libraries
+&lt;/h3>&lt;p>Client libraries play an essential role in the metrics system:&lt;/p>
+&lt;ul>
+&lt;li>They handle details like thread safety, bookkeeping, and producing the Prometheus text exposition format in response to HTTP requests.&lt;/li>
+&lt;li>Since metrics-based monitoring doesn&amp;rsquo;t track individual events, client library memory usage doesn&amp;rsquo;t increase with more events. Instead, memory usage depends on the number of metrics being tracked.&lt;/li>
+&lt;/ul>
+&lt;h3 id="instrumentation">Instrumentation
+&lt;/h3>&lt;p>To effectively monitor different types of services, appropriate instrumentation methods must be used. Here are three common types of services and how they should be instrumented:&lt;/p>
+&lt;h4 id="online-serving-systems">Online-Serving Systems
+&lt;/h4>&lt;p>For online-serving systems, such as web services, the &lt;strong>RED Method&lt;/strong> is used. This method involves tracking:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Requests&lt;/strong>: The count of incoming requests.&lt;/li>
+&lt;li>&lt;strong>Errors&lt;/strong>: The count of failed requests.&lt;/li>
+&lt;li>&lt;strong>Duration&lt;/strong>: The latency or response time of requests.&lt;/li>
+&lt;/ul>
+&lt;p>For example, a cache might track these metrics for both overall performance and for cache misses that need to be recalculated or fetched from a backend.&lt;/p>
+&lt;h4 id="offline-serving-systems">Offline-Serving Systems
+&lt;/h4>&lt;p>Offline-serving systems, such as log processors, usually batch up work and consist of multiple stages in a pipeline with queues in between. These systems run continuously, which distinguishes them from batch jobs. The &lt;strong>USE Method&lt;/strong> is used for these types of systems:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Utilization&lt;/strong>: How much of the system&amp;rsquo;s capacity is in use (e.g., how much work is in progress).&lt;/li>
+&lt;li>&lt;strong>Saturation&lt;/strong>: The amount of queued work and how much work is currently being processed.&lt;/li>
+&lt;li>&lt;strong>Errors&lt;/strong>: Any errors encountered during processing.&lt;/li>
+&lt;/ul>
+&lt;h4 id="batch-jobs">Batch Jobs
+&lt;/h4>&lt;p>Batch jobs are processes that run at scheduled intervals. The key metrics for batch jobs include:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Run Time&lt;/strong>: How long it took for the job to complete.&lt;/li>
+&lt;li>&lt;strong>Stage Duration&lt;/strong>: How long each stage of the job took to complete.&lt;/li>
+&lt;li>&lt;strong>Success Time&lt;/strong>: The time at which the job last succeeded.&lt;/li>
+&lt;/ul>
+&lt;p>Alerts can be set for when the job hasn&amp;rsquo;t succeeded within a certain time frame.&lt;/p>
+&lt;p>&lt;strong>Idempotency for Batch Jobs&lt;/strong>: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p></description></item><item><title>Comparing Session-Based and Token-Based Authentication</title><link>https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/</link><pubDate>Fri, 18 Jun 2021 12:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/</guid><description>&lt;p>This post will briefly compare and contrast the two most common authentication techniques: session-based and token-based authentication. Understanding the differences between these methods is crucial for selecting the right approach for your application&amp;rsquo;s needs.&lt;/p>
+&lt;h2 id="session-based-authentication">Session-Based Authentication
+&lt;/h2>&lt;p>In session-based authentication, the server creates a session for the user after the user logs in. The server generates a &lt;code>session id&lt;/code> that is stored in memory or an external cache for horizontal scaling. The client stores the session ID in a &lt;code>cookie&lt;/code> and sends it in the request header for every subsequent request.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">Cookie: &lt;span class="nv">JSESSIONID&lt;/span>&lt;span class="o">=&lt;/span>ABAD1D
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The server can verify the user by comparing the session ID in the cookie against the session information stored in cache and respond accordingly.&lt;/p>
+&lt;p>&lt;img src="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth.png"
+width="576"
+height="323"
+srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu6257918187294685625.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu7317305386953131357.png 1024w"
+loading="lazy"
+alt="Session Auth"
+class="gallery-image"
+data-flex-grow="178"
+data-flex-basis="427px"
+>&lt;/p>
+&lt;h2 id="token-based-authentication">Token-Based Authentication
+&lt;/h2>&lt;p>In token-based authentication, the server generates a &lt;a class="link" href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank" rel="noopener"
+>JWT (JSON Web Token)&lt;/a> with a secret and sends it to the client. The client stores the JWT in a cookie or local browser memory. Subsequent requests made to the server include the JWT in the header:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">Authorization: Bearer eyJhbGciOiJIUzI1NiIXVCJ9TJV
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>The server validates the JWT to verify the user and respond accordingly.&lt;/p>
+&lt;p>&lt;img src="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth.png"
+width="1186"
+height="885"
+srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu17119966753451935353.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu3468419247374115684.png 1024w"
+loading="lazy"
+alt="Token Auth"
+class="gallery-image"
+data-flex-grow="134"
+data-flex-basis="321px"
+>&lt;/p>
+&lt;h2 id="session-vs-token-authentication">Session vs. Token Authentication
+&lt;/h2>&lt;h3 id="tokens-jwt">Tokens (JWT)
+&lt;/h3>&lt;ul>
+&lt;li>Can work cross-origin across different domains. Downstream services can share tokens.&lt;/li>
+&lt;li>JWT-based authentication scales well horizontally because tokens are stored on the client side.&lt;/li>
+&lt;li>Provides integrity protection using a signature or MAC.&lt;/li>
+&lt;/ul>
+&lt;h3 id="sessions">Sessions
+&lt;/h3>&lt;ul>
+&lt;li>Offers more control over sessions, as they are easier to invalidate. JWTs remain valid until their expiration date is reached.&lt;/li>
+&lt;li>If a JWT contains a lot of data, it can slow down client requests. Session IDs are lightweight strings, making them more efficient. OAuth2 solves this issue by using short-lived access tokens and long-lived refresh tokens.&lt;/li>
+&lt;/ul>
+&lt;h2 id="conclusion">Conclusion
+&lt;/h2>&lt;p>Most production services can work with either authentication model, so the choice depends on the use case. In fact, many systems use a hybrid model that combines both types of authentication, with the JWT being associated with a user session for user tracking.&lt;/p></description></item><item><title>Signalling docker containers</title><link>https://hashimcolombowala.com/p/signalling-docker-containers/</link><pubDate>Wed, 27 Jan 2021 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/signalling-docker-containers/</guid><description>&lt;p>When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="nb">set&lt;/span> -o nounset
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">set&lt;/span> -x
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">gunicorn --config config/gunicorn/&lt;span class="nv">$GUNICORN_CONFIG&lt;/span>.py config.wsgi
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Here we are executing the gunicorn service with PID 1 when the container is deployed. Suppose we want to terminate the container with a &lt;code>docker stop &amp;lt;container_id&amp;gt;&lt;/code>, the command will send a &lt;code>SIGTERM&lt;/code> to the container. As the gunicorn process is PID 1, this signal is ignored.&lt;/p>
+&lt;p>The way to resolve this issue is to use &lt;code>exec&lt;/code> before the command to start your application. The last line of the above shell script should be &lt;code>gunicorn --config config/gunicorn/$GUNICORN_CONFIG.py config.wsgi&lt;/code>. A simple example is shown below&lt;/p>
+&lt;p>&lt;code>t.py:&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="nn">signal&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="nn">time&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">got_signal&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">False&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">process_signal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">signum&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">frame&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">global&lt;/span> &lt;span class="n">got_signal&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">got_signal&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">True&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">signal&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">signal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">signal&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">SIGINT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">process_signal&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">signal&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">signal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">signal&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">SIGTERM&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">process_signal&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">while&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="n">got_signal&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">time&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">sleep&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;looping...&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Ended with signal.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;code>entry.sh:&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">&lt;span class="cp">#!/usr/bin/env bash
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="cp">&lt;/span>&lt;span class="nb">exec&lt;/span> python ./t.py
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;code>Dockerfile:&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-docker" data-lang="docker">&lt;span class="line">&lt;span class="cl">&lt;span class="k">FROM&lt;/span>&lt;span class="s"> python:3.7&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">WORKDIR&lt;/span>&lt;span class="s"> /usr/src/app&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">COPY&lt;/span> . .&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="err">&lt;/span>&lt;span class="k">CMD&lt;/span> &lt;span class="p">[&lt;/span> &lt;span class="s2">&amp;#34;./entry.sh&amp;#34;&lt;/span> &lt;span class="p">]&lt;/span>&lt;span class="err">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">With the exec:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ docker run --rm -t signal
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Ended with signal.
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Without the exec:
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$ docker run --rm -t signal
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">looping...
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">$
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Both times, you can run &lt;code>docker stop&lt;/code> in another window. If the container doesn’t stop within 10 seconds, then it’s killed.&lt;/p>
+&lt;p>Most apps do not explicitely handle &lt;code>SIGTERM&lt;/code> the way &lt;code>t.py&lt;/code> does. If you replace &lt;code>t.py&lt;/code> with&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;span class="lnt">7
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="nn">time&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">while&lt;/span> &lt;span class="kc">True&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">time&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">sleep&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;looping...&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Ended with signal.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;code>SIGINT&lt;/code> will work with keyboard interrupt but &lt;code>docker stop&lt;/code> does not because of &lt;code>PID=1&lt;/code> issue.&lt;/p>
+&lt;p>If we run docker with a &lt;code>--init&lt;/code> option to force a non &lt;code>1&lt;/code> PID, the &lt;code>docker stop&lt;/code> works whether we use &lt;code>exec&lt;/code> in the script or not.&lt;/p>
+&lt;p>In order to use this feature with AWS Fargate, make a small change to your &lt;code>AWS::ECS::TaskDefinition&lt;/code> in your cloudformation as shown below&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">ContainerDefinitions&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="nt">Name&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">&amp;lt;container_name&amp;gt;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">Image&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">&amp;lt;container_image&amp;gt;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">Essential&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;true&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">linuxParameters&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">initProcessEnabled&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;true&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div></description></item><item><title>Abstract classes using Metaclasses</title><link>https://hashimcolombowala.com/p/abstract-classes-using-metaclasses/</link><pubDate>Mon, 28 Dec 2020 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/abstract-classes-using-metaclasses/</guid><description>&lt;p>In python3 all classes are new style classes, thus it is reasonable to refer to an objects type and its class interchangably&lt;/p>
+&lt;h3 id="type-and-class">Type and Class
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Foo&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="nb">type&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Foo&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="err">&amp;#39;&lt;/span>&lt;span class="nc">type&lt;/span>&lt;span class="s1">&amp;#39;&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Type is a metaclass of which classes are instances&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>Foo&lt;/code> is an instance of metaclass &lt;code>type&lt;/code>&lt;/li>
+&lt;li>&lt;code>type&lt;/code> is an instance of &lt;code>type&lt;/code> as well&lt;/li>
+&lt;/ul>
+&lt;h3 id="type-metaclass">Type Metaclass
+&lt;/h3>&lt;p>A &lt;code>type&lt;/code> metaclass is initialized with 3 arguments&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>name&lt;/code>: name of the class (&lt;strong>name&lt;/strong> attribute)&lt;/li>
+&lt;li>&lt;code>bases&lt;/code>: a tuple of classnames that the class inherits from&lt;/li>
+&lt;li>&lt;code>namespace&lt;/code>: a dictionary contianing definitions of the class body (&lt;strong>dict&lt;/strong> attribute of the class)&lt;/li>
+&lt;/ul>
+&lt;h3 id="creating-an-abstract-class-manually-with-metaclasses">Creating an abstract class manually with Metaclasses
+&lt;/h3>&lt;p>To understand metaclasses, we create an interface or abstract class implementation. Use &lt;code>from abc import ABC, abstractmethod&lt;/code> when implementing something at work.&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
+&lt;/span>&lt;span class="lnt">45
+&lt;/span>&lt;span class="lnt">46
+&lt;/span>&lt;span class="lnt">47
+&lt;/span>&lt;span class="lnt">48
+&lt;/span>&lt;span class="lnt">49
+&lt;/span>&lt;span class="lnt">50
+&lt;/span>&lt;span class="lnt">51
+&lt;/span>&lt;span class="lnt">52
+&lt;/span>&lt;span class="lnt">53
+&lt;/span>&lt;span class="lnt">54
+&lt;/span>&lt;span class="lnt">55
+&lt;/span>&lt;span class="lnt">56
+&lt;/span>&lt;span class="lnt">57
+&lt;/span>&lt;span class="lnt">58
+&lt;/span>&lt;span class="lnt">59
+&lt;/span>&lt;span class="lnt">60
+&lt;/span>&lt;span class="lnt">61
+&lt;/span>&lt;span class="lnt">62
+&lt;/span>&lt;span class="lnt">63
+&lt;/span>&lt;span class="lnt">64
+&lt;/span>&lt;span class="lnt">65
+&lt;/span>&lt;span class="lnt">66
+&lt;/span>&lt;span class="lnt">67
+&lt;/span>&lt;span class="lnt">68
+&lt;/span>&lt;span class="lnt">69
+&lt;/span>&lt;span class="lnt">70
+&lt;/span>&lt;span class="lnt">71
+&lt;/span>&lt;span class="lnt">72
+&lt;/span>&lt;span class="lnt">73
+&lt;/span>&lt;span class="lnt">74
+&lt;/span>&lt;span class="lnt">75
+&lt;/span>&lt;span class="lnt">76
+&lt;/span>&lt;span class="lnt">77
+&lt;/span>&lt;span class="lnt">78
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># test.py&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Decorator to add attribute to function&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">abstract_func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">func&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">__isabstract__&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">True&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">func&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># This is the metaclass inheriting from `type`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Interface&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">type&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Init method initialized from &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">class_methods&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;all_methods&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">base&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">required_methods&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;abstract_methods&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">required_methods&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">class_methods&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">msg&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&amp;#34;Can&amp;#39;t create abstract class &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">!
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="s2">&lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2"> must implement abstract method &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">method&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2"> of class &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">base&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">!&amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">raise&lt;/span> &lt;span class="ne">TypeError&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">msg&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__new__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">cls&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">namespace&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;abstract_methods&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Interface&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_get_abstract_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">namespace&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;all_methods&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Interface&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_get_all_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">cls&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__new__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">cls&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="bp">cls&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">_get_abstract_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">val&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">items&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">callable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;__isabstract__&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">False&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ret&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">_get_all_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">val&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">items&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">callable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ret&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># the __calls__() function calls the __new__() and __init__() methods of the metaclass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">NetworkInterface&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">metaclass&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">Interface&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@abstract_func&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">connect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@abstract_func&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">transfer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The object of this class will not be created &lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># because of missing abstract method&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">TestNetwork&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">NetworkInterface&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Init method initialized from &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">connect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># def transfer(self):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">c&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">TestNetwork&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="ne">TypeError&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Can&lt;/span>&lt;span class="s1">&amp;#39;t create abstract class TestNetwork!&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">TestNetwork&lt;/span> &lt;span class="n">must&lt;/span> &lt;span class="n">implement&lt;/span> &lt;span class="n">abstract&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">transfer&lt;/span> &lt;span class="n">of&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="err">&amp;lt;&lt;/span>&lt;span class="nc">class&lt;/span> &lt;span class="s1">&amp;#39;__main__.NetworkInterface&amp;#39;&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="err">!&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">After&lt;/span> &lt;span class="n">uncommenting&lt;/span> &lt;span class="n">the&lt;/span> &lt;span class="n">method&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="n">python3&lt;/span> &lt;span class="n">test&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">py&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">Init&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">initialized&lt;/span> &lt;span class="kn">from&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="err">&amp;#39;&lt;/span>&lt;span class="nc">__main__&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">NetworkInterface&lt;/span>&lt;span class="s1">&amp;#39;&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">Init&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">initialized&lt;/span> &lt;span class="kn">from&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="err">&amp;#39;&lt;/span>&lt;span class="nc">__main__&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TestNetwork&lt;/span>&lt;span class="s1">&amp;#39;&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">Init&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">called&lt;/span> &lt;span class="kn">from&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">__main__&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TestNetwork&lt;/span> &lt;span class="nb">object&lt;/span> &lt;span class="n">at&lt;/span> &lt;span class="mh">0x7fc5e7659350&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>When we initialize &lt;code>TestNetwork&lt;/code>, the following happens&lt;/p>
+&lt;ul>
+&lt;li>The interface init method is called twice. Once when creating the &lt;code>NetworkInterface&lt;/code> and &lt;code>TestNetwork&lt;/code> class from the metaclass blueprint.&lt;/li>
+&lt;li>In the &lt;code>Interface&lt;/code> init method, we iterate over the list of abstract methods in the parent class and make sure each one is present in the current class.&lt;/li>
+&lt;li>If we don&amp;rsquo;t find a method in the class with the same name, we raise an exception&lt;/li>
+&lt;/ul></description></item><item><title>The Zen of Python</title><link>https://hashimcolombowala.com/p/the-zen-of-python/</link><pubDate>Tue, 07 Apr 2020 18:54:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/the-zen-of-python/</guid><description>&lt;p>Every once in a while, it&amp;rsquo;s good to revisit the principles that guide Python&amp;rsquo;s design and philosophy. One of the most iconic expressions of these principles is &amp;ldquo;The Zen of Python&amp;rdquo; by Tim Peters. If you haven&amp;rsquo;t read it in a while, it might be worth taking a moment to appreciate the simplicity and wisdom it contains.&lt;/p>
+&lt;p>To view &amp;ldquo;The Zen of Python,&amp;rdquo; open a Python interpreter and enter:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="nn">this&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>Here&amp;rsquo;s what you&amp;rsquo;ll see:&lt;/p>
+&lt;p>&lt;strong>The Zen of Python, by Tim Peters&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Beautiful is better than ugly.&lt;/li>
+&lt;li>Explicit is better than implicit.&lt;/li>
+&lt;li>Simple is better than complex.&lt;/li>
+&lt;li>Complex is better than complicated.&lt;/li>
+&lt;li>Flat is better than nested.&lt;/li>
+&lt;li>Sparse is better than dense.&lt;/li>
+&lt;li>Readability counts.&lt;/li>
+&lt;li>Special cases aren&amp;rsquo;t special enough to break the rules.&lt;/li>
+&lt;li>Although practicality beats purity.&lt;/li>
+&lt;li>Errors should never pass silently.&lt;/li>
+&lt;li>Unless explicitly silenced.&lt;/li>
+&lt;li>In the face of ambiguity, refuse the temptation to guess.&lt;/li>
+&lt;li>There should be one—and preferably only one—obvious way to do it.&lt;/li>
+&lt;li>Although that way may not be obvious at first unless you&amp;rsquo;re Dutch.&lt;/li>
+&lt;li>Now is better than never.&lt;/li>
+&lt;li>Although never is often better than &lt;em>right&lt;/em> now.&lt;/li>
+&lt;li>If the implementation is hard to explain, it&amp;rsquo;s a bad idea.&lt;/li>
+&lt;li>If the implementation is easy to explain, it may be a good idea.&lt;/li>
+&lt;li>Namespaces are one honking great idea—let&amp;rsquo;s do more of those!&lt;/li>
+&lt;/ul>
+&lt;p>The Zen of Python encapsulates the values that make Python such a delightful programming language. It&amp;rsquo;s about simplicity, clarity, and pragmatism. Whether you&amp;rsquo;re new to Python or a seasoned developer, keeping these principles in mind can help guide you to write better, more maintainable code.&lt;/p></description></item><item><title>Python decorator common use cases</title><link>https://hashimcolombowala.com/p/python-decorator-common-use-cases/</link><pubDate>Sat, 04 Apr 2020 15:54:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/python-decorator-common-use-cases/</guid><description>&lt;p>Python decorators are a powerful feature that allow you to extend the functionality of existing functions or methods in a reusable and elegant way. They are especially useful for tasks that you may need to apply repeatedly to different functions. Below are some common use cases for Python decorators.&lt;/p>
+&lt;h3 id="1-timing-functions">1. Timing Functions
+&lt;/h3>&lt;p>Timing functions are a classic example of using decorators, often featured as the first example on StackOverflow. These decorators help measure how long a function takes to execute, making it easy to identify performance bottlenecks. You can also use a context manager to time functions, which is a good way to learn how &lt;code>__enter__&lt;/code> and &lt;code>__exit__&lt;/code> methods work in Python.&lt;/p>
+&lt;h3 id="2-retrying-functions">2. Retrying Functions
+&lt;/h3>&lt;p>Sometimes, a function may fail due to transient errors (e.g., network issues). A retrying decorator can be used to attempt the function again after a failure, with optional exponential backoff to increase the wait time between retries. Bonus points if you implement increasing wait times to avoid overwhelming the system.&lt;/p>
+&lt;h3 id="3-setting-a-maximum-execution-time">3. Setting a Maximum Execution Time
+&lt;/h3>&lt;p>If you have a function that runs in a loop or is amenable to timeout, a decorator can enforce a maximum execution time. This can be useful when you want to avoid infinite loops or long-running operations that may block other processes.&lt;/p>
+&lt;h3 id="4-logging-functions">4. Logging Functions
+&lt;/h3>&lt;p>Logging is an essential part of debugging and monitoring applications. There are numerous types of logging decorators, each serving different purposes. Often, these decorators require a decorator factory or class to accommodate parameters like a logger instance. You can use decorators to log function calls, inputs, outputs, and exceptions.&lt;/p>
+&lt;h3 id="5-simple-debugging">5. Simple Debugging
+&lt;/h3>&lt;p>A simple debugging decorator can print the function&amp;rsquo;s inputs and outputs, either to a log file or just to the console. This is especially useful during development when trying to trace issues in code.&lt;/p>
+&lt;h3 id="6-validating-function-inputs">6. Validating Function Inputs
+&lt;/h3>&lt;p>Python is typically &amp;ldquo;Easier to Ask for Forgiveness than Permission&amp;rdquo; (EAFP), but there are times when input validation is necessary. A decorator can validate function inputs, ensuring they meet certain criteria. You can also use this to modify inputs—for instance, adding &lt;code>http://&lt;/code> to a URL if the user forgets to include it.&lt;/p>
+&lt;h3 id="7-validating-function-outputs">7. Validating Function Outputs
+&lt;/h3>&lt;p>In addition to input validation, decorators can also validate function outputs. For example, you can enforce output constraints, such as ensuring the value is within a specific range.&lt;/p>
+&lt;h3 id="8-waitingrate-limiting">8. Waiting/Rate-Limiting
+&lt;/h3>&lt;p>When interacting with a web service, it&amp;rsquo;s often crucial to rate-limit your requests to avoid being banned or overwhelming the server. A waiting or rate-limiting decorator can add delays between function calls, ensuring compliance with rate limits.&lt;/p>
+&lt;h3 id="9-cachingmemoization">9. Caching/Memoization
+&lt;/h3>&lt;p>If you have a pure or idempotent function that&amp;rsquo;s computationally expensive and runs multiple times with the same inputs, a caching decorator (e.g., &lt;code>functools.lru_cache&lt;/code>) can save results for future use. This is particularly useful in functional programming paradigms to improve efficiency by avoiding redundant calculations.&lt;/p>
+&lt;h3 id="10-handling-database-transactions-gracefully">10. Handling Database Transactions Gracefully
+&lt;/h3>&lt;p>When working with databases, it&amp;rsquo;s important to handle transactions properly. A decorator can ensure that transactions are committed when successful or rolled back when an exception occurs. Although many DB-API libraries offer built-in ways to manage transactions, a decorator can provide a consistent and reusable approach.&lt;/p>
+&lt;h3 id="11-synchronization">11. Synchronization
+&lt;/h3>&lt;p>In multithreading or multiprocessing applications, decorators can be used for synchronization—acquiring and releasing locks. This helps prevent race conditions by ensuring only one thread or process can access a critical section at a time.&lt;/p>
+&lt;h3 id="12-authentication">12. Authentication
+&lt;/h3>&lt;p>Authentication is a common use case in web frameworks, where decorators are used to ensure that a user is logged in before they can access a certain resource or perform an action. This is a convenient way to add access control across multiple endpoints in a web application.&lt;/p>
+&lt;h3 id="conclusion">Conclusion
+&lt;/h3>&lt;p>Decorators offer a powerful, reusable, and elegant way to extend the behavior of your functions. From timing functions and retry mechanisms to logging and input validation, decorators help reduce repetitive code while maintaining consistency across your application.&lt;/p></description></item></channel></rss>

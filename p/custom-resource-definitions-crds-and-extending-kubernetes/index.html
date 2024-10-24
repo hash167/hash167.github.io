@@ -1,602 +1,81 @@
-<!DOCTYPE html>
-<html lang="en-us" dir="ltr">
-    <head><script src="/livereload.js?mindelay=10&amp;v=2&amp;port=62050&amp;path=livereload" data-no-instant defer></script><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content="Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.\n">
-<title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title>
-
-<link rel='canonical' href='http://localhost:62050/p/custom-resource-definitions-crds-and-extending-kubernetes/'>
-
-<link rel="stylesheet" href="/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css"><meta property='og:title' content="Custom Resource Definitions (CRDs) and Extending Kubernetes">
-<meta property='og:description' content="Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.\n">
-<meta property='og:url' content='http://localhost:62050/p/custom-resource-definitions-crds-and-extending-kubernetes/'>
-<meta property='og:site_name' content='Hashim Colombowala'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='kubernetes' /><meta property='article:tag' content='controllers-1' /><meta property='article:published_time' content='2024-10-12T23:00:35-07:00'/><meta property='article:modified_time' content='2024-10-12T23:00:35-07:00'/>
-<meta name="twitter:title" content="Custom Resource Definitions (CRDs) and Extending Kubernetes">
-<meta name="twitter:description" content="Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.\n">
-    <link rel="shortcut icon" href="/favicon.png" />
-
-    </head>
-    <body class="
-    article-page
-    ">
-    <script>
-        (function() {
-            const colorSchemeKey = 'StackColorScheme';
-            if(!localStorage.getItem(colorSchemeKey)){
-                localStorage.setItem(colorSchemeKey, "auto");
-            }
-        })();
-    </script><script>
-    (function() {
-        const colorSchemeKey = 'StackColorScheme';
-        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
-        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-
-        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
-            
-
-            document.documentElement.dataset.scheme = 'dark';
-        } else {
-            document.documentElement.dataset.scheme = 'light';
-        }
-    })();
-</script>
-<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="Toggle Menu">
-        <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-        </span>
-    </button>
-
-    <header>
-        
-            
-            <figure class="site-avatar">
-                <a href="/">
-                
-                    
-                    
-                    
-                        
-                        <img src="/img/avatar_hu17444537569875534604.jpg" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
-                    
-                
-                </a>
-                
-                    <span class="emoji">🍥</span>
-                
-            </figure>
-            
-        
-        
-        <div class="site-meta">
-            <h1 class="site-name"><a href="/">Hashim Colombowala</a></h1>
-            <h2 class="site-description">Software Engineer working on cool things like K8s, Streaming Infrastructure, Observability systems and more</h2>
-        </div>
-    </header><ol class="menu-social">
-            
-                <li>
-                    <a 
-                        href='https://github.com/hash167'
-                        target="_blank"
-                        title="GitHub"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
-</svg>
-
-
-
-                        
-                    </a>
-                </li>
-            
-                <li>
-                    <a 
-                        href='https://linkedin.com/in/hashimcolombowala'
-                        target="_blank"
-                        title="LinkedIn"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-linkedin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"></path>
-  <rect x="4" y="4" width="16" height="16" rx="2"></rect>
-  <line x1="8" y1="11" x2="8" y2="16"></line>
-  <line x1="8" y1="8" x2="8" y2="8.01"></line>
-  <line x1="12" y1="16" x2="12" y2="11"></line>
-  <path d="M16 16v-3a2 2 0 0 0 -4 0"></path>
-</svg>
-
-                        
-                    </a>
-                </li>
-            
-        </ol><ol class="menu" id="main-menu">
-        
-        
-        
-        <li >
-            <a href='/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <polyline points="5 12 3 12 12 3 21 12 19 12" />
-  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-</svg>
-
-
-
-                
-                <span>🖋️ Blogs</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/about/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
-  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
-</svg>
-
-
-
-                
-                <span>🧑‍💼 About</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/archives/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <rect x="3" y="4" width="18" height="4" rx="2" />
-  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
-  <line x1="10" y1="12" x2="14" y2="12" />
-</svg>
-
-
-
-                
-                <span>🗂️ Archives</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/search/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-                
-                <span>🔍 Search</span>
-            </a>
-        </li>
-        
-        <li class="menu-bottom-section">
-            <ol class="menu">
-
-                
-                    <li id="dark-mode-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="8" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="16" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <span>Dark Mode</span>
-                    </li>
-                
-            </ol>
-        </li>
-    </ol>
-</aside>
-
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">Table of contents</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li>
-      <ol>
-        <li><a href="#how-crds-work">How CRDs Work</a></li>
-        <li><a href="#a-simple-example-load-testing-as-a-crd">A Simple Example: Load Testing as a CRD</a></li>
-        <li><a href="#why-use-crds">Why Use CRDs?</a></li>
-        <li><a href="#wrap-up">Wrap-Up</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
-            <main class="main full-width">
-    <article class="main-article">
-    <header class="article-header">
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/k8s/" >
-                K8s
-            </a>
-        
-            <a href="/categories/controllers/" >
-                Controllers
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/custom-resource-definitions-crds-and-extending-kubernetes/">Custom Resource Definitions (CRDs) and Extending Kubernetes</a>
-        </h2>
-    
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">Oct 12, 2024</time>
-            </div>
-        
-
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <polyline points="12 7 12 12 15 15" />
-</svg>
-
-
-
-                <time class="article-time--reading">
-                    5 minute read
-                </time>
-            </div>
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-
-    <section class="article-content">
-    
-    
-    <p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.</p>
-<p>By defining a CRD, we essentially added a new table to Kubernetes&rsquo; internal document store via the API server (etcd). This resource could now be interacted with just like any built-in Kubernetes object. Using tools like <code>kubectl</code>, we could create, update, and delete instances of this new resource, seamlessly integrating it with existing workflows.</p>
-<p>By using CRDs and controllers, we can offer reusable services to our teams while avoiding the overhead of developing new APIs from scratch. The built-in Kubernetes ecosystem provides authentication, authorization, and even CLI tooling for free, significantly reducing development time and complexity.</p>
-<p><strong>Why Use CRDs?</strong></p>
-<ul>
-<li>Kubernetes controllers reconcile the desired state of resources with their actual state, and we can create custom controllers using tools as simple as Bash.</li>
-<li>Custom Resource Definitions (CRDs) allow you to extend Kubernetes to meet your organization&rsquo;s specific needs, making it a powerful platform not just for containers, but for custom orchestration tasks.</li>
-<li>Instead of building new microservices, leveraging Kubernetes CRDs and controllers lets you create powerful, integrated solutions that are already compatible with Kubernetes&rsquo; tooling and infrastructure.</li>
-<li><strong>Consistency</strong>: Using CRDs means everything—even your own internal processes—can be treated like a Kubernetes resource, managed consistently with the rest of your cluster.</li>
-<li><strong>Tooling Integration</strong>: CRDs get the same benefits as built-in Kubernetes objects. You can use <code>kubectl</code> to interact with them, and they integrate seamlessly with Kubernetes&rsquo; authentication, authorization, and RBAC policies.</li>
-<li><strong>Modular Infrastructure</strong>: By using custom resources, you can create more modular infrastructure, which makes scaling easier. Your <code>LoadTest</code> or <code>CronTask</code> controller can run independently of your other services.</li>
-</ul>
-<h3 id="how-crds-work">How CRDs Work
-</h3><p>CRDs work by allowing you to register new types of resources with the Kubernetes API server. The Kubernetes API server is the brain behind Kubernetes. It stores information about the cluster&rsquo;s state, using etcd as an internal document store, and ensures that whatever you&rsquo;ve defined—a number of Pods running, a particular service being exposed—matches reality. etcd functions as a distributed key-value store where all the cluster&rsquo;s state information, including your custom resources, is stored. With CRDs, you get to extend the brain to understand new resources that you define.</p>
-<p>The process is straightforward:</p>
-<ol>
-<li><strong>Define Your Custom Resource</strong>: You describe what your new resource looks like. This could include fields like <code>method</code> and <code>endpoint</code> for a <code>LoadTest</code> resource.</li>
-<li><strong>Register It with the API Server</strong>: Using a YAML or JSON file, you apply your CRD to the Kubernetes cluster. This lets the API server know about your new resource type.</li>
-<li><strong>Write Controllers</strong>: Controllers are programs that watch your resources and ensure the state matches what you&rsquo;ve defined. For your <code>LoadTest</code>, this could mean watching for new requests and kicking off an actual load test when one appears.</li>
-</ol>
-<p>Once you&rsquo;ve done this, your Kubernetes cluster now understands this new type of resource—and you can manage these resources using the same tools and commands as any other part of Kubernetes.</p>
-<h3 id="a-simple-example-load-testing-as-a-crd">A Simple Example: Load Testing as a CRD
-</h3><p>Imagine you want a way for your developers to request a load test easily—no extra tooling, no separate scripts, just a simple definition. You could define a <code>LoadTest</code> custom resource, which has fields for the test duration, endpoint to test, and type of HTTP request. Checkout this [Github repo](<a class="link" href="https://github.com/hash167/kubernetes_controller"  target="_blank" rel="noopener"
-    >https://github.com/hash167/kubernetes_controller</a>) for a controller written in bash which watches for events about the CRD.</p>
-<p>Here&rsquo;s a simple <code>LoadTest</code> definition:</p>
-<div class="highlight"><div class="chroma">
-<table class="lntable"><tr><td class="lntd">
-<pre tabindex="0" class="chroma"><code><span class="lnt"> 1
-</span><span class="lnt"> 2
-</span><span class="lnt"> 3
-</span><span class="lnt"> 4
-</span><span class="lnt"> 5
-</span><span class="lnt"> 6
-</span><span class="lnt"> 7
-</span><span class="lnt"> 8
-</span><span class="lnt"> 9
-</span><span class="lnt">10
-</span><span class="lnt">11
-</span><span class="lnt">12
-</span><span class="lnt">13
-</span><span class="lnt">14
-</span><span class="lnt">15
-</span><span class="lnt">16
-</span><span class="lnt">17
-</span><span class="lnt">18
-</span><span class="lnt">19
-</span><span class="lnt">20
-</span><span class="lnt">21
-</span><span class="lnt">22
-</span><span class="lnt">23
-</span><span class="lnt">24
-</span><span class="lnt">25
-</span><span class="lnt">26
-</span><span class="lnt">27
-</span><span class="lnt">28
-</span><span class="lnt">29
-</span><span class="lnt">30
-</span></code></pre></td>
-<td class="lntd">
-<pre tabindex="0" class="chroma"><code class="language-yaml" data-lang="yaml"><span class="line"><span class="cl"><span class="nt">apiVersion</span><span class="p">:</span><span class="w"> </span><span class="l">apiextensions.k8s.io/v1</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">CustomResourceDefinition</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">metadata</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">loadtests.platform.mycompany.com</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="nt">spec</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">group</span><span class="p">:</span><span class="w"> </span><span class="l">platform.mycompany.com</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">versions</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l">v1</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">served</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">storage</span><span class="p">:</span><span class="w"> </span><span class="kc">true</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">      </span><span class="nt">schema</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">        </span><span class="nt">openAPIV3Schema</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">object</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">          </span><span class="nt">properties</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">            </span><span class="nt">spec</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">              </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">object</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">              </span><span class="nt">properties</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">endpoint</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">                  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">string</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">duration</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">                  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">string</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">                </span><span class="nt">method</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">                  </span><span class="nt">type</span><span class="p">:</span><span class="w"> </span><span class="l">string</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">scope</span><span class="p">:</span><span class="w"> </span><span class="l">Namespaced</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">  </span><span class="nt">names</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">plural</span><span class="p">:</span><span class="w"> </span><span class="l">loadtests</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">singular</span><span class="p">:</span><span class="w"> </span><span class="l">loadtest</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">kind</span><span class="p">:</span><span class="w"> </span><span class="l">LoadTest</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="nt">shortNames</span><span class="p">:</span><span class="w">
-</span></span></span><span class="line"><span class="cl"><span class="w">    </span>- <span class="l">lt</span><span class="w">
-</span></span></span></code></pre></td></tr></table>
-</div>
-</div><p>The updated CRD definition can also be found in the GitHub repository <a class="link" href="https://github.com/hash167/kubernetes_controller/blob/main/k8s/crd.yaml"  target="_blank" rel="noopener"
-    >here</a>.</p>
-<p>After defining this CRD and applying it, your developers can create <code>LoadTest</code> resources just like they create Pods or Deployments. A controller you build (or use off the shelf) would then watch for <code>LoadTest</code> resources and initiate the load test accordingly.</p>
-<h3 id="why-use-crds">Why Use CRDs?
-</h3><ul>
-<li><strong>Consistency</strong>: Using CRDs means everything—even your own internal processes—can be treated like a Kubernetes resource, managed consistently with the rest of your cluster.</li>
-<li><strong>Tooling Integration</strong>: CRDs get the same benefits as built-in Kubernetes objects. You can use <code>kubectl</code> to interact with them, and they integrate seamlessly with Kubernetes&rsquo; authentication, authorization, and RBAC policies.</li>
-<li><strong>Modular Infrastructure</strong>: By using custom resources, you can create more modular infrastructure, which makes scaling easier. Your <code>LoadTest</code> or <code>CronTask</code> controller can run independently of your other services.</li>
-</ul>
-<h3 id="wrap-up">Wrap-Up
-</h3><p>CRDs let you harness the full power of Kubernetes beyond managing containers. By integrating custom resources into the Kubernetes API, you bring consistency, power, and scalability to your workflows.</p>
-<p>The best way to understand CRDs is to experiment—try extending Kubernetes with something that matches your team&rsquo;s needs. And remember, Kubernetes is a platform that can grow with you—so don&rsquo;t be afraid to push its boundaries.</p>
-
-</section>
-
-
-    <footer class="article-footer">
-    
-    <section class="article-tags">
-        
-            <a href="/tags/kubernetes/">Kubernetes</a>
-        
-            <a href="/tags/controllers-1/">Controllers-1</a>
-        
-    </section>
-
-
-    </footer>
-
-
-    
-</article>
-
-    
-
-    
-
-     
-    
-        
-    
-
-    <footer class="site-footer">
-    <section class="copyright">
-        &copy; 
-        
-            2018 - 
-        
-        2024 Hashim Colombowala
-    </section>
-    
-    <section class="powerby">
-        
-            End <br/>
-        Built with <a href="https://gohugo.io/" target="_blank" rel="noopener">Hugo</a> <br />
-        Theme <b><a href="https://github.com/CaiJimmy/hugo-theme-stack" target="_blank" rel="noopener" data-version="3.29.0">Stack</a></b> designed by <a href="https://jimmycai.com" target="_blank" rel="noopener">Jimmy</a>
-    </section>
-</footer>
-
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-
-            </main>
-        </div>
-        <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
-                
-                >
-            </script><script type="text/javascript" src="/ts/main.dee6707d52794e47a3f033cca7814c4cbbcdff7a007a5364a7c5f59d7587f058.js" defer></script>
-<script>
-    (function () {
-        const customFont = document.createElement('link');
-        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
-
-        customFont.type = "text/css";
-        customFont.rel = "stylesheet";
-
-        document.head.appendChild(customFont);
-    }());
-</script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-      var footer = document.querySelector("footer.site-footer");
-      if (footer) {
-        footer.remove();
-      }
-    });
-</script>
-    
-    </body>
-</html>
+<!doctype html><html lang=en-us dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content="Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.\n"><title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title>
+<link rel=canonical href=https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/><link rel=stylesheet href=/scss/style.min.663803bebe609202d5b39d848f2d7c2dc8b598a2d879efa079fa88893d29c49c.css><meta property='og:title' content="Custom Resource Definitions (CRDs) and Extending Kubernetes"><meta property='og:description' content="Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.\n"><meta property='og:url' content='https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/'><meta property='og:site_name' content='Hashim Colombowala'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='kubernetes'><meta property='article:tag' content='controllers-1'><meta property='article:published_time' content='2024-10-12T23:00:35-07:00'><meta property='article:modified_time' content='2024-10-12T23:00:35-07:00'><meta name=twitter:title content="Custom Resource Definitions (CRDs) and Extending Kubernetes"><meta name=twitter:description content="Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.\n"><link rel="shortcut icon" href=/favicon.png></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label="Toggle Menu">
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hu17444537569875534604.jpg width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>🍥</span></figure><div class=site-meta><h1 class=site-name><a href=/>Hashim Colombowala</a></h1><h2 class=site-description>Software Engineer working on cool things like K8s, Streaming Infrastructure, Observability systems and more</h2></div></header><ol class=menu-social><li><a href=https://github.com/hash167 target=_blank title=GitHub rel=me><svg class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li><li><a href=https://linkedin.com/in/hashimcolombowala target=_blank title=LinkedIn rel=me><svg class="icon icon-tabler icon-tabler-brand-linkedin" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><rect x="4" y="4" width="16" height="16" rx="2"/><line x1="8" y1="11" x2="8" y2="16"/><line x1="8" y1="8" x2="8" y2="8.01"/><line x1="12" y1="16" x2="12" y2="11"/><path d="M16 16v-3a2 2 0 00-4 0"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>🖋️ Blogs</span></a></li><li><a href=/about/><svg class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>🧑‍💼 About</span></a></li><li><a href=/archives/><svg class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>🗂️ Archives</span></a></li><li><a href=/search/><svg class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>🔍 Search</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>Dark Mode</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">Table of contents</h2><div class=widget--toc><nav id=TableOfContents><ol><li><ol><li><a href=#how-crds-work>How CRDs Work</a></li><li><a href=#a-simple-example-load-testing-as-a-crd>A Simple Example: Load Testing as a CRD</a></li><li><a href=#why-use-crds>Why Use CRDs?</a></li><li><a href=#wrap-up>Wrap-Up</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/k8s/>K8s
+</a><a href=/categories/controllers/>Controllers</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/custom-resource-definitions-crds-and-extending-kubernetes/>Custom Resource Definitions (CRDs) and Extending Kubernetes</a></h2></div><footer class=article-time><div><svg class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>Oct 12, 2024</time></div><div><svg class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>
+<time class=article-time--reading>5 minute read</time></div></footer></div></header><section class=article-content><p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.</p><p>By defining a CRD, we essentially added a new table to Kubernetes&rsquo; internal document store via the API server (etcd). This resource could now be interacted with just like any built-in Kubernetes object. Using tools like <code>kubectl</code>, we could create, update, and delete instances of this new resource, seamlessly integrating it with existing workflows.</p><p>By using CRDs and controllers, we can offer reusable services to our teams while avoiding the overhead of developing new APIs from scratch. The built-in Kubernetes ecosystem provides authentication, authorization, and even CLI tooling for free, significantly reducing development time and complexity.</p><p><strong>Why Use CRDs?</strong></p><ul><li>Kubernetes controllers reconcile the desired state of resources with their actual state, and we can create custom controllers using tools as simple as Bash.</li><li>Custom Resource Definitions (CRDs) allow you to extend Kubernetes to meet your organization&rsquo;s specific needs, making it a powerful platform not just for containers, but for custom orchestration tasks.</li><li>Instead of building new microservices, leveraging Kubernetes CRDs and controllers lets you create powerful, integrated solutions that are already compatible with Kubernetes&rsquo; tooling and infrastructure.</li><li><strong>Consistency</strong>: Using CRDs means everything—even your own internal processes—can be treated like a Kubernetes resource, managed consistently with the rest of your cluster.</li><li><strong>Tooling Integration</strong>: CRDs get the same benefits as built-in Kubernetes objects. You can use <code>kubectl</code> to interact with them, and they integrate seamlessly with Kubernetes&rsquo; authentication, authorization, and RBAC policies.</li><li><strong>Modular Infrastructure</strong>: By using custom resources, you can create more modular infrastructure, which makes scaling easier. Your <code>LoadTest</code> or <code>CronTask</code> controller can run independently of your other services.</li></ul><h3 id=how-crds-work>How CRDs Work</h3><p>CRDs work by allowing you to register new types of resources with the Kubernetes API server. The Kubernetes API server is the brain behind Kubernetes. It stores information about the cluster&rsquo;s state, using etcd as an internal document store, and ensures that whatever you&rsquo;ve defined—a number of Pods running, a particular service being exposed—matches reality. etcd functions as a distributed key-value store where all the cluster&rsquo;s state information, including your custom resources, is stored. With CRDs, you get to extend the brain to understand new resources that you define.</p><p>The process is straightforward:</p><ol><li><strong>Define Your Custom Resource</strong>: You describe what your new resource looks like. This could include fields like <code>method</code> and <code>endpoint</code> for a <code>LoadTest</code> resource.</li><li><strong>Register It with the API Server</strong>: Using a YAML or JSON file, you apply your CRD to the Kubernetes cluster. This lets the API server know about your new resource type.</li><li><strong>Write Controllers</strong>: Controllers are programs that watch your resources and ensure the state matches what you&rsquo;ve defined. For your <code>LoadTest</code>, this could mean watching for new requests and kicking off an actual load test when one appears.</li></ol><p>Once you&rsquo;ve done this, your Kubernetes cluster now understands this new type of resource—and you can manage these resources using the same tools and commands as any other part of Kubernetes.</p><h3 id=a-simple-example-load-testing-as-a-crd>A Simple Example: Load Testing as a CRD</h3><p>Imagine you want a way for your developers to request a load test easily—no extra tooling, no separate scripts, just a simple definition. You could define a <code>LoadTest</code> custom resource, which has fields for the test duration, endpoint to test, and type of HTTP request. Checkout this [Github repo](<a class=link href=https://github.com/hash167/kubernetes_controller target=_blank rel=noopener>https://github.com/hash167/kubernetes_controller</a>) for a controller written in bash which watches for events about the CRD.</p><p>Here&rsquo;s a simple <code>LoadTest</code> definition:</p><div class=highlight><div class=chroma><table class=lntable><tr><td class=lntd><pre tabindex=0 class=chroma><code><span class=lnt> 1
+</span><span class=lnt> 2
+</span><span class=lnt> 3
+</span><span class=lnt> 4
+</span><span class=lnt> 5
+</span><span class=lnt> 6
+</span><span class=lnt> 7
+</span><span class=lnt> 8
+</span><span class=lnt> 9
+</span><span class=lnt>10
+</span><span class=lnt>11
+</span><span class=lnt>12
+</span><span class=lnt>13
+</span><span class=lnt>14
+</span><span class=lnt>15
+</span><span class=lnt>16
+</span><span class=lnt>17
+</span><span class=lnt>18
+</span><span class=lnt>19
+</span><span class=lnt>20
+</span><span class=lnt>21
+</span><span class=lnt>22
+</span><span class=lnt>23
+</span><span class=lnt>24
+</span><span class=lnt>25
+</span><span class=lnt>26
+</span><span class=lnt>27
+</span><span class=lnt>28
+</span><span class=lnt>29
+</span><span class=lnt>30
+</span></code></pre></td><td class=lntd><pre tabindex=0 class=chroma><code class=language-yaml data-lang=yaml><span class=line><span class=cl><span class=nt>apiVersion</span><span class=p>:</span><span class=w> </span><span class=l>apiextensions.k8s.io/v1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=nt>kind</span><span class=p>:</span><span class=w> </span><span class=l>CustomResourceDefinition</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=nt>metadata</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>loadtests.platform.mycompany.com</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w></span><span class=nt>spec</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>group</span><span class=p>:</span><span class=w> </span><span class=l>platform.mycompany.com</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>versions</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=nt>name</span><span class=p>:</span><span class=w> </span><span class=l>v1</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>served</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>storage</span><span class=p>:</span><span class=w> </span><span class=kc>true</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>      </span><span class=nt>schema</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>        </span><span class=nt>openAPIV3Schema</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>object</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>          </span><span class=nt>properties</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>            </span><span class=nt>spec</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>              </span><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>object</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>              </span><span class=nt>properties</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nt>endpoint</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                  </span><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nt>duration</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                  </span><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                </span><span class=nt>method</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>                  </span><span class=nt>type</span><span class=p>:</span><span class=w> </span><span class=l>string</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>scope</span><span class=p>:</span><span class=w> </span><span class=l>Namespaced</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>  </span><span class=nt>names</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>plural</span><span class=p>:</span><span class=w> </span><span class=l>loadtests</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>singular</span><span class=p>:</span><span class=w> </span><span class=l>loadtest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>kind</span><span class=p>:</span><span class=w> </span><span class=l>LoadTest</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span><span class=nt>shortNames</span><span class=p>:</span><span class=w>
+</span></span></span><span class=line><span class=cl><span class=w>    </span>- <span class=l>lt</span><span class=w>
+</span></span></span></code></pre></td></tr></table></div></div><p>The updated CRD definition can also be found in the GitHub repository <a class=link href=https://github.com/hash167/kubernetes_controller/blob/main/k8s/crd.yaml target=_blank rel=noopener>here</a>.</p><p>After defining this CRD and applying it, your developers can create <code>LoadTest</code> resources just like they create Pods or Deployments. A controller you build (or use off the shelf) would then watch for <code>LoadTest</code> resources and initiate the load test accordingly.</p><h3 id=why-use-crds>Why Use CRDs?</h3><ul><li><strong>Consistency</strong>: Using CRDs means everything—even your own internal processes—can be treated like a Kubernetes resource, managed consistently with the rest of your cluster.</li><li><strong>Tooling Integration</strong>: CRDs get the same benefits as built-in Kubernetes objects. You can use <code>kubectl</code> to interact with them, and they integrate seamlessly with Kubernetes&rsquo; authentication, authorization, and RBAC policies.</li><li><strong>Modular Infrastructure</strong>: By using custom resources, you can create more modular infrastructure, which makes scaling easier. Your <code>LoadTest</code> or <code>CronTask</code> controller can run independently of your other services.</li></ul><h3 id=wrap-up>Wrap-Up</h3><p>CRDs let you harness the full power of Kubernetes beyond managing containers. By integrating custom resources into the Kubernetes API, you bring consistency, power, and scalability to your workflows.</p><p>The best way to understand CRDs is to experiment—try extending Kubernetes with something that matches your team&rsquo;s needs. And remember, Kubernetes is a platform that can grow with you—so don&rsquo;t be afraid to push its boundaries.</p></section><footer class=article-footer><section class=article-tags><a href=/tags/kubernetes/>Kubernetes</a>
+<a href=/tags/controllers-1/>Controllers-1</a></section></footer></article><footer class=site-footer><section class=copyright>&copy;
+2018 -
+2024 Hashim Colombowala</section><section class=powerby>End<br>Built with <a href=https://gohugo.io/ target=_blank rel=noopener>Hugo</a><br>Theme <b><a href=https://github.com/CaiJimmy/hugo-theme-stack target=_blank rel=noopener data-version=3.29.0>Stack</a></b> designed by <a href=https://jimmycai.com target=_blank rel=noopener>Jimmy</a></section></footer><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.1e9a3bafd846ced4c345d084b355fb8c7bae75701c338f8a1f8a82c780137826.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script><script>document.addEventListener("DOMContentLoaded",function(){var e=document.querySelector("footer.site-footer");e&&e.remove()})</script></body></html>

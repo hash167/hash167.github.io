@@ -1,54 +1,19 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>Pages on Hashim Colombowala</title>
-        <link>http://localhost:62050/page/</link>
-        <description>Recent content in Pages on Hashim Colombowala</description>
-        <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
-        <lastBuildDate>Sun, 06 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="http://localhost:62050/page/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>🗂️ Archives</title>
-        <link>http://localhost:62050/archives/</link>
-        <pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate>
-        
-        <guid>http://localhost:62050/archives/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>🔍 Search</title>
-        <link>http://localhost:62050/search/</link>
-        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-        
-        <guid>http://localhost:62050/search/</guid>
-        <description></description>
-        </item>
-        <item>
-        <title>🧑‍💼 About</title>
-        <link>http://localhost:62050/about/</link>
-        <pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate>
-        
-        <guid>http://localhost:62050/about/</guid>
-        <description>&lt;h2 id=&#34;-intro&#34;&gt;📝 Intro
-&lt;/h2&gt;&lt;p&gt;My journey involves finishing a masters degree in Electrical Engineering at USC to working as a Sr. Software Engineer in the Observability space at a Fintech company in the Bay Area of California.&lt;/p&gt;
-&lt;h2 id=&#34;-skills--expertise&#34;&gt;🚀 Skills &amp;amp; Expertise
-&lt;/h2&gt;&lt;h3 id=&#34;-cloud-infrastructure&#34;&gt;🌐 Cloud Infrastructure
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;EKS on AWS:&lt;/strong&gt; Hands-on experience with deploying, scaling, and maintaining Kubernetes on AWS.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Optimizing Observability Platforms:&lt;/strong&gt; Expertise in scaling observability systems to accommodate company growth while maintaining budget efficiency.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;-observability-stack&#34;&gt;📊 Observability Stack
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;Logging:&lt;/strong&gt; ElasticSearch for scalable log aggregation and analysis.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Metrics:&lt;/strong&gt; Prometheus for monitoring and alerting with custom integrations.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Tracing:&lt;/strong&gt; Deep integration with OpenTelemetry for distributed tracing.&lt;/li&gt;
-&lt;/ul&gt;
-&lt;h3 id=&#34;-data-pipelines--streaming&#34;&gt;⚙️ Data Pipelines &amp;amp; Streaming
-&lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;&lt;strong&gt;ETL Pipelines:&lt;/strong&gt; Architecting ETL processes to transform raw logs into actionable analytics.&lt;/li&gt;
-&lt;li&gt;&lt;strong&gt;Flink Streaming:&lt;/strong&gt; Building real-time SLO systems using Apache Flink to process telemetry data efficiently.&lt;/li&gt;
-&lt;/ul&gt;
-</description>
-        </item>
-        
-    </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Pages on Hashim Colombowala</title><link>https://hashimcolombowala.com/page/</link><description>Recent content in Pages on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sun, 06 Mar 2022 00:00:00 +0000</lastBuildDate><atom:link href="https://hashimcolombowala.com/page/index.xml" rel="self" type="application/rss+xml"/><item><title>🗂️ Archives</title><link>https://hashimcolombowala.com/archives/</link><pubDate>Sun, 06 Mar 2022 00:00:00 +0000</pubDate><guid>https://hashimcolombowala.com/archives/</guid><description/></item><item><title>🔍 Search</title><link>https://hashimcolombowala.com/search/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://hashimcolombowala.com/search/</guid><description/></item><item><title>🧑‍💼 About</title><link>https://hashimcolombowala.com/about/</link><pubDate>Mon, 01 Jan 0001 00:00:00 +0000</pubDate><guid>https://hashimcolombowala.com/about/</guid><description>&lt;h2 id="-intro">📝 Intro
+&lt;/h2>&lt;p>My journey involves finishing a masters degree in Electrical Engineering at USC to working as a Sr. Software Engineer in the Observability space at a Fintech company in the Bay Area of California.&lt;/p>
+&lt;h2 id="-skills--expertise">🚀 Skills &amp;amp; Expertise
+&lt;/h2>&lt;h3 id="-cloud-infrastructure">🌐 Cloud Infrastructure
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>EKS on AWS:&lt;/strong> Hands-on experience with deploying, scaling, and maintaining Kubernetes on AWS.&lt;/li>
+&lt;li>&lt;strong>Optimizing Observability Platforms:&lt;/strong> Expertise in scaling observability systems to accommodate company growth while maintaining budget efficiency.&lt;/li>
+&lt;/ul>
+&lt;h3 id="-observability-stack">📊 Observability Stack
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Logging:&lt;/strong> ElasticSearch for scalable log aggregation and analysis.&lt;/li>
+&lt;li>&lt;strong>Metrics:&lt;/strong> Prometheus for monitoring and alerting with custom integrations.&lt;/li>
+&lt;li>&lt;strong>Tracing:&lt;/strong> Deep integration with OpenTelemetry for distributed tracing.&lt;/li>
+&lt;/ul>
+&lt;h3 id="-data-pipelines--streaming">⚙️ Data Pipelines &amp;amp; Streaming
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>ETL Pipelines:&lt;/strong> Architecting ETL processes to transform raw logs into actionable analytics.&lt;/li>
+&lt;li>&lt;strong>Flink Streaming:&lt;/strong> Building real-time SLO systems using Apache Flink to process telemetry data efficiently.&lt;/li>
+&lt;/ul></description></item></channel></rss>

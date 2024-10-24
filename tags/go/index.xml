@@ -1,30 +1,11 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>Go on Hashim Colombowala</title>
-        <link>http://localhost:62050/tags/go/</link>
-        <description>Recent content in Go on Hashim Colombowala</description>
-        <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
-        <lastBuildDate>Sat, 20 Jun 2020 16:00:00 -0700</lastBuildDate><atom:link href="http://localhost:62050/tags/go/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>The Go Spec(compiling)</title>
-        <link>http://localhost:62050/p/the-go-speccompiling/</link>
-        <pubDate>Sat, 20 Jun 2020 16:00:00 -0700</pubDate>
-        
-        <guid>http://localhost:62050/p/the-go-speccompiling/</guid>
-        <description>&lt;p&gt;The Go compiler can compile the Go source go with different go specs. Fo example, if you have installed go 1.14, you can compile your source with &lt;code&gt;Go spec 1.13&lt;/code&gt;.&lt;/p&gt;
-&lt;h3 id=&#34;the-rules-for-which-version-of-the-go-spec-used-during-compilation-appear-to-be&#34;&gt;The rules for which version of the Go spec used during compilation appear to be
-&lt;/h3&gt;&lt;ol&gt;
-&lt;li&gt;If your source code is stored within the &lt;code&gt;GOPATH&lt;/code&gt; (or you have disabled modules with &lt;code&gt;GO111MODULE=off&lt;/code&gt;) then the version of the Go spec used to compile matches the version of the compiler you are using. ie if you have go 1.13(&lt;code&gt;GOROOT&lt;/code&gt; points to your &lt;code&gt;go&lt;/code&gt; installation) installed then the go spec used will be 1.13&lt;/li&gt;
-&lt;li&gt;If your source code is outside the &lt;code&gt;GOPATH&lt;/code&gt;(or &lt;code&gt;GO111MODULE=on&lt;/code&gt;), then the go tool will take the version from the &lt;code&gt;go.mod&lt;/code&gt; file&lt;/li&gt;
-&lt;li&gt;If no &lt;code&gt;go.mod&lt;/code&gt; file is provided, then same as point 1&lt;/li&gt;
-&lt;li&gt;If you are in module mode(see point 2) and no version is specified in the &lt;code&gt;go.mod&lt;/code&gt; file, then &lt;code&gt;go 1.13&lt;/code&gt; is used by default&lt;/li&gt;
-&lt;/ol&gt;
-&lt;p&gt;The last point is interesting.&lt;/p&gt;
-&lt;p&gt;Reference: &lt;a class=&#34;link&#34; href=&#34;https://www.jetbrains.com/help/go/configuring-goroot-and-gopath.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;https://www.jetbrains.com/help/go/configuring-goroot-and-gopath.html&lt;/a&gt;&lt;/p&gt;
-</description>
-        </item>
-        
-    </channel>
-</rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Go on Hashim Colombowala</title><link>https://hashimcolombowala.com/tags/go/</link><description>Recent content in Go on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 20 Jun 2020 16:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/go/index.xml" rel="self" type="application/rss+xml"/><item><title>The Go Spec(compiling)</title><link>https://hashimcolombowala.com/p/the-go-speccompiling/</link><pubDate>Sat, 20 Jun 2020 16:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/the-go-speccompiling/</guid><description>&lt;p>The Go compiler can compile the Go source go with different go specs. Fo example, if you have installed go 1.14, you can compile your source with &lt;code>Go spec 1.13&lt;/code>.&lt;/p>
+&lt;h3 id="the-rules-for-which-version-of-the-go-spec-used-during-compilation-appear-to-be">The rules for which version of the Go spec used during compilation appear to be
+&lt;/h3>&lt;ol>
+&lt;li>If your source code is stored within the &lt;code>GOPATH&lt;/code> (or you have disabled modules with &lt;code>GO111MODULE=off&lt;/code>) then the version of the Go spec used to compile matches the version of the compiler you are using. ie if you have go 1.13(&lt;code>GOROOT&lt;/code> points to your &lt;code>go&lt;/code> installation) installed then the go spec used will be 1.13&lt;/li>
+&lt;li>If your source code is outside the &lt;code>GOPATH&lt;/code>(or &lt;code>GO111MODULE=on&lt;/code>), then the go tool will take the version from the &lt;code>go.mod&lt;/code> file&lt;/li>
+&lt;li>If no &lt;code>go.mod&lt;/code> file is provided, then same as point 1&lt;/li>
+&lt;li>If you are in module mode(see point 2) and no version is specified in the &lt;code>go.mod&lt;/code> file, then &lt;code>go 1.13&lt;/code> is used by default&lt;/li>
+&lt;/ol>
+&lt;p>The last point is interesting.&lt;/p>
+&lt;p>Reference: &lt;a class="link" href="https://www.jetbrains.com/help/go/configuring-goroot-and-gopath.html" target="_blank" rel="noopener"
+>https://www.jetbrains.com/help/go/configuring-goroot-and-gopath.html&lt;/a>&lt;/p></description></item></channel></rss>
