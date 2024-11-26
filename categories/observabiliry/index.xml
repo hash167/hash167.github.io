@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Observabiliry on Hashim Colombowala</title>
+        <link>http://localhost:1313/categories/observabiliry/</link>
+        <description>Recent content in Observabiliry on Hashim Colombowala</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Tue, 26 Nov 2024 06:49:00 -0700</lastBuildDate><atom:link href="http://localhost:1313/categories/observabiliry/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Delta vs. Cumulative Metrics: Key Differences and System Preferences</title>
+        <link>http://localhost:1313/p/delta/</link>
+        <pubDate>Tue, 26 Nov 2024 06:49:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/p/delta/</guid>
+        <description>&lt;img src="http://localhost:1313/p/delta/metrics.jpg" alt="Featured image of post Delta vs. Cumulative Metrics: Key Differences and System Preferences" /&gt;&lt;p&gt;When it comes to collecting and analyzing metrics, one crucial decision is whether to use &lt;strong&gt;delta&lt;/strong&gt; or &lt;strong&gt;cumulative&lt;/strong&gt; metrics. These two approaches define how measurements are reported over time, and different metrics systems have their preferences based on their design and use cases. In this blog post, we’ll explore the difference between delta and cumulative metrics, examine their trade-offs, and highlight the systems that prefer one over the other.&lt;/p&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;what-are-delta-and-cumulative-metrics&#34;&gt;&lt;strong&gt;What Are Delta and Cumulative Metrics?&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;&lt;strong&gt;Cumulative Metrics&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;These represent the total value accumulated from the start of the measurement up to the current point.&lt;/li&gt;
+&lt;li&gt;Every reported value includes all previous measurements, providing a running total.&lt;/li&gt;
+&lt;li&gt;Example:
+&lt;ul&gt;
+&lt;li&gt;At time t0: 5&lt;/li&gt;
+&lt;li&gt;At time t0+10s: 10&lt;/li&gt;
+&lt;li&gt;At time t0+20s: 20&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Use case&lt;/strong&gt;: Cumulative metrics are ideal when you need a holistic view of total occurrences, such as the total number of requests or errors since the application started. They also help mitigate data loss because missed intervals can still be accounted for in subsequent reports.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Delta Metrics&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Delta metrics report only the change in value since the last measurement.&lt;/li&gt;
+&lt;li&gt;Each value reflects the increment or decrement during a specific reporting interval.&lt;/li&gt;
+&lt;li&gt;Example:
+&lt;ul&gt;
+&lt;li&gt;At time t0: 5&lt;/li&gt;
+&lt;li&gt;At time t0+10s: 5&lt;/li&gt;
+&lt;li&gt;At time t0+20s: 10&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Use case&lt;/strong&gt;: Delta metrics are great for analyzing the rate of change over specific intervals. They’re especially useful in systems designed for high-frequency reporting where capturing incremental updates is more efficient.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;key-differences-between-delta-and-cumulative-metrics&#34;&gt;&lt;strong&gt;Key Differences Between Delta and Cumulative Metrics&lt;/strong&gt;
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th&gt;Feature&lt;/th&gt;
+          &lt;th&gt;Cumulative Metrics&lt;/th&gt;
+          &lt;th&gt;Delta Metrics&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Representation&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Running total since the start&lt;/td&gt;
+          &lt;td&gt;Increment since the last report&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Data Loss Handling&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Resilient to missed intervals&lt;/td&gt;
+          &lt;td&gt;Data may be lost if intervals are missed&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Rate Calculation&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;Requires backend calculations&lt;/td&gt;
+          &lt;td&gt;Directly provides the rate per interval&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td&gt;&lt;strong&gt;Overhead&lt;/strong&gt;&lt;/td&gt;
+          &lt;td&gt;More storage-intensive for long periods&lt;/td&gt;
+          &lt;td&gt;More efficient for short intervals&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;metrics-systems-and-their-preferences&#34;&gt;&lt;strong&gt;Metrics Systems and Their Preferences&lt;/strong&gt;
+&lt;/h3&gt;&lt;h4 id=&#34;metrics-systems-using-cumulative-metrics&#34;&gt;&lt;strong&gt;Metrics Systems Using Cumulative Metrics&lt;/strong&gt;
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Prometheus&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Cumulative metrics are the default. Counters track the total value over time, and functions like &lt;code&gt;rate()&lt;/code&gt; derive per-second rates.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Google Cloud Monitoring&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Uses cumulative metrics to represent continuous totals, like the number of requests served.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Amazon CloudWatch&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Designed around cumulative metrics, with built-in support for rate and delta calculations.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;metrics-systems-using-delta-metrics&#34;&gt;&lt;strong&gt;Metrics Systems Using Delta Metrics&lt;/strong&gt;
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;OpenTelemetry (OTLP)&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Delta temporality is supported for certain metric types, allowing granular reporting over intervals.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;StatsD&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Metrics like counters are reported as deltas, focusing on changes during the last interval for lightweight and efficient ingestion.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Datadog&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Prefers delta metrics for some integrations to provide detailed visibility into per-second rates.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Chronosphere&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Delta metrics are used to track changes for dynamic workloads with fine-grained time-based analysis.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;systems-supporting-both-delta-and-cumulative-metrics&#34;&gt;&lt;strong&gt;Systems Supporting Both Delta and Cumulative Metrics&lt;/strong&gt;
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;OpenTelemetry&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Provides flexibility by allowing users to configure metrics as either cumulative or delta.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Grafana Mimir and Cortex&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;While aligned with Prometheus&amp;rsquo; cumulative approach, these systems can process both formats.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Elastic Observability&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Supports both, though cumulative metrics are more effective for long-term storage and trend analysis.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Splunk Observability Cloud&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Handles both delta and cumulative metrics, adapting to the data source requirements.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;choosing-the-right-temporality&#34;&gt;&lt;strong&gt;Choosing the Right Temporality&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;When deciding between delta and cumulative metrics, consider the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;System Compatibility&lt;/strong&gt;: Some systems (e.g., Prometheus) work better with cumulative metrics, while others (e.g., StatsD) prefer deltas.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Data Loss Resilience&lt;/strong&gt;: Cumulative metrics are more forgiving when intervals are missed.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Analysis Needs&lt;/strong&gt;: Use delta metrics for fine-grained interval analysis and cumulative metrics for overall trends and totals.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;hr&gt;
+&lt;h3 id=&#34;conclusion&#34;&gt;&lt;strong&gt;Conclusion&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;Both delta and cumulative metrics have their place in observability, and the choice between them depends on your system&amp;rsquo;s capabilities and monitoring goals. If you’re using Prometheus or CloudWatch, cumulative metrics might be your go-to. On the other hand, for lightweight, interval-based reporting systems like StatsD or Datadog, delta metrics are often preferred. Tools like OpenTelemetry and Splunk give you the flexibility to use either, making it easier to adapt to your backend requirements.&lt;/p&gt;
+&lt;p&gt;Understanding the differences between these metrics and aligning them with your systems can help you make better decisions, ensure accurate data collection, and unlock the full potential of your observability stack.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>
