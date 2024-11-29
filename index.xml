@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hashim Colombowala</title><link>https://hashimcolombowala.com/</link><description>Recent content on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 26 Nov 2024 06:49:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/p/flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/flink/</guid><description>&lt;img src="https://hashimcolombowala.com/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" />&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hashim Colombowala</title><link>https://hashimcolombowala.com/</link><description>Recent content on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 29 Nov 2024 08:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/p/flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/flink/</guid><description>&lt;img src="https://hashimcolombowala.com/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" />&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p>
 &lt;ul>
 &lt;li>Daily and monthly latency aggregations&lt;/li>
 &lt;li>Support for various quantiles&lt;/li>
@@ -199,7 +199,71 @@ F --> G["Storage System (P50/P99 results)"]
 >Grafana Blog: Converting Delta to Cumulative Metrics&lt;/a>&lt;/li>
 &lt;li>&lt;a class="link" href="https://cloud.google.com/monitoring/docs/concepts/metric-types" target="_blank" rel="noopener"
 >Google Cloud Monitoring and Metric Temporality&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title><link>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</link><pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</guid><description>&lt;p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&amp;rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.&lt;/p>
+&lt;/ul></description></item><item><title>Trade Offs made in o11y systems for high volume traffic</title><link>https://hashimcolombowala.com/p/tradeoffs/</link><pubDate>Fri, 29 Nov 2024 08:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/tradeoffs/</guid><description>&lt;h3 id="introduction">Introduction
+&lt;/h3>&lt;p>Phillip Carter&amp;rsquo;s blog &lt;a class="link" href="https://phillipcarter.dev/2024/09/14/the-observability-cap-theorem/" target="_blank" rel="noopener"
+>&amp;ldquo;The Observability CAP Theorem&amp;rdquo;&lt;/a> explores the challenging balancing act of building and managing observability systems for high-traffic organizations, something which resonates with me. It explores the trade-offs between key features of observability—like cost, data detail, retention, and query efficiency—and how organizations have to prioritize based on their specific needs.&lt;/p>
+&lt;p>One big takeaway is that no system can excel at everything. For example, making data queries fast and efficient might mean sacrificing how much data you can store long-term or how detailed that data is.&lt;/p>
+&lt;p>Another point that stood out is how observability priorities change over time. What works today might need to evolve as your company grows, regulations change, or new tools emerge. With that in mind, I wanted to write some thoughts and takeaways from the blog—both to reflect on and as a guide for future decisions.&lt;/p>
+&lt;h3 id="properties-of-observability">Properties of Observability
+&lt;/h3>&lt;ul>
+&lt;li>Quick and efficient real-time querying of your data&lt;/li>
+&lt;li>Sufficient historical data availability per query, ranging from days to years&lt;/li>
+&lt;li>Comprehensive access to relevant data for a specific context&lt;/li>
+&lt;li>Cost-effective operations that align with budgetary expectations&lt;/li>
+&lt;/ul>
+&lt;h3 id="trade-offs-in-observability-systems">Trade-offs in Observability Systems
+&lt;/h3>&lt;p>Due to the challenges of managing large volumes of data, observability systems often make trade-offs to optimize for specific use cases or properties. These trade-offs include:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Comprehensive Metric Storage vs. Investigation Efficiency&lt;/strong>: Observability systems may prioritize the ability to cheaply store and observe metrics for extensive datasets, but this can come at the cost of making in-depth investigations into root causes more challenging.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Extensive Log Retention vs. Query Costs&lt;/strong>: Systems may enable the retention of all log data, even in a user-managed cloud environment, but this often involves incurring costs for each query or analysis performed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Fast Trace Queries vs. Sampling Trade-offs&lt;/strong>: To enable fast querying and analysis of trace data, systems may rely on effective sampling techniques, potentially reducing the completeness of the data available for analysis.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Unified Data Ingestion vs. User Experience Fragmentation&lt;/strong>: Systems that allow all types of data to be sent to a single tool may result in inconsistent user experiences, depending on the type of data being analyzed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Uniform Analysis Across Data Sources vs. Specialized Capabilities&lt;/strong>: Tools that offer consistent analysis and visualization for all data types may sacrifice advanced features optimized for specific kinds of telemetry data.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="prioritizing-observability-properties-for-companies-generating-high-volume-traffic">&lt;strong>Prioritizing Observability Properties for companies generating high volume traffic&lt;/strong>
+&lt;/h3>&lt;p>For experienced engineers in organizations, unsampled high volume data can be stored cost-effectively in long-term archives, priorities shift to emphasize real-time operational efficiency. The updated order of importance is as follows:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Fast Queries for Incident Response&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Quick access to actionable insights during incidents is critical for minimizing downtime and addressing urgent issues.&lt;/li>
+&lt;li>Engineers value systems that enable rapid querying over recent, relevant data, as this directly impacts the ability to resolve problems efficiently.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Efficient Sampling and Aggregation&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Effective techniques like sampling, filtering, and aggregation allow teams to maintain representativeness while reducing data volume and cost.&lt;/li>
+&lt;li>This ensures that a smaller, relevant subset of data is readily available in fast-querying stores, while the rest can be archived for later use if needed.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Cost-Effective Compliance Data Retention&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Compliance data can be stored in low-cost archival systems (e.g., object storage like AWS S3 or similar solutions), minimizing its impact on operational observability costs.&lt;/li>
+&lt;li>Retrieval and processing can be deferred to meet regulatory requirements without affecting real-time observability needs.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Cost-Conscious Operations&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Observability costs must align with organizational budgets. Prioritizing cost-effective tools and strategies ensures observability delivers value without overextending financial resources.&lt;/li>
+&lt;li>Open-source solutions or tiered pricing models for commercial tools can help manage costs effectively.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="conclusion">Conclusion
+&lt;/h3>&lt;p>Observability handles different types of data streams with unpredictable volumes. The trade-offs in observability systems are rooted in technical and organizational realities. The ultimate impact of these trade-offs often depends on an organization’s unique priorities, such as tolerance for incident duration, audit requirements, tool standardization, and budget constraints. These priorities can shift over time due to internal dynamics or external pressures.&lt;/p></description></item><item><title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title><link>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</link><pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</guid><description>&lt;p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&amp;rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.&lt;/p>
 &lt;p>By defining a CRD, we essentially added a new table to Kubernetes&amp;rsquo; internal document store via the API server (etcd). This resource could now be interacted with just like any built-in Kubernetes object. Using tools like &lt;code>kubectl&lt;/code>, we could create, update, and delete instances of this new resource, seamlessly integrating it with existing workflows.&lt;/p>
 &lt;p>By using CRDs and controllers, we can offer reusable services to our teams while avoiding the overhead of developing new APIs from scratch. The built-in Kubernetes ecosystem provides authentication, authorization, and even CLI tooling for free, significantly reducing development time and complexity.&lt;/p>
 &lt;p>&lt;strong>Why Use CRDs?&lt;/strong>&lt;/p>
