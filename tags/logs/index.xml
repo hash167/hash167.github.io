@@ -1,0 +1,194 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Logs on Hashim Colombowala</title><link>https://hashimcolombowala.com/tags/logs/</link><description>Recent content in Logs on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 03 Dec 2024 15:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/logs/index.xml" rel="self" type="application/rss+xml"/><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
+&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned the callsite configuration for logging is strongly preferred. Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
+&lt;h4 id="what-is-callsite-configuration">What is Callsite Configuration?
+&lt;/h4>&lt;p>Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Python Example&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Order processed successfully: &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">order_id&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>JVM Example&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Order processed successfully: {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">orderId&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>Callsite configuration allows you to specify details such as:&lt;/p>
+&lt;ul>
+&lt;li>Log level (e.g., &lt;code>info&lt;/code>, &lt;code>debug&lt;/code>).&lt;/li>
+&lt;li>Formatting of the message.&lt;/li>
+&lt;li>Whether the log message should even be emitted.&lt;/li>
+&lt;/ul>
+&lt;p>This method provides &lt;strong>fine-grained control&lt;/strong>, making it easier to:&lt;/p>
+&lt;ul>
+&lt;li>Adjust logging behavior for specific scenarios.&lt;/li>
+&lt;li>Suppress unnecessary logs from overwhelming your system.&lt;/li>
+&lt;li>Tailor logs for better debugging or performance insights.&lt;/li>
+&lt;/ul>
+&lt;p>Since callsite configuration operates at the source of the logging call, it takes precedence over broader logger settings.&lt;/p>
+&lt;h4 id="what-is-logger-configuration">What is Logger Configuration?
+&lt;/h4>&lt;p>Logger configuration, on the other hand, applies rules to all logs emitted by a specific logger. This is typically managed through centralized configuration files, such as:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>&lt;code>sepia.yaml&lt;/code> for Python applications.&lt;/strong>&lt;/li>
+&lt;li>&lt;strong>&lt;code>logback.xml&lt;/code> for JVM-based applications.&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>Logger configuration is often used for third-party libraries like Kafka or Redis, where you can&amp;rsquo;t modify the logging calls directly. It allows you to:&lt;/p>
+&lt;ul>
+&lt;li>Set log levels globally for a library (e.g., suppressing verbose logs from Redis or Kafka).&lt;/li>
+&lt;li>Control output destinations (e.g., log files, console).&lt;/li>
+&lt;li>Apply global formatting.&lt;/li>
+&lt;/ul>
+&lt;p>While logger configuration is powerful, its broad scope can lead to excessive or insufficient logging. It&amp;rsquo;s most useful for managing logs in codebases outside your control.&lt;/p>
+&lt;h4 id="why-is-callsite-configuration-preferred">Why is Callsite Configuration Preferred?
+&lt;/h4>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Precision&lt;/strong>&lt;br>
+Callsite configuration lets you adjust logging behavior exactly where it matters. This ensures that logs are actionable and relevant, reducing noise.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Debugging Efficiency&lt;/strong>&lt;br>
+Fine-tuning logs at the source of an issue makes debugging faster. Developers can emit detailed logs for complex operations without cluttering the rest of the system.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Overrides Broad Rules&lt;/strong>&lt;br>
+Since callsite configurations take precedence, they allow developers to bypass general logger settings when specific adjustments are needed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Third-Party Exceptions&lt;/strong>&lt;br>
+Logger configuration is a fallback for third-party libraries where callsite control isn’t possible. However, this should be the exception, not the norm.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="example-combining-callsite-and-logger-configurations">Example: Combining Callsite and Logger Configurations
+&lt;/h4>&lt;h5 id="python-example">Python Example
+&lt;/h5>&lt;p>Imagine an application that uses Redis for caching. You might configure logs like this:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Callsite Configuration&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">isEnabledFor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">logging&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DEBUG&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">debug&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Processing cache entry for key: &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">key&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Logger Configuration (&lt;code>sepia.yaml&lt;/code>)&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">loggers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">redis&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">level&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">WARN&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">handlers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">console&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>Here, callsite configuration manages log verbosity for your application code, while logger configuration ensures Redis’s internal logs don’t overwhelm the system.&lt;/p>
+&lt;h5 id="jvm-example">JVM Example
+&lt;/h5>&lt;p>Now imagine a Java application using Kafka for messaging. You might configure logs like this:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Callsite Configuration&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">isDebugEnabled&lt;/span>&lt;span class="p">())&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">debug&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Processing message with key: {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">messageKey&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Logger Configuration (&lt;code>logback.xml&lt;/code>)&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-xml" data-lang="xml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;logger&lt;/span> &lt;span class="na">name=&lt;/span>&lt;span class="s">&amp;#34;org.apache.kafka&amp;#34;&lt;/span> &lt;span class="na">level=&lt;/span>&lt;span class="s">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span class="nt">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;appender&lt;/span> &lt;span class="na">name=&lt;/span>&lt;span class="s">&amp;#34;CONSOLE&amp;#34;&lt;/span> &lt;span class="na">class=&lt;/span>&lt;span class="s">&amp;#34;ch.qos.logback.core.ConsoleAppender&amp;#34;&lt;/span>&lt;span class="nt">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;pattern&amp;gt;&lt;/span>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n&lt;span class="nt">&amp;lt;/pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/appender&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;root&lt;/span> &lt;span class="na">level=&lt;/span>&lt;span class="s">&amp;#34;INFO&amp;#34;&lt;/span>&lt;span class="nt">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;appender-ref&lt;/span> &lt;span class="na">ref=&lt;/span>&lt;span class="s">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span class="nt">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nt">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>Here, callsite configuration provides fine-grained control for your Kafka-related logs, while logger configuration keeps Kafka’s verbose logs at a manageable level.&lt;/p>
+&lt;h4 id="best-practices-for-logging-configurations">Best Practices for Logging Configurations
+&lt;/h4>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Use Callsite Configurations for Your Code&lt;/strong>&lt;br>
+Apply logging settings directly in your application code to maintain control and precision.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Fallback to Logger Configurations for Third-Party Libraries&lt;/strong>&lt;br>
+Use logger configurations sparingly to manage logs from libraries or systems you can’t modify.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Document Logging Policies&lt;/strong>&lt;br>
+Maintain clear documentation on when to use callsite versus logger configurations to ensure consistency across your codebase.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Monitor and Adjust&lt;/strong>&lt;br>
+Periodically review logs to ensure they provide actionable insights without overwhelming storage or analysis tools.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="resources">Resources
+&lt;/h4>&lt;ul>
+&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/logging.html" target="_blank" rel="noopener"
+>Python Logging Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://logback.qos.ch/documentation.html" target="_blank" rel="noopener"
+>Logback Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://12factor.net/logs" target="_blank" rel="noopener"
+>12-Factor App: Logs&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://redis.io/docs/management/logging/" target="_blank" rel="noopener"
+>Redis Logging Configuration Guide&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://kafka.apache.org/documentation.html#log-config" target="_blank" rel="noopener"
+>Kafka Logging Configuration Guide&lt;/a>&lt;/li>
+&lt;/ul></description></item></channel></rss>

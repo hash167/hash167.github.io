@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Hashim Colombowala</title><link>https://hashimcolombowala.com/post/</link><description>Recent content in Posts on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 29 Nov 2024 08:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/post/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/p/flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/flink/</guid><description>&lt;img src="https://hashimcolombowala.com/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" />&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on Hashim Colombowala</title><link>https://hashimcolombowala.com/post/</link><description>Recent content in Posts on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 03 Dec 2024 15:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/post/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/p/flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/flink/</guid><description>&lt;img src="https://hashimcolombowala.com/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" />&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p>
 &lt;ul>
 &lt;li>Daily and monthly latency aggregations&lt;/li>
 &lt;li>Support for various quantiles&lt;/li>
@@ -65,7 +65,264 @@ F --> G["Storage System (P50/P99 results)"]
 &lt;li>&lt;strong>Custom processing&lt;/strong>: The process function applies a user-defined LatencyAggregateProcessFunction for calculating latency metrics, allowing custom logic to be executed for each window.&lt;/li>
 &lt;li>&lt;strong>Type safety and efficiency&lt;/strong>: Using Flink’s TypeHint, we ensure type safety and help optimize serialization and deserialization in distributed environments, which enhances performance.&lt;/li>
 &lt;/ol>
-&lt;p>This one-liner hides a ton of complexity — from fault tolerance to scaling — and Flink’s ability to marry simplicity with powerful distributed processing is where it shines. In just a few lines of code, you have a resilient, scalable, and efficient stream processing pipeline!&lt;/p></description></item><item><title>Delta vs. Cumulative Metrics: Key Differences and System Preferences</title><link>https://hashimcolombowala.com/p/delta/</link><pubDate>Tue, 26 Nov 2024 06:49:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/delta/</guid><description>&lt;img src="https://hashimcolombowala.com/p/delta/metrics.jpg" alt="Featured image of post Delta vs. Cumulative Metrics: Key Differences and System Preferences" />&lt;p>When it comes to collecting and analyzing metrics, one crucial decision is whether to use &lt;strong>delta&lt;/strong> or &lt;strong>cumulative&lt;/strong> metrics. These two approaches define how measurements are reported over time, and different metrics systems have their preferences based on their design and use cases. In this blog post, we’ll explore the difference between delta and cumulative metrics, examine their trade-offs, and highlight the systems that prefer one over the other.&lt;/p>
+&lt;p>This one-liner hides a ton of complexity — from fault tolerance to scaling — and Flink’s ability to marry simplicity with powerful distributed processing is where it shines. In just a few lines of code, you have a resilient, scalable, and efficient stream processing pipeline!&lt;/p></description></item><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
+&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned the callsite configuration for logging is strongly preferred. Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
+&lt;h4 id="what-is-callsite-configuration">What is Callsite Configuration?
+&lt;/h4>&lt;p>Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Python Example&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Order processed successfully: &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">order_id&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>JVM Example&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Order processed successfully: {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">orderId&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>Callsite configuration allows you to specify details such as:&lt;/p>
+&lt;ul>
+&lt;li>Log level (e.g., &lt;code>info&lt;/code>, &lt;code>debug&lt;/code>).&lt;/li>
+&lt;li>Formatting of the message.&lt;/li>
+&lt;li>Whether the log message should even be emitted.&lt;/li>
+&lt;/ul>
+&lt;p>This method provides &lt;strong>fine-grained control&lt;/strong>, making it easier to:&lt;/p>
+&lt;ul>
+&lt;li>Adjust logging behavior for specific scenarios.&lt;/li>
+&lt;li>Suppress unnecessary logs from overwhelming your system.&lt;/li>
+&lt;li>Tailor logs for better debugging or performance insights.&lt;/li>
+&lt;/ul>
+&lt;p>Since callsite configuration operates at the source of the logging call, it takes precedence over broader logger settings.&lt;/p>
+&lt;h4 id="what-is-logger-configuration">What is Logger Configuration?
+&lt;/h4>&lt;p>Logger configuration, on the other hand, applies rules to all logs emitted by a specific logger. This is typically managed through centralized configuration files, such as:&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>&lt;code>sepia.yaml&lt;/code> for Python applications.&lt;/strong>&lt;/li>
+&lt;li>&lt;strong>&lt;code>logback.xml&lt;/code> for JVM-based applications.&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;p>Logger configuration is often used for third-party libraries like Kafka or Redis, where you can&amp;rsquo;t modify the logging calls directly. It allows you to:&lt;/p>
+&lt;ul>
+&lt;li>Set log levels globally for a library (e.g., suppressing verbose logs from Redis or Kafka).&lt;/li>
+&lt;li>Control output destinations (e.g., log files, console).&lt;/li>
+&lt;li>Apply global formatting.&lt;/li>
+&lt;/ul>
+&lt;p>While logger configuration is powerful, its broad scope can lead to excessive or insufficient logging. It&amp;rsquo;s most useful for managing logs in codebases outside your control.&lt;/p>
+&lt;h4 id="why-is-callsite-configuration-preferred">Why is Callsite Configuration Preferred?
+&lt;/h4>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Precision&lt;/strong>&lt;br>
+Callsite configuration lets you adjust logging behavior exactly where it matters. This ensures that logs are actionable and relevant, reducing noise.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Debugging Efficiency&lt;/strong>&lt;br>
+Fine-tuning logs at the source of an issue makes debugging faster. Developers can emit detailed logs for complex operations without cluttering the rest of the system.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Overrides Broad Rules&lt;/strong>&lt;br>
+Since callsite configurations take precedence, they allow developers to bypass general logger settings when specific adjustments are needed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Third-Party Exceptions&lt;/strong>&lt;br>
+Logger configuration is a fallback for third-party libraries where callsite control isn’t possible. However, this should be the exception, not the norm.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="example-combining-callsite-and-logger-configurations">Example: Combining Callsite and Logger Configurations
+&lt;/h4>&lt;h5 id="python-example">Python Example
+&lt;/h5>&lt;p>Imagine an application that uses Redis for caching. You might configure logs like this:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Callsite Configuration&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">isEnabledFor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">logging&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DEBUG&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">debug&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Processing cache entry for key: &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">key&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Logger Configuration (&lt;code>sepia.yaml&lt;/code>)&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">loggers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">redis&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">level&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">WARN&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">handlers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">console&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>Here, callsite configuration manages log verbosity for your application code, while logger configuration ensures Redis’s internal logs don’t overwhelm the system.&lt;/p>
+&lt;h5 id="jvm-example">JVM Example
+&lt;/h5>&lt;p>Now imagine a Java application using Kafka for messaging. You might configure logs like this:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Callsite Configuration&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">isDebugEnabled&lt;/span>&lt;span class="p">())&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">debug&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Processing message with key: {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">messageKey&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Logger Configuration (&lt;code>logback.xml&lt;/code>)&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-xml" data-lang="xml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">&amp;lt;configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;logger&lt;/span> &lt;span class="na">name=&lt;/span>&lt;span class="s">&amp;#34;org.apache.kafka&amp;#34;&lt;/span> &lt;span class="na">level=&lt;/span>&lt;span class="s">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span class="nt">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;appender&lt;/span> &lt;span class="na">name=&lt;/span>&lt;span class="s">&amp;#34;CONSOLE&amp;#34;&lt;/span> &lt;span class="na">class=&lt;/span>&lt;span class="s">&amp;#34;ch.qos.logback.core.ConsoleAppender&amp;#34;&lt;/span>&lt;span class="nt">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;pattern&amp;gt;&lt;/span>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n&lt;span class="nt">&amp;lt;/pattern&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/encoder&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/appender&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;root&lt;/span> &lt;span class="na">level=&lt;/span>&lt;span class="s">&amp;#34;INFO&amp;#34;&lt;/span>&lt;span class="nt">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;appender-ref&lt;/span> &lt;span class="na">ref=&lt;/span>&lt;span class="s">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span class="nt">/&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/root&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nt">&amp;lt;/configuration&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;p>Here, callsite configuration provides fine-grained control for your Kafka-related logs, while logger configuration keeps Kafka’s verbose logs at a manageable level.&lt;/p>
+&lt;h4 id="best-practices-for-logging-configurations">Best Practices for Logging Configurations
+&lt;/h4>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Use Callsite Configurations for Your Code&lt;/strong>&lt;br>
+Apply logging settings directly in your application code to maintain control and precision.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Fallback to Logger Configurations for Third-Party Libraries&lt;/strong>&lt;br>
+Use logger configurations sparingly to manage logs from libraries or systems you can’t modify.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Document Logging Policies&lt;/strong>&lt;br>
+Maintain clear documentation on when to use callsite versus logger configurations to ensure consistency across your codebase.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Monitor and Adjust&lt;/strong>&lt;br>
+Periodically review logs to ensure they provide actionable insights without overwhelming storage or analysis tools.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h4 id="resources">Resources
+&lt;/h4>&lt;ul>
+&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/logging.html" target="_blank" rel="noopener"
+>Python Logging Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://logback.qos.ch/documentation.html" target="_blank" rel="noopener"
+>Logback Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://12factor.net/logs" target="_blank" rel="noopener"
+>12-Factor App: Logs&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://redis.io/docs/management/logging/" target="_blank" rel="noopener"
+>Redis Logging Configuration Guide&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://kafka.apache.org/documentation.html#log-config" target="_blank" rel="noopener"
+>Kafka Logging Configuration Guide&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Trade Offs made in o11y systems for high volume traffic</title><link>https://hashimcolombowala.com/p/tradeoffs/</link><pubDate>Fri, 29 Nov 2024 08:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/tradeoffs/</guid><description>&lt;h3 id="introduction">Introduction
+&lt;/h3>&lt;p>Phillip Carter&amp;rsquo;s blog &lt;a class="link" href="https://phillipcarter.dev/2024/09/14/the-observability-cap-theorem/" target="_blank" rel="noopener"
+>&amp;ldquo;The Observability CAP Theorem&amp;rdquo;&lt;/a> explores the challenging balancing act of building and managing observability systems for high-traffic organizations, something which resonates with me. It explores the trade-offs between key features of observability—like cost, data detail, retention, and query efficiency—and how organizations have to prioritize based on their specific needs.&lt;/p>
+&lt;p>One big takeaway is that no system can excel at everything. For example, making data queries fast and efficient might mean sacrificing how much data you can store long-term or how detailed that data is.&lt;/p>
+&lt;p>Another point that stood out is how observability priorities change over time. What works today might need to evolve as your company grows, regulations change, or new tools emerge. With that in mind, I wanted to write some thoughts and takeaways from the blog—both to reflect on and as a guide for future decisions.&lt;/p>
+&lt;h3 id="properties-of-observability">Properties of Observability
+&lt;/h3>&lt;ul>
+&lt;li>Quick and efficient real-time querying of your data&lt;/li>
+&lt;li>Sufficient historical data availability per query, ranging from days to years&lt;/li>
+&lt;li>Comprehensive access to relevant data for a specific context&lt;/li>
+&lt;li>Cost-effective operations that align with budgetary expectations&lt;/li>
+&lt;/ul>
+&lt;h3 id="trade-offs-in-observability-systems">Trade-offs in Observability Systems
+&lt;/h3>&lt;p>Due to the challenges of managing large volumes of data, observability systems often make trade-offs to optimize for specific use cases or properties. These trade-offs include:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Comprehensive Metric Storage vs. Investigation Efficiency&lt;/strong>: Observability systems may prioritize the ability to cheaply store and observe metrics for extensive datasets, but this can come at the cost of making in-depth investigations into root causes more challenging.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Extensive Log Retention vs. Query Costs&lt;/strong>: Systems may enable the retention of all log data, even in a user-managed cloud environment, but this often involves incurring costs for each query or analysis performed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Fast Trace Queries vs. Sampling Trade-offs&lt;/strong>: To enable fast querying and analysis of trace data, systems may rely on effective sampling techniques, potentially reducing the completeness of the data available for analysis.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Unified Data Ingestion vs. User Experience Fragmentation&lt;/strong>: Systems that allow all types of data to be sent to a single tool may result in inconsistent user experiences, depending on the type of data being analyzed.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Uniform Analysis Across Data Sources vs. Specialized Capabilities&lt;/strong>: Tools that offer consistent analysis and visualization for all data types may sacrifice advanced features optimized for specific kinds of telemetry data.&lt;/p>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="prioritizing-observability-properties-for-companies-generating-high-volume-traffic">&lt;strong>Prioritizing Observability Properties for companies generating high volume traffic&lt;/strong>
+&lt;/h3>&lt;p>For experienced engineers in organizations, unsampled high volume data can be stored cost-effectively in long-term archives, priorities shift to emphasize real-time operational efficiency. The updated order of importance is as follows:&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Fast Queries for Incident Response&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Quick access to actionable insights during incidents is critical for minimizing downtime and addressing urgent issues.&lt;/li>
+&lt;li>Engineers value systems that enable rapid querying over recent, relevant data, as this directly impacts the ability to resolve problems efficiently.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Efficient Sampling and Aggregation&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Effective techniques like sampling, filtering, and aggregation allow teams to maintain representativeness while reducing data volume and cost.&lt;/li>
+&lt;li>This ensures that a smaller, relevant subset of data is readily available in fast-querying stores, while the rest can be archived for later use if needed.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Cost-Effective Compliance Data Retention&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Compliance data can be stored in low-cost archival systems (e.g., object storage like AWS S3 or similar solutions), minimizing its impact on operational observability costs.&lt;/li>
+&lt;li>Retrieval and processing can be deferred to meet regulatory requirements without affecting real-time observability needs.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Cost-Conscious Operations&lt;/strong>&lt;/p>
+&lt;ul>
+&lt;li>Observability costs must align with organizational budgets. Prioritizing cost-effective tools and strategies ensures observability delivers value without overextending financial resources.&lt;/li>
+&lt;li>Open-source solutions or tiered pricing models for commercial tools can help manage costs effectively.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="conclusion">Conclusion
+&lt;/h3>&lt;p>Observability handles different types of data streams with unpredictable volumes. The trade-offs in observability systems are rooted in technical and organizational realities. The ultimate impact of these trade-offs often depends on an organization’s unique priorities, such as tolerance for incident duration, audit requirements, tool standardization, and budget constraints. These priorities can shift over time due to internal dynamics or external pressures.&lt;/p></description></item><item><title>Delta vs. Cumulative Metrics: Key Differences and System Preferences</title><link>https://hashimcolombowala.com/p/delta/</link><pubDate>Tue, 26 Nov 2024 06:49:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/delta/</guid><description>&lt;p>When it comes to collecting and analyzing metrics, one crucial decision is whether to use &lt;strong>delta&lt;/strong> or &lt;strong>cumulative&lt;/strong> metrics. These two approaches define how measurements are reported over time, and different metrics systems have their preferences based on their design and use cases. In this blog post, we’ll explore the difference between delta and cumulative metrics, examine their trade-offs, and highlight the systems that prefer one over the other.&lt;/p>
 &lt;h3 id="understanding-temporality">&lt;strong>Understanding Temporality&lt;/strong>
 &lt;/h3>&lt;p>Temporality refers to the way metrics are recorded and reported over time. Choosing the right temporality depends on your monitoring backend and analytical needs.&lt;/p>
 &lt;ul>
@@ -199,71 +456,7 @@ F --> G["Storage System (P50/P99 results)"]
 >Grafana Blog: Converting Delta to Cumulative Metrics&lt;/a>&lt;/li>
 &lt;li>&lt;a class="link" href="https://cloud.google.com/monitoring/docs/concepts/metric-types" target="_blank" rel="noopener"
 >Google Cloud Monitoring and Metric Temporality&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Trade Offs made in o11y systems for high volume traffic</title><link>https://hashimcolombowala.com/p/tradeoffs/</link><pubDate>Fri, 29 Nov 2024 08:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/tradeoffs/</guid><description>&lt;h3 id="introduction">Introduction
-&lt;/h3>&lt;p>Phillip Carter&amp;rsquo;s blog &lt;a class="link" href="https://phillipcarter.dev/2024/09/14/the-observability-cap-theorem/" target="_blank" rel="noopener"
->&amp;ldquo;The Observability CAP Theorem&amp;rdquo;&lt;/a> explores the challenging balancing act of building and managing observability systems for high-traffic organizations, something which resonates with me. It explores the trade-offs between key features of observability—like cost, data detail, retention, and query efficiency—and how organizations have to prioritize based on their specific needs.&lt;/p>
-&lt;p>One big takeaway is that no system can excel at everything. For example, making data queries fast and efficient might mean sacrificing how much data you can store long-term or how detailed that data is.&lt;/p>
-&lt;p>Another point that stood out is how observability priorities change over time. What works today might need to evolve as your company grows, regulations change, or new tools emerge. With that in mind, I wanted to write some thoughts and takeaways from the blog—both to reflect on and as a guide for future decisions.&lt;/p>
-&lt;h3 id="properties-of-observability">Properties of Observability
-&lt;/h3>&lt;ul>
-&lt;li>Quick and efficient real-time querying of your data&lt;/li>
-&lt;li>Sufficient historical data availability per query, ranging from days to years&lt;/li>
-&lt;li>Comprehensive access to relevant data for a specific context&lt;/li>
-&lt;li>Cost-effective operations that align with budgetary expectations&lt;/li>
-&lt;/ul>
-&lt;h3 id="trade-offs-in-observability-systems">Trade-offs in Observability Systems
-&lt;/h3>&lt;p>Due to the challenges of managing large volumes of data, observability systems often make trade-offs to optimize for specific use cases or properties. These trade-offs include:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>Comprehensive Metric Storage vs. Investigation Efficiency&lt;/strong>: Observability systems may prioritize the ability to cheaply store and observe metrics for extensive datasets, but this can come at the cost of making in-depth investigations into root causes more challenging.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Extensive Log Retention vs. Query Costs&lt;/strong>: Systems may enable the retention of all log data, even in a user-managed cloud environment, but this often involves incurring costs for each query or analysis performed.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Fast Trace Queries vs. Sampling Trade-offs&lt;/strong>: To enable fast querying and analysis of trace data, systems may rely on effective sampling techniques, potentially reducing the completeness of the data available for analysis.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Unified Data Ingestion vs. User Experience Fragmentation&lt;/strong>: Systems that allow all types of data to be sent to a single tool may result in inconsistent user experiences, depending on the type of data being analyzed.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Uniform Analysis Across Data Sources vs. Specialized Capabilities&lt;/strong>: Tools that offer consistent analysis and visualization for all data types may sacrifice advanced features optimized for specific kinds of telemetry data.&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h3 id="prioritizing-observability-properties-for-companies-generating-high-volume-traffic">&lt;strong>Prioritizing Observability Properties for companies generating high volume traffic&lt;/strong>
-&lt;/h3>&lt;p>For experienced engineers in organizations, unsampled high volume data can be stored cost-effectively in long-term archives, priorities shift to emphasize real-time operational efficiency. The updated order of importance is as follows:&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>Fast Queries for Incident Response&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Quick access to actionable insights during incidents is critical for minimizing downtime and addressing urgent issues.&lt;/li>
-&lt;li>Engineers value systems that enable rapid querying over recent, relevant data, as this directly impacts the ability to resolve problems efficiently.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Efficient Sampling and Aggregation&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Effective techniques like sampling, filtering, and aggregation allow teams to maintain representativeness while reducing data volume and cost.&lt;/li>
-&lt;li>This ensures that a smaller, relevant subset of data is readily available in fast-querying stores, while the rest can be archived for later use if needed.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Cost-Effective Compliance Data Retention&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Compliance data can be stored in low-cost archival systems (e.g., object storage like AWS S3 or similar solutions), minimizing its impact on operational observability costs.&lt;/li>
-&lt;li>Retrieval and processing can be deferred to meet regulatory requirements without affecting real-time observability needs.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Cost-Conscious Operations&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Observability costs must align with organizational budgets. Prioritizing cost-effective tools and strategies ensures observability delivers value without overextending financial resources.&lt;/li>
-&lt;li>Open-source solutions or tiered pricing models for commercial tools can help manage costs effectively.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ol>
-&lt;h3 id="conclusion">Conclusion
-&lt;/h3>&lt;p>Observability handles different types of data streams with unpredictable volumes. The trade-offs in observability systems are rooted in technical and organizational realities. The ultimate impact of these trade-offs often depends on an organization’s unique priorities, such as tolerance for incident duration, audit requirements, tool standardization, and budget constraints. These priorities can shift over time due to internal dynamics or external pressures.&lt;/p></description></item><item><title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title><link>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</link><pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</guid><description>&lt;p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&amp;rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.&lt;/p>
+&lt;/ul></description></item><item><title>Custom Resource Definitions (CRDs) and Extending Kubernetes</title><link>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</link><pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/custom-resource-definitions-crds-and-extending-kubernetes/</guid><description>&lt;p>Kubernetes is known for its power and flexibility in managing containerized applications, but did you know it can also be extended to orchestrate custom workflows unique to your organization&amp;rsquo;s needs? Enter Custom Resource Definitions (CRDs). CRDs allow you to define your own resource types, extending Kubernetes beyond its out-of-the-box functionality. This means that Kubernetes can manage not just Pods and Services, but also any other kind of resource that your team requires.&lt;/p>
 &lt;p>By defining a CRD, we essentially added a new table to Kubernetes&amp;rsquo; internal document store via the API server (etcd). This resource could now be interacted with just like any built-in Kubernetes object. Using tools like &lt;code>kubectl&lt;/code>, we could create, update, and delete instances of this new resource, seamlessly integrating it with existing workflows.&lt;/p>
 &lt;p>By using CRDs and controllers, we can offer reusable services to our teams while avoiding the overhead of developing new APIs from scratch. The built-in Kubernetes ecosystem provides authentication, authorization, and even CLI tooling for free, significantly reducing development time and complexity.&lt;/p>
 &lt;p>&lt;strong>Why Use CRDs?&lt;/strong>&lt;/p>
