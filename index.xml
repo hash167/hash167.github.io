@@ -66,7 +66,11 @@ F --> G["Storage System (P50/P99 results)"]
 &lt;li>&lt;strong>Type safety and efficiency&lt;/strong>: Using Flink’s TypeHint, we ensure type safety and help optimize serialization and deserialization in distributed environments, which enhances performance.&lt;/li>
 &lt;/ol>
 &lt;p>This one-liner hides a ton of complexity — from fault tolerance to scaling — and Flink’s ability to marry simplicity with powerful distributed processing is where it shines. In just a few lines of code, you have a resilient, scalable, and efficient stream processing pipeline!&lt;/p></description></item><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
-&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned the callsite configuration for logging is strongly preferred. Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
+&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned&lt;/p>
+&lt;blockquote>
+&lt;p>Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p>
+&lt;/blockquote>
+&lt;p>Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
 &lt;h4 id="what-is-callsite-configuration">What is Callsite Configuration?
 &lt;/h4>&lt;p>Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p>
 &lt;ul>

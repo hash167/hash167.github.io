@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Observability on Hashim Colombowala</title><link>https://hashimcolombowala.com/categories/observability/</link><description>Recent content in Observability on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 03 Dec 2024 15:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/categories/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
-&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned the callsite configuration for logging is strongly preferred. Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
+&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned&lt;/p>
+&lt;blockquote>
+&lt;p>Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p>
+&lt;/blockquote>
+&lt;p>Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
 &lt;h4 id="what-is-callsite-configuration">What is Callsite Configuration?
 &lt;/h4>&lt;p>Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p>
 &lt;ul>
