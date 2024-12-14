@@ -1445,6 +1445,21 @@ data-flex-basis="321px"
 &lt;li>The client holds the state (in the form of a token).&lt;/li>
 &lt;li>Scales well horizontally because the server is stateless.&lt;/li>
 &lt;li>Ideal for distributed systems or APIs.&lt;/li>
+&lt;/ul>
+&lt;h2 id="further-reading">Further Reading
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://flask.palletsprojects.com/en/2.3.x/api/#sessions" target="_blank" rel="noopener"
+>Flask Session Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies" target="_blank" rel="noopener"
+>Understanding Cookies for Session Management&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://jwt.io/introduction" target="_blank" rel="noopener"
+>JWT Introduction&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://pyjwt.readthedocs.io/en/stable/" target="_blank" rel="noopener"
+>Using PyJWT for Token Creation and Validation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://oauth.net/2/" target="_blank" rel="noopener"
+>OAuth 2.0 for Token-Based Authentication&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://auth0.com/blog/scaling-authentication-with-microservices-and-distributed-systems/" target="_blank" rel="noopener"
+>Scaling Authentication in Distributed Systems&lt;/a>&lt;/li>
 &lt;/ul></description></item><item><title>Signalling docker containers</title><link>https://hashimcolombowala.com/p/signalling-docker-containers/</link><pubDate>Wed, 27 Jan 2021 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/signalling-docker-containers/</guid><description>&lt;p>When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
