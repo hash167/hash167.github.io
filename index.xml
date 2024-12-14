@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hashim Colombowala</title><link>https://hashimcolombowala.com/</link><description>Recent content on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 03 Dec 2024 15:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/p/flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/flink/</guid><description>&lt;img src="https://hashimcolombowala.com/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" />&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Hashim Colombowala</title><link>https://hashimcolombowala.com/</link><description>Recent content on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Fri, 13 Dec 2024 22:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/index.xml" rel="self" type="application/rss+xml"/><item><title>What is flink and why should we care about it</title><link>https://hashimcolombowala.com/p/flink/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/flink/</guid><description>&lt;img src="https://hashimcolombowala.com/p/flink/cover.jpg" alt="Featured image of post What is flink and why should we care about it" />&lt;p>Recently, the observability team was tasked with a latency reporting project. The key features included:&lt;/p>
 &lt;ul>
 &lt;li>Daily and monthly latency aggregations&lt;/li>
 &lt;li>Support for various quantiles&lt;/li>
@@ -65,7 +65,190 @@ F --> G["Storage System (P50/P99 results)"]
 &lt;li>&lt;strong>Custom processing&lt;/strong>: The process function applies a user-defined LatencyAggregateProcessFunction for calculating latency metrics, allowing custom logic to be executed for each window.&lt;/li>
 &lt;li>&lt;strong>Type safety and efficiency&lt;/strong>: Using Flink’s TypeHint, we ensure type safety and help optimize serialization and deserialization in distributed environments, which enhances performance.&lt;/li>
 &lt;/ol>
-&lt;p>This one-liner hides a ton of complexity — from fault tolerance to scaling — and Flink’s ability to marry simplicity with powerful distributed processing is where it shines. In just a few lines of code, you have a resilient, scalable, and efficient stream processing pipeline!&lt;/p></description></item><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
+&lt;p>This one-liner hides a ton of complexity — from fault tolerance to scaling — and Flink’s ability to marry simplicity with powerful distributed processing is where it shines. In just a few lines of code, you have a resilient, scalable, and efficient stream processing pipeline!&lt;/p></description></item><item><title>Moving to Kotlin Gradle Catalog to simplify Dependency Management in Kotlin projects</title><link>https://hashimcolombowala.com/p/kotlin-gradle/</link><pubDate>Fri, 13 Dec 2024 22:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/kotlin-gradle/</guid><description>&lt;p>Recently, we revamped the way we manage dependencies for our internal Kotlin library. We migrated observability dependency management to Gradle Catalog to simplify and streamline the process.&lt;/p>
+&lt;h3 id="what-is-the-kotlin-gradle-catalog">What is the Kotlin Gradle Catalog?
+&lt;/h3>&lt;p>The &lt;strong>Kotlin Gradle Catalog&lt;/strong> is a Gradle feature that allows you to manage dependencies and plugins in a structured and reusable way using a central &lt;code>libs.versions.toml&lt;/code> file. It helps organize and simplify the management of library versions, plugins, and other dependencies in Kotlin or Java projects, making the build script cleaner and reducing duplication.&lt;/p>
+&lt;h4 id="key-features">Key Features
+&lt;/h4>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Centralized Dependency Management&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Define all dependencies and their versions in a single &lt;code>libs.versions.toml&lt;/code> file.&lt;/li>
+&lt;li>Reuse these definitions across your project or in multiple subprojects in a multi-module setup.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Readability&lt;/strong>: Replace hardcoded dependency strings in &lt;code>build.gradle.kts&lt;/code> files with human-readable aliases.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Version Control&lt;/strong>: Manage all library versions in one place, making upgrades and maintenance easier.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Standardization&lt;/strong>: Ensure consistent dependency versions across all modules in a project.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="structure-of-libsversionstoml">Structure of &lt;code>libs.versions.toml&lt;/code>
+&lt;/h3>&lt;p>The &lt;code>libs.versions.toml&lt;/code> file resides in the &lt;code>gradle&lt;/code> folder by convention and organizes dependencies into:&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;strong>Version Definitions&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-toml" data-lang="toml">&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">versions&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">kotlin&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;1.9.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">coroutines&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;1.7.2&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Library Aliases&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-toml" data-lang="toml">&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">libraries&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">kotlin-stdlib&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">module&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;org.jetbrains.kotlin:kotlin-stdlib&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ref&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;kotlin&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">coroutines-core&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">module&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;org.jetbrains.kotlinx:kotlinx-coroutines-core&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ref&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;coroutines&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Plugins&lt;/strong>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-toml" data-lang="toml">&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">plugins&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">kotlin&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">id&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;org.jetbrains.kotlin.jvm&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ref&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;kotlin&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h3 id="how-we-integrated-prometheus-and-opentelemetry-with-gradle-catalog">How We Integrated Prometheus and OpenTelemetry with Gradle Catalog
+&lt;/h3>&lt;h4 id="1-defining-dependencies-in-libsversionstoml">1. Defining Dependencies in &lt;code>libs.versions.toml&lt;/code>
+&lt;/h4>&lt;p>Here’s how we structured the dependencies for Prometheus and OpenTelemetry:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-toml" data-lang="toml">&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">versions&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">kotlin&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;1.9.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">prometheus&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;0.16.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">otel&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;1.30.0&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">[&lt;/span>&lt;span class="nx">libraries&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">micrometer-core&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">module&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;io.micrometer:micrometer-core&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;1.11.4&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">micrometer-registry-prometheus&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">module&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;io.micrometer:micrometer-registry-prometheus&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;1.11.4&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">otel-sdk&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">module&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;io.opentelemetry:opentelemetry-sdk&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ref&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;otel&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">otel-exporter-otlp&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="p">{&lt;/span> &lt;span class="nx">module&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;io.opentelemetry:opentelemetry-exporter-otlp&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">version&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">ref&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s2">&amp;#34;otel&amp;#34;&lt;/span> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="2-configuring-buildgradlekts">2. Configuring &lt;code>build.gradle.kts&lt;/code>
+&lt;/h4>&lt;p>With the dependencies defined in the catalog, integrating them into the build script was much simpler:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="n">plugins&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">id&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;org.jetbrains.kotlin.jvm&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="n">version&lt;/span> &lt;span class="n">libs&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">versions&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">kotlin&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">application&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">dependencies&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">implementation&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">libs&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">micrometer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">core&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">implementation&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">libs&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">micrometer&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">registry&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">prometheus&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">implementation&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">libs&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">otel&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">sdk&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">implementation&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">libs&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">otel&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">exporter&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">otlp&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">application&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">mainClass&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="k">set&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;com.example.DropwizardApp&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h4 id="3-using-prometheus-and-opentelemetry-in-the-application">3. Using Prometheus and OpenTelemetry in the Application
+&lt;/h4>&lt;p>We integrated &lt;strong>Micrometer&lt;/strong> to expose metrics for Prometheus and &lt;strong>OpenTelemetry&lt;/strong> for distributed tracing. The setup involved:&lt;/p>
+&lt;ul>
+&lt;li>Initializing Prometheus metrics with Micrometer:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;span class="lnt">2
+&lt;/span>&lt;span class="lnt">3
+&lt;/span>&lt;span class="lnt">4
+&lt;/span>&lt;span class="lnt">5
+&lt;/span>&lt;span class="lnt">6
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="k">val&lt;/span> &lt;span class="py">prometheusRegistry&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="n">PrometheusMeterRegistry&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nc">PrometheusConfig&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">DEFAULT&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">prometheusRegistry&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">bindTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">JvmMemoryMetrics&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">prometheusRegistry&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">bindTo&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">JvmGcMetrics&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// Register Prometheus servlet
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="n">environment&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">admin&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="n">addServlet&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;metrics&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">MetricsServlet&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">prometheusRegistry&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">prometheusRegistry&lt;/span>&lt;span class="p">)).&lt;/span>&lt;span class="n">addMapping&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;/metrics&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;ul>
+&lt;li>Enabling OpenTelemetry auto-instrumentation:&lt;/li>
+&lt;/ul>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-kotlin" data-lang="kotlin">&lt;span class="line">&lt;span class="cl">&lt;span class="nc">AutoConfiguredOpenTelemetrySdk&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="n">initialize&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="why-we-switched-to-gradle-catalog">Why We Switched to Gradle Catalog
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Reduced Boilerplate&lt;/strong>: Eliminating verbose dependency declarations from &lt;code>build.gradle.kts&lt;/code> made the build script cleaner and more maintainable.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Centralized Updates&lt;/strong>: Upgrading library versions became easier since all versioning now resides in &lt;code>libs.versions.toml&lt;/code>.&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Consistency Across Projects&lt;/strong>: The catalog ensured that multiple subprojects in our ecosystem used the same dependency versions.&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="conclusion">Conclusion
+&lt;/h3>&lt;p>By switching to Gradle Catalog, we simplified dependency management and ensured consistency across our Kotlin projects. Integrating Prometheus and OpenTelemetry was seamless, allowing us to instrument our services with minimal effort.&lt;/p></description></item><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
 &lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned&lt;/p>
 &lt;blockquote>
 &lt;p>Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p>
