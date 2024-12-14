@@ -308,31 +308,31 @@ Periodically review logs to ensure they provide actionable insights without over
 &lt;/h3>&lt;table>
 &lt;thead>
 &lt;tr>
-&lt;th>Feature&lt;/th>
-&lt;th>Cumulative Metrics&lt;/th>
-&lt;th>Delta Metrics&lt;/th>
+&lt;th style="text-align: left">Feature&lt;/th>
+&lt;th style="text-align: left">Cumulative Metrics&lt;/th>
+&lt;th style="text-align: left">Delta Metrics&lt;/th>
 &lt;/tr>
 &lt;/thead>
 &lt;tbody>
 &lt;tr>
-&lt;td>&lt;strong>Representation&lt;/strong>&lt;/td>
-&lt;td>Running total since the start&lt;/td>
-&lt;td>Increment since the last report&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Representation&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">Running total since the start&lt;/td>
+&lt;td style="text-align: left">Increment since the last report&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>&lt;strong>Data Loss Handling&lt;/strong>&lt;/td>
-&lt;td>Resilient to missed intervals&lt;/td>
-&lt;td>Data may be lost if intervals are missed&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Data Loss Handling&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">Resilient to missed intervals&lt;/td>
+&lt;td style="text-align: left">Data may be lost if intervals are missed&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>&lt;strong>Rate Calculation&lt;/strong>&lt;/td>
-&lt;td>Requires backend calculations&lt;/td>
-&lt;td>Directly provides the rate per interval&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Rate Calculation&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">Requires backend calculations&lt;/td>
+&lt;td style="text-align: left">Directly provides the rate per interval&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>&lt;strong>Overhead&lt;/strong>&lt;/td>
-&lt;td>More storage-intensive for long periods&lt;/td>
-&lt;td>More efficient for short intervals&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Overhead&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">More storage-intensive for long periods&lt;/td>
+&lt;td style="text-align: left">More efficient for short intervals&lt;/td>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
@@ -435,54 +435,54 @@ data-flex-basis="294px"
 &lt;table>
 &lt;thead>
 &lt;tr>
-&lt;th>TIMESTAMP&lt;/th>
-&lt;th>VALUE&lt;/th>
+&lt;th style="text-align: left">TIMESTAMP&lt;/th>
+&lt;th style="text-align: left">VALUE&lt;/th>
 &lt;/tr>
 &lt;/thead>
 &lt;tbody>
 &lt;tr>
-&lt;td>2024-09-23T05:05:05.37-04:00&lt;/td>
-&lt;td>72929&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:05:05.37-04:00&lt;/td>
+&lt;td style="text-align: left">72929&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:05:35.37-04:00&lt;/td>
-&lt;td>72929&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:05:35.37-04:00&lt;/td>
+&lt;td style="text-align: left">72929&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:06:05.37-04:00&lt;/td>
-&lt;td>72930&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:06:05.37-04:00&lt;/td>
+&lt;td style="text-align: left">72930&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:06:35.371-04:00&lt;/td>
-&lt;td>72930&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:06:35.371-04:00&lt;/td>
+&lt;td style="text-align: left">72930&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:07:05.371-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:07:05.371-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:07:35.37-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:07:35.37-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:08:05.37-04:00&lt;/td>
-&lt;td>72933&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:08:05.37-04:00&lt;/td>
+&lt;td style="text-align: left">72933&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:10:59.487-04:00&lt;/td>
-&lt;td>72932 &lt;code>(decrease in counter)&lt;/code>&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:10:59.487-04:00&lt;/td>
+&lt;td style="text-align: left">72932 &lt;code>(decrease in counter)&lt;/code>&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:11:29.496-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:11:29.496-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:11:59.5-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:11:59.5-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:12:29.489-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:12:29.489-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>

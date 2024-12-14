@@ -558,31 +558,31 @@ Periodically review logs to ensure they provide actionable insights without over
 &lt;/h3>&lt;table>
 &lt;thead>
 &lt;tr>
-&lt;th>Feature&lt;/th>
-&lt;th>Cumulative Metrics&lt;/th>
-&lt;th>Delta Metrics&lt;/th>
+&lt;th style="text-align: left">Feature&lt;/th>
+&lt;th style="text-align: left">Cumulative Metrics&lt;/th>
+&lt;th style="text-align: left">Delta Metrics&lt;/th>
 &lt;/tr>
 &lt;/thead>
 &lt;tbody>
 &lt;tr>
-&lt;td>&lt;strong>Representation&lt;/strong>&lt;/td>
-&lt;td>Running total since the start&lt;/td>
-&lt;td>Increment since the last report&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Representation&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">Running total since the start&lt;/td>
+&lt;td style="text-align: left">Increment since the last report&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>&lt;strong>Data Loss Handling&lt;/strong>&lt;/td>
-&lt;td>Resilient to missed intervals&lt;/td>
-&lt;td>Data may be lost if intervals are missed&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Data Loss Handling&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">Resilient to missed intervals&lt;/td>
+&lt;td style="text-align: left">Data may be lost if intervals are missed&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>&lt;strong>Rate Calculation&lt;/strong>&lt;/td>
-&lt;td>Requires backend calculations&lt;/td>
-&lt;td>Directly provides the rate per interval&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Rate Calculation&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">Requires backend calculations&lt;/td>
+&lt;td style="text-align: left">Directly provides the rate per interval&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>&lt;strong>Overhead&lt;/strong>&lt;/td>
-&lt;td>More storage-intensive for long periods&lt;/td>
-&lt;td>More efficient for short intervals&lt;/td>
+&lt;td style="text-align: left">&lt;strong>Overhead&lt;/strong>&lt;/td>
+&lt;td style="text-align: left">More storage-intensive for long periods&lt;/td>
+&lt;td style="text-align: left">More efficient for short intervals&lt;/td>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
@@ -787,54 +787,54 @@ data-flex-basis="294px"
 &lt;table>
 &lt;thead>
 &lt;tr>
-&lt;th>TIMESTAMP&lt;/th>
-&lt;th>VALUE&lt;/th>
+&lt;th style="text-align: left">TIMESTAMP&lt;/th>
+&lt;th style="text-align: left">VALUE&lt;/th>
 &lt;/tr>
 &lt;/thead>
 &lt;tbody>
 &lt;tr>
-&lt;td>2024-09-23T05:05:05.37-04:00&lt;/td>
-&lt;td>72929&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:05:05.37-04:00&lt;/td>
+&lt;td style="text-align: left">72929&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:05:35.37-04:00&lt;/td>
-&lt;td>72929&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:05:35.37-04:00&lt;/td>
+&lt;td style="text-align: left">72929&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:06:05.37-04:00&lt;/td>
-&lt;td>72930&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:06:05.37-04:00&lt;/td>
+&lt;td style="text-align: left">72930&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:06:35.371-04:00&lt;/td>
-&lt;td>72930&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:06:35.371-04:00&lt;/td>
+&lt;td style="text-align: left">72930&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:07:05.371-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:07:05.371-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:07:35.37-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:07:35.37-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:08:05.37-04:00&lt;/td>
-&lt;td>72933&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:08:05.37-04:00&lt;/td>
+&lt;td style="text-align: left">72933&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:10:59.487-04:00&lt;/td>
-&lt;td>72932 &lt;code>(decrease in counter)&lt;/code>&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:10:59.487-04:00&lt;/td>
+&lt;td style="text-align: left">72932 &lt;code>(decrease in counter)&lt;/code>&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:11:29.496-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:11:29.496-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:11:59.5-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:11:59.5-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;tr>
-&lt;td>2024-09-23T05:12:29.489-04:00&lt;/td>
-&lt;td>72932&lt;/td>
+&lt;td style="text-align: left">2024-09-23T05:12:29.489-04:00&lt;/td>
+&lt;td style="text-align: left">72932&lt;/td>
 &lt;/tr>
 &lt;/tbody>
 &lt;/table>
@@ -973,64 +973,479 @@ data-flex-basis="294px"
 &lt;li>&lt;strong>Success Time&lt;/strong>: The time at which the job last succeeded.&lt;/li>
 &lt;/ul>
 &lt;p>Alerts can be set for when the job hasn&amp;rsquo;t succeeded within a certain time frame.&lt;/p>
-&lt;p>&lt;strong>Idempotency for Batch Jobs&lt;/strong>: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p></description></item><item><title>Comparing Session-Based and Token-Based Authentication</title><link>https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/</link><pubDate>Fri, 18 Jun 2021 12:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/</guid><description>&lt;p>This post will briefly compare and contrast the two most common authentication techniques: session-based and token-based authentication. Understanding the differences between these methods is crucial for selecting the right approach for your application&amp;rsquo;s needs.&lt;/p>
-&lt;h2 id="session-based-authentication">Session-Based Authentication
-&lt;/h2>&lt;p>In session-based authentication, the server creates a session for the user after the user logs in. The server generates a &lt;code>session id&lt;/code> that is stored in memory or an external cache for horizontal scaling. The client stores the session ID in a &lt;code>cookie&lt;/code> and sends it in the request header for every subsequent request.&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
+&lt;p>&lt;strong>Idempotency for Batch Jobs&lt;/strong>: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p></description></item><item><title>Python decorators: A super useful feature</title><link>https://hashimcolombowala.com/p/python-decorators-a-super-useful-feature/</link><pubDate>Mon, 04 Apr 2022 15:54:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/python-decorators-a-super-useful-feature/</guid><description>&lt;p>Python decorators are one of my favorite features—they allow you to extend the functionality of existing functions or methods in a reusable and elegant way. Over the years, I’ve found them invaluable for streamlining repetitive tasks across different functions in my projects. Below are some interesting examples I&amp;rsquo;ve worked on&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>Prometheus Histogram Timing Decorators&lt;/strong>&lt;/li>
+&lt;li>&lt;strong>OpenTelemetry (OTel) Manual Span Decorators&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;h2 id="common-use-cases-for-python-decorators">Common Use Cases for Python Decorators
+&lt;/h2>&lt;h3 id="1-timing-functions-with-prometheus">1. Timing Functions with Prometheus
+&lt;/h3>&lt;p>Measuring the execution time of functions is a classic use case for decorators. While custom decorators can do the job, the &lt;strong>Prometheus Python client library&lt;/strong> provides a built-in &lt;code>time&lt;/code> decorator, making this task even simpler.&lt;/p>
+&lt;h4 id="using-the-built-in-time-decorator">Using the Built-In &lt;code>time&lt;/code> Decorator
+&lt;/h4>&lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
 &lt;/span>&lt;/code>&lt;/pre>&lt;/td>
 &lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">Cookie: &lt;span class="nv">JSESSIONID&lt;/span>&lt;span class="o">=&lt;/span>ABAD1D
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">prometheus_client&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Histogram&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">REQUEST_LATENCY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Histogram&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;request_latency_seconds&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;Time spent processing request&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@REQUEST_LATENCY.time&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">process_request&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Simulate processing&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kn">import&lt;/span> &lt;span class="nn">time&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">time&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">sleep&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Processed &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">process_request&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;example&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>The server can verify the user by comparing the session ID in the cookie against the session information stored in cache and respond accordingly.&lt;/p>
+&lt;/div>&lt;p>This &lt;code>time()&lt;/code> decorator wraps the function, measures its execution time, and updates the histogram. It’s concise, readable, and integrates seamlessly with Prometheus.&lt;/p>
+&lt;h4 id="how-the-time-decorator-works-internally">How the &lt;code>time&lt;/code> Decorator Works Internally
+&lt;/h4>&lt;p>Here’s a simplified example of how the &lt;code>time&lt;/code> decorator is implemented in the Prometheus Python library:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">time&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">time&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">functools&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">wraps&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Histogram&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">description&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">name&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">description&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">description&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">observations&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">observe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">value&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">observations&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">value&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Observed &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">value&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2"> seconds for &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">time&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">decorator&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@wraps&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">wrapper&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">start_time&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">time&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">try&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">finally&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">duration&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">time&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">start_time&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">observe&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">duration&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">wrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">decorator&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This decorator is a great example of how reusable logic is encapsulated to ensure consistent behavior.&lt;/p>
+&lt;h4 id="custom-timing-decorator">Custom Timing Decorator
+&lt;/h4>&lt;p>If you need custom behavior beyond just timing, you can create your own decorator:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="nn">time&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">timing_decorator&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">wrapper&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">start_time&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">time&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">time&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">result&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">end_time&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">time&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">time&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="vm">__name__&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2"> executed in &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">end_time&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="n">start_time&lt;/span>&lt;span class="si">:&lt;/span>&lt;span class="s2">.4f&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2"> seconds&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">result&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">wrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@timing_decorator&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">slow_function&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">time&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">sleep&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">2&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;Finished slow_function&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">slow_function&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="2-tracing-functions-with-opentelemetry">2. Tracing Functions with OpenTelemetry
+&lt;/h3>&lt;p>When implementing distributed tracing, decorators can simplify the process of adding spans to functions. Here’s an example using OpenTelemetry:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">opentelemetry.trace&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">get_tracer&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">tracer&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">get_tracer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="vm">__name__&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">otel_span_decorator&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">span_name&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">decorator&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@wraps&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">wrapper&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">with&lt;/span> &lt;span class="n">tracer&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">start_as_current_span&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">span_name&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">wrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">decorator&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@otel_span_decorator&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;process_request_span&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">process_request&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Simulate request processing&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Processing &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">data&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">process_request&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;example&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>This approach ensures spans are consistently created and closed without manually repeating the tracing logic in each function.&lt;/p>
+&lt;h3 id="side-note-retaining-function-signatures">Side Note: Retaining Function Signatures
+&lt;/h3>&lt;p>One important thing to watch out for when working with decorators is that they can alter the original function&amp;rsquo;s signature. This affects tools like &lt;code>help()&lt;/code>, &lt;code>inspect&lt;/code>, or frameworks that rely on function metadata (e.g., Flask, FastAPI).&lt;/p>
+&lt;p>To retain the original signature, use &lt;code>functools.wraps&lt;/code>:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">functools&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">wraps&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">my_decorator&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@wraps&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">wrapper&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Calling &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="vm">__name__&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">args&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">kwargs&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">wrapper&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@my_decorator&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">greet&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="s2">&amp;#34;&amp;#34;&amp;#34;Greets the user by name.&amp;#34;&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Hello, &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">!&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">greet&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="vm">__name__&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1"># Outputs: greet&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">greet&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="vm">__doc__&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1"># Outputs: Greets the user by name.&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;p>&lt;strong>Tip&lt;/strong>: Always use &lt;code>@wraps&lt;/code> when writing decorators to avoid unexpected behavior!&lt;/p>
+&lt;h3 id="additional-use-cases-for-decorators">Additional Use Cases for Decorators
+&lt;/h3>&lt;p>Here are other practical examples of Python decorators which I&amp;rsquo;ve seen being used. I will update this space if I come across any.&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>Retrying Functions&lt;/strong>: Handle transient errors with retries.&lt;/li>
+&lt;li>&lt;strong>Setting a Maximum Execution Time&lt;/strong>: Enforce timeouts using &lt;code>signal&lt;/code>.&lt;/li>
+&lt;li>&lt;strong>Logging Functions&lt;/strong>: Log function calls, inputs, and outputs.&lt;/li>
+&lt;li>&lt;strong>Simple Debugging&lt;/strong>: Print function inputs and outputs during development.&lt;/li>
+&lt;li>&lt;strong>Validating Function Inputs/Outputs&lt;/strong>: Ensure inputs/outputs meet certain criteria.&lt;/li>
+&lt;li>&lt;strong>Waiting/Rate-Limiting&lt;/strong>: Add delays to prevent overloading APIs.&lt;/li>
+&lt;li>&lt;strong>Caching/Memoization&lt;/strong>: Use &lt;code>functools.lru_cache&lt;/code> for expensive calculations.&lt;/li>
+&lt;li>&lt;strong>Handling Database Transactions&lt;/strong>: Ensure proper commit/rollback.&lt;/li>
+&lt;li>&lt;strong>Synchronization&lt;/strong>: Use locks to prevent race conditions.&lt;/li>
+&lt;li>&lt;strong>Authentication&lt;/strong>: Enforce access control for web applications.&lt;/li>
+&lt;/ol>
+&lt;h3 id="references">References
+&lt;/h3>&lt;ul>
+&lt;li>&lt;a class="link" href="https://docs.python.org/3/glossary.html#term-decorator" target="_blank" rel="noopener"
+>Python Decorators Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/prometheus/client_python" target="_blank" rel="noopener"
+>Prometheus Python Client Library&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://peps.python.org/pep-0318/" target="_blank" rel="noopener"
+>PEP 318: Decorators for Functions and Methods&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Comparing Session-Based and Token-Based Authentication</title><link>https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/</link><pubDate>Fri, 18 Jun 2021 12:33:40 -0700</pubDate><guid>https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/</guid><description>&lt;p>A while back, a senior colleague of mine was migrating a service from session-based authentication to token-based authentication. That got me curious. I decided to dive deeper into the topic, experiment a bit, and see how these approaches work in practice.&lt;/p>
+&lt;h2 id="whats-the-difference">What’s the Difference?
+&lt;/h2>&lt;p>The key difference between session-based and token-based authentication lies in &lt;strong>where the state lives&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>In &lt;strong>session-based authentication&lt;/strong>, the server maintains the state (session information).&lt;/li>
+&lt;li>In &lt;strong>token-based authentication&lt;/strong>, the state is encoded in the token and lives on the client side.&lt;/li>
+&lt;/ul>
+&lt;h2 id="session-based-authentication">Session-Based Authentication
+&lt;/h2>&lt;p>In session-based authentication, after a user logs in, the server creates a session and assigns it a &lt;code>session ID&lt;/code>. This session ID is stored on the client side (usually in a cookie). For every subsequent request, the client sends the session ID back to the server. The server checks its session store to validate the user.&lt;/p>
+&lt;p>Here’s a quick rundown of how it works with some Flask magic:&lt;/p>
+&lt;h3 id="example-session-based-authentication-in-python">Example: Session-Based Authentication in Python
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">flask&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Flask&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">session&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">jsonify&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">app&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Flask&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="vm">__name__&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">app&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">secret_key&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s1">&amp;#39;supersecretkey&amp;#39;&lt;/span> &lt;span class="c1"># Used to sign session cookies&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@app.route&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;/login&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">methods&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;POST&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">login&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">username&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">json&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;username&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">password&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">json&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;password&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Dummy credentials check&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">username&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;user&amp;#39;&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="n">password&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;pass&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">session&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;user_id&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">username&lt;/span> &lt;span class="c1"># Store the user&amp;#39;s ID in the session&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Login successful&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Invalid credentials&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">401&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@app.route&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;/protected&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">methods&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;GET&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">protected&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="s1">&amp;#39;user_id&amp;#39;&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">session&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Hello, &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">session&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;user_id&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">!&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Unauthorized&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">401&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@app.route&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;/logout&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">methods&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;POST&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">logout&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">session&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">pop&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;user_id&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">None&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="c1"># Remove user ID from session&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Logged out&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="vm">__name__&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;__main__&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">app&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">run&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">debug&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="kc">True&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h3 id="how-it-works">How It Works:
+&lt;/h3>&lt;ol>
+&lt;li>When the user logs in, the server creates a session and stores the &lt;code>user_id&lt;/code>.&lt;/li>
+&lt;li>The client gets a session cookie, which is sent with every request.&lt;/li>
+&lt;li>The server checks the session store to validate the user.&lt;/li>
+&lt;/ol>
 &lt;p>&lt;img src="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth.png"
 width="576"
 height="323"
 srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu6257918187294685625.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu7317305386953131357.png 1024w"
 loading="lazy"
-alt="Session Auth"
+alt="Session-Based Authentication"
 class="gallery-image"
 data-flex-grow="178"
 data-flex-basis="427px"
 >&lt;/p>
+&lt;p>It’s simple, but the server has to maintain the session state, which can get tricky when scaling.&lt;/p>
 &lt;h2 id="token-based-authentication">Token-Based Authentication
-&lt;/h2>&lt;p>In token-based authentication, the server generates a &lt;a class="link" href="https://en.wikipedia.org/wiki/JSON_Web_Token" target="_blank" rel="noopener"
->JWT (JSON Web Token)&lt;/a> with a secret and sends it to the client. The client stores the JWT in a cookie or local browser memory. Subsequent requests made to the server include the JWT in the header:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
+&lt;/h2>&lt;p>Token-based authentication is all about &lt;strong>moving the state to the client&lt;/strong>. After the user logs in, the server generates a token (often a JWT) that contains the user information. The client stores the token and sends it with every request. The server validates the token to authenticate the user.&lt;/p>
+&lt;p>Here’s how I played around with it:&lt;/p>
+&lt;h3 id="example-token-based-authentication-in-python">Example: Token-Based Authentication in Python
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;span class="lnt">11
+&lt;/span>&lt;span class="lnt">12
+&lt;/span>&lt;span class="lnt">13
+&lt;/span>&lt;span class="lnt">14
+&lt;/span>&lt;span class="lnt">15
+&lt;/span>&lt;span class="lnt">16
+&lt;/span>&lt;span class="lnt">17
+&lt;/span>&lt;span class="lnt">18
+&lt;/span>&lt;span class="lnt">19
+&lt;/span>&lt;span class="lnt">20
+&lt;/span>&lt;span class="lnt">21
+&lt;/span>&lt;span class="lnt">22
+&lt;/span>&lt;span class="lnt">23
+&lt;/span>&lt;span class="lnt">24
+&lt;/span>&lt;span class="lnt">25
+&lt;/span>&lt;span class="lnt">26
+&lt;/span>&lt;span class="lnt">27
+&lt;/span>&lt;span class="lnt">28
+&lt;/span>&lt;span class="lnt">29
+&lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
+&lt;/span>&lt;span class="lnt">35
+&lt;/span>&lt;span class="lnt">36
+&lt;/span>&lt;span class="lnt">37
+&lt;/span>&lt;span class="lnt">38
+&lt;/span>&lt;span class="lnt">39
+&lt;/span>&lt;span class="lnt">40
+&lt;/span>&lt;span class="lnt">41
+&lt;/span>&lt;span class="lnt">42
+&lt;/span>&lt;span class="lnt">43
+&lt;/span>&lt;span class="lnt">44
 &lt;/span>&lt;/code>&lt;/pre>&lt;/td>
 &lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-sh" data-lang="sh">&lt;span class="line">&lt;span class="cl">Authorization: Bearer eyJhbGciOiJIUzI1NiIXVCJ9TJV
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="nn">jwt&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">flask&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Flask&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">jsonify&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">app&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Flask&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="vm">__name__&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">SECRET_KEY&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="s1">&amp;#39;supersecretkey&amp;#39;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a JWT&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">create_jwt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">user_id&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jwt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">encode&lt;/span>&lt;span class="p">({&lt;/span>&lt;span class="s1">&amp;#39;user_id&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">user_id&lt;/span>&lt;span class="p">},&lt;/span> &lt;span class="n">SECRET_KEY&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">algorithm&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s1">&amp;#39;HS256&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Decode a JWT&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">decode_jwt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">token&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">try&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jwt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">decode&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">token&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">SECRET_KEY&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">algorithms&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;HS256&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">except&lt;/span> &lt;span class="n">jwt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">ExpiredSignatureError&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">None&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">except&lt;/span> &lt;span class="n">jwt&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">InvalidTokenError&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">None&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@app.route&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;/login&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">methods&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;POST&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">login&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">username&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">json&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;username&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">password&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">json&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;password&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Dummy credentials check&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">username&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;user&amp;#39;&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="n">password&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;pass&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">token&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">create_jwt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">username&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">token&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">token&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Invalid credentials&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">401&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nd">@app.route&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;/protected&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">methods&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;GET&amp;#39;&lt;/span>&lt;span class="p">])&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">protected&lt;/span>&lt;span class="p">():&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">auth_header&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">request&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">headers&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;Authorization&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="n">auth_header&lt;/span> &lt;span class="ow">or&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="n">auth_header&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">startswith&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;Bearer &amp;#39;&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Unauthorized&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">401&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">token&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">auth_header&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">split&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34; &amp;#34;&lt;/span>&lt;span class="p">)[&lt;/span>&lt;span class="mi">1&lt;/span>&lt;span class="p">]&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">decoded&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">decode_jwt&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">token&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">decoded&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Hello, &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">decoded&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;user_id&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">!&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">200&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">jsonify&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">message&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;Unauthorized&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="mi">401&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="vm">__name__&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s1">&amp;#39;__main__&amp;#39;&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">app&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">run&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">debug&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="kc">True&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>The server validates the JWT to verify the user and respond accordingly.&lt;/p>
+&lt;/div>&lt;h3 id="how-it-works-1">How It Works:
+&lt;/h3>&lt;ol>
+&lt;li>The server generates a token with the user&amp;rsquo;s information and sends it to the client.&lt;/li>
+&lt;li>The client sends the token in the &lt;code>Authorization&lt;/code> header for subsequent requests.&lt;/li>
+&lt;li>The server validates the token using its secret key.&lt;/li>
+&lt;/ol>
 &lt;p>&lt;img src="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth.png"
 width="1186"
 height="885"
 srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu17119966753451935353.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu3468419247374115684.png 1024w"
 loading="lazy"
-alt="Token Auth"
+alt="Token-Based Authentication"
 class="gallery-image"
 data-flex-grow="134"
 data-flex-basis="321px"
 >&lt;/p>
-&lt;h2 id="session-vs-token-authentication">Session vs. Token Authentication
-&lt;/h2>&lt;h3 id="tokens-jwt">Tokens (JWT)
+&lt;p>This approach is stateless, meaning the server doesn’t need to maintain a session store. Perfect for scaling!&lt;/p>
+&lt;h2 id="comparing-the-two-approaches">Comparing the Two Approaches
+&lt;/h2>&lt;p>Here’s a quick summary of what I learned:&lt;/p>
+&lt;h3 id="session-based-authentication-1">&lt;strong>Session-Based Authentication&lt;/strong>
 &lt;/h3>&lt;ul>
-&lt;li>Can work cross-origin across different domains. Downstream services can share tokens.&lt;/li>
-&lt;li>JWT-based authentication scales well horizontally because tokens are stored on the client side.&lt;/li>
-&lt;li>Provides integrity protection using a signature or MAC.&lt;/li>
+&lt;li>The server maintains the session state.&lt;/li>
+&lt;li>Easier to invalidate sessions.&lt;/li>
+&lt;li>Great for single-domain applications where scaling isn’t a concern.&lt;/li>
 &lt;/ul>
-&lt;h3 id="sessions">Sessions
+&lt;h3 id="token-based-authentication-1">&lt;strong>Token-Based Authentication&lt;/strong>
 &lt;/h3>&lt;ul>
-&lt;li>Offers more control over sessions, as they are easier to invalidate. JWTs remain valid until their expiration date is reached.&lt;/li>
-&lt;li>If a JWT contains a lot of data, it can slow down client requests. Session IDs are lightweight strings, making them more efficient. OAuth2 solves this issue by using short-lived access tokens and long-lived refresh tokens.&lt;/li>
-&lt;/ul>
-&lt;h2 id="conclusion">Conclusion
-&lt;/h2>&lt;p>Most production services can work with either authentication model, so the choice depends on the use case. In fact, many systems use a hybrid model that combines both types of authentication, with the JWT being associated with a user session for user tracking.&lt;/p></description></item><item><title>Signalling docker containers</title><link>https://hashimcolombowala.com/p/signalling-docker-containers/</link><pubDate>Wed, 27 Jan 2021 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/signalling-docker-containers/</guid><description>&lt;p>When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this&lt;/p>
+&lt;li>The client holds the state (in the form of a token).&lt;/li>
+&lt;li>Scales well horizontally because the server is stateless.&lt;/li>
+&lt;li>Ideal for distributed systems or APIs.&lt;/li>
+&lt;/ul></description></item><item><title>Signalling docker containers</title><link>https://hashimcolombowala.com/p/signalling-docker-containers/</link><pubDate>Wed, 27 Jan 2021 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/signalling-docker-containers/</guid><description>&lt;p>When deploying a containerized application to a container management system like AWS Fargate, you tend to run your application from a shell script. Suppose your script looks like this&lt;/p>
 &lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
@@ -1449,30 +1864,4 @@ data-flex-basis="321px"
 &lt;li>If the implementation is easy to explain, it may be a good idea.&lt;/li>
 &lt;li>Namespaces are one honking great idea—let&amp;rsquo;s do more of those!&lt;/li>
 &lt;/ul>
-&lt;p>The Zen of Python encapsulates the values that make Python such a delightful programming language. It&amp;rsquo;s about simplicity, clarity, and pragmatism. Whether you&amp;rsquo;re new to Python or a seasoned developer, keeping these principles in mind can help guide you to write better, more maintainable code.&lt;/p></description></item><item><title>Python decorator common use cases</title><link>https://hashimcolombowala.com/p/python-decorator-common-use-cases/</link><pubDate>Sat, 04 Apr 2020 15:54:35 -0700</pubDate><guid>https://hashimcolombowala.com/p/python-decorator-common-use-cases/</guid><description>&lt;p>Python decorators are a powerful feature that allow you to extend the functionality of existing functions or methods in a reusable and elegant way. They are especially useful for tasks that you may need to apply repeatedly to different functions. Below are some common use cases for Python decorators.&lt;/p>
-&lt;h3 id="1-timing-functions">1. Timing Functions
-&lt;/h3>&lt;p>Timing functions are a classic example of using decorators, often featured as the first example on StackOverflow. These decorators help measure how long a function takes to execute, making it easy to identify performance bottlenecks. You can also use a context manager to time functions, which is a good way to learn how &lt;code>__enter__&lt;/code> and &lt;code>__exit__&lt;/code> methods work in Python.&lt;/p>
-&lt;h3 id="2-retrying-functions">2. Retrying Functions
-&lt;/h3>&lt;p>Sometimes, a function may fail due to transient errors (e.g., network issues). A retrying decorator can be used to attempt the function again after a failure, with optional exponential backoff to increase the wait time between retries. Bonus points if you implement increasing wait times to avoid overwhelming the system.&lt;/p>
-&lt;h3 id="3-setting-a-maximum-execution-time">3. Setting a Maximum Execution Time
-&lt;/h3>&lt;p>If you have a function that runs in a loop or is amenable to timeout, a decorator can enforce a maximum execution time. This can be useful when you want to avoid infinite loops or long-running operations that may block other processes.&lt;/p>
-&lt;h3 id="4-logging-functions">4. Logging Functions
-&lt;/h3>&lt;p>Logging is an essential part of debugging and monitoring applications. There are numerous types of logging decorators, each serving different purposes. Often, these decorators require a decorator factory or class to accommodate parameters like a logger instance. You can use decorators to log function calls, inputs, outputs, and exceptions.&lt;/p>
-&lt;h3 id="5-simple-debugging">5. Simple Debugging
-&lt;/h3>&lt;p>A simple debugging decorator can print the function&amp;rsquo;s inputs and outputs, either to a log file or just to the console. This is especially useful during development when trying to trace issues in code.&lt;/p>
-&lt;h3 id="6-validating-function-inputs">6. Validating Function Inputs
-&lt;/h3>&lt;p>Python is typically &amp;ldquo;Easier to Ask for Forgiveness than Permission&amp;rdquo; (EAFP), but there are times when input validation is necessary. A decorator can validate function inputs, ensuring they meet certain criteria. You can also use this to modify inputs—for instance, adding &lt;code>http://&lt;/code> to a URL if the user forgets to include it.&lt;/p>
-&lt;h3 id="7-validating-function-outputs">7. Validating Function Outputs
-&lt;/h3>&lt;p>In addition to input validation, decorators can also validate function outputs. For example, you can enforce output constraints, such as ensuring the value is within a specific range.&lt;/p>
-&lt;h3 id="8-waitingrate-limiting">8. Waiting/Rate-Limiting
-&lt;/h3>&lt;p>When interacting with a web service, it&amp;rsquo;s often crucial to rate-limit your requests to avoid being banned or overwhelming the server. A waiting or rate-limiting decorator can add delays between function calls, ensuring compliance with rate limits.&lt;/p>
-&lt;h3 id="9-cachingmemoization">9. Caching/Memoization
-&lt;/h3>&lt;p>If you have a pure or idempotent function that&amp;rsquo;s computationally expensive and runs multiple times with the same inputs, a caching decorator (e.g., &lt;code>functools.lru_cache&lt;/code>) can save results for future use. This is particularly useful in functional programming paradigms to improve efficiency by avoiding redundant calculations.&lt;/p>
-&lt;h3 id="10-handling-database-transactions-gracefully">10. Handling Database Transactions Gracefully
-&lt;/h3>&lt;p>When working with databases, it&amp;rsquo;s important to handle transactions properly. A decorator can ensure that transactions are committed when successful or rolled back when an exception occurs. Although many DB-API libraries offer built-in ways to manage transactions, a decorator can provide a consistent and reusable approach.&lt;/p>
-&lt;h3 id="11-synchronization">11. Synchronization
-&lt;/h3>&lt;p>In multithreading or multiprocessing applications, decorators can be used for synchronization—acquiring and releasing locks. This helps prevent race conditions by ensuring only one thread or process can access a critical section at a time.&lt;/p>
-&lt;h3 id="12-authentication">12. Authentication
-&lt;/h3>&lt;p>Authentication is a common use case in web frameworks, where decorators are used to ensure that a user is logged in before they can access a certain resource or perform an action. This is a convenient way to add access control across multiple endpoints in a web application.&lt;/p>
-&lt;h3 id="conclusion">Conclusion
-&lt;/h3>&lt;p>Decorators offer a powerful, reusable, and elegant way to extend the behavior of your functions. From timing functions and retry mechanisms to logging and input validation, decorators help reduce repetitive code while maintaining consistency across your application.&lt;/p></description></item></channel></rss>
+&lt;p>The Zen of Python encapsulates the values that make Python such a delightful programming language. It&amp;rsquo;s about simplicity, clarity, and pragmatism. Whether you&amp;rsquo;re new to Python or a seasoned developer, keeping these principles in mind can help guide you to write better, more maintainable code.&lt;/p></description></item></channel></rss>
