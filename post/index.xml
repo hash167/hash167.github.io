@@ -856,15 +856,23 @@ data-flex-basis="294px"
 &lt;/ol>
 &lt;h3 id="conclusion">Conclusion
 &lt;/h3>&lt;p>So here we have it. An off-by-one (decrement to the count) can lead to an increment of 99. Who would have thought.&lt;/p></description></item><item><title>Learning Generics by extending the prometheus python client</title><link>https://hashimcolombowala.com/p/learning-generics-by-extending-the-prometheus-python-client/</link><pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate><guid>https://hashimcolombowala.com/p/learning-generics-by-extending-the-prometheus-python-client/</guid><description>&lt;p>Imagine you&amp;rsquo;re writing a library to extend the &lt;a class="link" href="https://github.com/prometheus/client_python" target="_blank" rel="noopener"
->prometheus python client&lt;/a> and you needed to add some dynamic labels specific to the environment. Ideally you would add most of your labels at the collector end and avoid writing extensions.&lt;/p>
-&lt;p>Say you need to inject some dynamic labels and you will need to at some point, we may want to extend the client.&lt;/p>
-&lt;h2 id="what-are-generics-and-why-do-we-use-them-in-python">What are Generics? and why do we use them in python?
-&lt;/h2>&lt;p>Without sacrificing the inherent safety of a statically typed language, generic programming gives us primitives to declare “placeholder types” that allow us to focus less on the specific types that may be used or declared by other portions of the codebase, but rather focus on these higher-level patterns that can be consolidated into simpler declarations.&lt;/p>
-&lt;p>Python has no built-in type checking. As long as a given Python program is syntactically valid, it will run, and issues like incompatible types will only surface at runtime. This forces the developer to ensure there is error handling in place to deal with such errors, and even with this, a common best practice is to use &lt;a class="link" href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener"
->type hints&lt;/a> combined with third-party linting tools to try to stay on top of issues like this.&lt;/p>
-&lt;p>Generics in my opinion is a programming stype for statically typed languages brought into python via type hints.&lt;/p>
-&lt;h2 id="some-code-with-comments">Some code with comments
-&lt;/h2>&lt;div class="highlight">&lt;div class="chroma">
+>Prometheus Python client&lt;/a> and need to add some &lt;strong>dynamic labels&lt;/strong> specific to the environment. Ideally, you would add most of your labels at the &lt;strong>collector&lt;/strong> end to avoid writing extensions, but there are situations where injecting dynamic labels is unavoidable. For these cases, you might want to extend the client in a structured and type-safe manner.&lt;/p>
+&lt;h2 id="what-are-generics-and-why-do-we-use-them-in-python">What Are Generics? And Why Do We Use Them in Python?
+&lt;/h2>&lt;p>Generics are a feature commonly associated with statically typed languages. They allow you to create code that works with a variety of types while maintaining type safety. By declaring &amp;ldquo;placeholder types,&amp;rdquo; generics help us write higher-level patterns that simplify declarations and reduce redundancy.&lt;/p>
+&lt;p>While Python doesn’t enforce type checking at runtime (as long as the code is syntactically valid, it will run), tools like &lt;strong>type hints&lt;/strong> and third-party linters like &lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
+>mypy&lt;/a> bring the safety of statically typed languages to Python. These tools enable developers to:&lt;/p>
+&lt;ul>
+&lt;li>Catch type errors early.&lt;/li>
+&lt;li>Improve code readability.&lt;/li>
+&lt;li>Document function and class behavior clearly.&lt;/li>
+&lt;/ul>
+&lt;h3 id="generics-in-python">Generics in Python
+&lt;/h3>&lt;p>Generics in Python are brought to life using &lt;strong>type hints&lt;/strong> from the &lt;a class="link" href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener"
+>&lt;code>typing&lt;/code>&lt;/a> module. In essence, generics in Python are a &lt;strong>programming style&lt;/strong> adapted from statically typed languages to achieve similar benefits in Python&amp;rsquo;s dynamic environment.&lt;/p>
+&lt;h2 id="extending-the-prometheus-python-client-with-generics">Extending the Prometheus Python Client with Generics
+&lt;/h2>&lt;p>Below is an example of extending the Prometheus client to support dynamic labels using generics. This approach makes it easier to manage labels dynamically while preserving type safety.&lt;/p>
+&lt;h3 id="example-code-with-comments">Example Code with Comments
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
 &lt;/span>&lt;span class="lnt"> 2
@@ -896,45 +904,89 @@ data-flex-basis="294px"
 &lt;/span>&lt;span class="lnt">28
 &lt;/span>&lt;span class="lnt">29
 &lt;/span>&lt;span class="lnt">30
+&lt;/span>&lt;span class="lnt">31
+&lt;/span>&lt;span class="lnt">32
+&lt;/span>&lt;span class="lnt">33
+&lt;/span>&lt;span class="lnt">34
 &lt;/span>&lt;/code>&lt;/pre>&lt;/td>
 &lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">from prometheus_client import Counter as _PromCounter
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">from prometheus_client import Histogram as _PromHistogram
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">from typing import TypeVar, Generics
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">prometheus_client&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Counter&lt;/span> &lt;span class="k">as&lt;/span> &lt;span class="n">_PromCounter&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">prometheus_client&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Histogram&lt;/span> &lt;span class="k">as&lt;/span> &lt;span class="n">_PromHistogram&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">typing&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">TypeVar&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Generic&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Iterable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Dict&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">cast&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># a new generic type, bound to two types
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">_MetricsTypeT = TypeVar(&amp;#39;_MetricsTypeT&amp;#39;, bound=[_PromCounter, _PromHistogram])
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a new generic type, bound to two specific Prometheus metric types&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">_MetricsTypeT&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">TypeVar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;_MetricsTypeT&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">_PromCounter&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">_PromHistogram&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># base class of type generic(child class to pass type in)
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">class _MetricsBase(Generic[_MetricsTypeT]):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> def __init__(self, label_names: Iterable[str]):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self.default_labels: Dict[str] = get_default_labels()
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self.all_label_names: list = list(label_names) + list(self.default_labels.keys())
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self._parent_metric: _MetricsTypeT = None
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Base class of type generic; the child class will pass in the type&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">_MetricsBase&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Generic&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">]):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">label_names&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Iterable&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">str&lt;/span>&lt;span class="p">]):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Default labels dynamically fetched (e.g., environment-specific)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Dict&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">str&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">get_default_labels&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">all_label_names&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">list&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">list&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">label_names&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="nb">list&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">keys&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">_MetricsTypeT&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">None&lt;/span> &lt;span class="c1"># Parent metric instance&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> # Provides the label functionality
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> def labels(self, *labelargs, **labelkwargs) -&amp;gt; _MetricsTypeT:
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> if labelargs:
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> labelargs += tuple(self.default_labels.values())
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return cast(_MetricsTypeT, self._parent_metric.labels(*labelargs))
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> labelkwargs.update(self.default_labels)
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> return cast(_MetricsTypeT, self._parent_metric.labels(**labelkwargs))
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Provides dynamic label functionality&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">labels&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">labelargs&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">labelkwargs&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">-&amp;gt;&lt;/span> &lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">labelargs&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Append default labels to positional arguments&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">labelargs&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="nb">tuple&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">values&lt;/span>&lt;span class="p">())&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">cast&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">labels&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">labelargs&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Merge default labels into keyword arguments&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">labelkwargs&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">update&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">cast&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">labels&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">**&lt;/span>&lt;span class="n">labelkwargs&lt;/span>&lt;span class="p">))&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"># child class passing in type to base class via generics
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">class Counter(_MetricsBase[_PromCounter]):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> def __init__(self, name, documentation, labelnames=()):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> super().__init__(label_names=labelnames)
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> self._parent_metric = _PromCounter(
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> name=name, documentation=documentation,
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> labelnames=self.all_label_names)
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Child class passing a specific type (_PromCounter) to the base class via generics&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Counter&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">_MetricsBase&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">_PromCounter&lt;/span>&lt;span class="p">]):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">str&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">documentation&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">str&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">labelnames&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Iterable&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">str&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">()):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">label_names&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">labelnames&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Create the actual Prometheus Counter metric&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">_PromCounter&lt;/span>&lt;span class="p">(&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">documentation&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">documentation&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">labelnames&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">all_label_names&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>Complete code &lt;a class="link" href="https://github.com/hash167/prom_client_generics/" target="_blank" rel="noopener"
->here&lt;/a>&lt;/p>
-&lt;h2 id="the-final-world">The final world
-&lt;/h2>&lt;p>In my project, I used generics programing to type my base class. My base clase _MetricsBase accepts a Generic type, passed in by classes(Counter, Histogram) inheritering from it. The common method label returns the generic type passed in from the child class. When we use third party linters like &lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
->mypy&lt;/a>, we get some of the controll of statically typed languages with python&lt;/p></description></item><item><title>Designing a metrics system notes</title><link>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</link><pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</guid><description>&lt;p>To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p>
+&lt;/div>&lt;h3 id="key-points">Key Points:
+&lt;/h3>&lt;ol>
+&lt;li>
+&lt;p>&lt;strong>Generics in Base Class&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>_MetricsBase&lt;/code> accepts a generic type (&lt;code>_MetricsTypeT&lt;/code>), which can be either a Prometheus &lt;code>Counter&lt;/code> or &lt;code>Histogram&lt;/code>.&lt;/li>
+&lt;li>This ensures type safety across methods like &lt;code>labels()&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Dynamic Label Handling&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>default_labels&lt;/code> are fetched dynamically, e.g., from the environment or configuration.&lt;/li>
+&lt;li>These labels are automatically added to the user-provided labels when creating or using metrics.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>&lt;strong>Child Classes&lt;/strong>:&lt;/p>
+&lt;ul>
+&lt;li>Child classes (&lt;code>Counter&lt;/code>, &lt;code>Histogram&lt;/code>) specify the type of Prometheus metric they represent.&lt;/li>
+&lt;li>They inherit the generic behavior while remaining strongly typed.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h2 id="the-final-word">The Final Word
+&lt;/h2>&lt;p>In my project, I used generics to type my base class &lt;code>_MetricsBase&lt;/code>. This class accepts a &lt;strong>generic type&lt;/strong> that is passed in by its child classes (&lt;code>Counter&lt;/code>, &lt;code>Histogram&lt;/code>). The &lt;code>labels()&lt;/code> method dynamically appends environment-specific labels while ensuring type safety. By leveraging &lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
+>mypy&lt;/a> or similar tools, I achieved many of the benefits of statically typed languages in Python.&lt;/p>
+&lt;h3 id="complete-code">Complete Code
+&lt;/h3>&lt;p>You can find the complete code for this example &lt;a class="link" href="https://github.com/hash167/prom_client_generics/" target="_blank" rel="noopener"
+>here&lt;/a>.&lt;/p>
+&lt;h2 id="further-reading">Further Reading
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://github.com/prometheus/client_python" target="_blank" rel="noopener"
+>Prometheus Python Client Library&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener"
+>Python Typing Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://peps.python.org/pep-0484/#generic-classes" target="_blank" rel="noopener"
+>Generics in Python&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
+>mypy Type Checker&lt;/a>&lt;/li>
+&lt;/ul></description></item><item><title>Designing a metrics system notes</title><link>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</link><pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</guid><description>&lt;p>To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p>
 &lt;h3 id="requirements-for-a-metrics-system">Requirements for a Metrics System
 &lt;/h3>&lt;ul>
 &lt;li>&lt;strong>Multidimensional Data Model&lt;/strong>: The metrics system should support a multidimensional data model that can be sliced and diced along different dimensions as defined by the service (e.g., instance, service, endpoint, method).&lt;/li>
@@ -1635,41 +1687,41 @@ data-flex-basis="321px"
 &lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">initProcessEnabled&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;true&amp;#34;&lt;/span>&lt;span class="w">
 &lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div></description></item><item><title>Abstract classes using Metaclasses</title><link>https://hashimcolombowala.com/p/abstract-classes-using-metaclasses/</link><pubDate>Mon, 28 Dec 2020 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/abstract-classes-using-metaclasses/</guid><description>&lt;p>In python3 all classes are new style classes, thus it is reasonable to refer to an objects type and its class interchangably&lt;/p>
-&lt;h3 id="type-and-class">Type and Class
+&lt;/div></description></item><item><title>Abstract classes using Metaclasses</title><link>https://hashimcolombowala.com/p/abstract-classes-using-metaclasses/</link><pubDate>Mon, 28 Dec 2020 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/abstract-classes-using-metaclasses/</guid><description>&lt;p>In Python 3, all classes are &lt;strong>new-style classes&lt;/strong>, making it reasonable to refer to an object’s &lt;strong>type&lt;/strong> and its &lt;strong>class&lt;/strong> interchangeably.&lt;/p>
+&lt;h2 id="type-and-class">Type and Class
+&lt;/h2>&lt;p>In Python, every class is an instance of a metaclass, and by default, the metaclass is &lt;code>type&lt;/code>. This creates an interesting relationship where:&lt;/p>
+&lt;ul>
+&lt;li>&lt;code>Foo&lt;/code> (a class) is an instance of the metaclass &lt;code>type&lt;/code>.&lt;/li>
+&lt;li>&lt;code>type&lt;/code> itself is an instance of &lt;code>type&lt;/code>.&lt;/li>
+&lt;/ul>
+&lt;h3 id="example-type-and-class-relationship">Example: Type and Class Relationship
 &lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
 &lt;/span>&lt;span class="lnt">2
 &lt;/span>&lt;span class="lnt">3
 &lt;/span>&lt;span class="lnt">4
-&lt;/span>&lt;span class="lnt">5
-&lt;/span>&lt;span class="lnt">6
 &lt;/span>&lt;/code>&lt;/pre>&lt;/td>
 &lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Foo&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Foo&lt;/span>&lt;span class="p">:&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="nb">type&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Foo&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="err">&amp;#39;&lt;/span>&lt;span class="nc">type&lt;/span>&lt;span class="s1">&amp;#39;&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">type&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Foo&lt;/span>&lt;span class="p">))&lt;/span> &lt;span class="c1"># Output: &amp;lt;class &amp;#39;type&amp;#39;&amp;gt;&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>Type is a metaclass of which classes are instances&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>Foo&lt;/code> is an instance of metaclass &lt;code>type&lt;/code>&lt;/li>
-&lt;li>&lt;code>type&lt;/code> is an instance of &lt;code>type&lt;/code> as well&lt;/li>
-&lt;/ul>
-&lt;h3 id="type-metaclass">Type Metaclass
-&lt;/h3>&lt;p>A &lt;code>type&lt;/code> metaclass is initialized with 3 arguments&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>name&lt;/code>: name of the class (&lt;strong>name&lt;/strong> attribute)&lt;/li>
-&lt;li>&lt;code>bases&lt;/code>: a tuple of classnames that the class inherits from&lt;/li>
-&lt;li>&lt;code>namespace&lt;/code>: a dictionary contianing definitions of the class body (&lt;strong>dict&lt;/strong> attribute of the class)&lt;/li>
-&lt;/ul>
-&lt;h3 id="creating-an-abstract-class-manually-with-metaclasses">Creating an abstract class manually with Metaclasses
-&lt;/h3>&lt;p>To understand metaclasses, we create an interface or abstract class implementation. Use &lt;code>from abc import ABC, abstractmethod&lt;/code> when implementing something at work.&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
+&lt;/div>&lt;p>Here, &lt;code>type&lt;/code> is the metaclass that created &lt;code>Foo&lt;/code>.&lt;/p>
+&lt;h2 id="the-type-metaclass">The &lt;code>type&lt;/code> Metaclass
+&lt;/h2>&lt;p>The &lt;code>type&lt;/code> metaclass is initialized with three arguments:&lt;/p>
+&lt;ol>
+&lt;li>&lt;strong>&lt;code>name&lt;/code>&lt;/strong>: The name of the class (corresponding to the &lt;code>__name__&lt;/code> attribute).&lt;/li>
+&lt;li>&lt;strong>&lt;code>bases&lt;/code>&lt;/strong>: A tuple of base classes the class inherits from.&lt;/li>
+&lt;li>&lt;strong>&lt;code>namespace&lt;/code>&lt;/strong>: A dictionary containing the definitions of the class body (corresponding to the &lt;code>__dict__&lt;/code> attribute).&lt;/li>
+&lt;/ol>
+&lt;p>This mechanism makes metaclasses highly flexible, allowing developers to modify class behavior programmatically.&lt;/p>
+&lt;h2 id="creating-an-abstract-class-manually-with-metaclasses">Creating an Abstract Class Manually with Metaclasses
+&lt;/h2>&lt;p>To understand metaclasses better, let’s manually create an interface (or abstract class) implementation. For production work, you should use &lt;code>from abc import ABC, abstractmethod&lt;/code> to implement abstract classes. But for this exercise, we&amp;rsquo;ll implement the functionality ourselves.&lt;/p>
+&lt;h3 id="example-abstract-class-with-a-custom-metaclass">Example: Abstract Class with a Custom Metaclass
+&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
 &lt;table class="lntable">&lt;tr>&lt;td class="lntd">
 &lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
 &lt;/span>&lt;span class="lnt"> 2
@@ -1734,39 +1786,20 @@ data-flex-basis="321px"
 &lt;/span>&lt;span class="lnt">61
 &lt;/span>&lt;span class="lnt">62
 &lt;/span>&lt;span class="lnt">63
-&lt;/span>&lt;span class="lnt">64
-&lt;/span>&lt;span class="lnt">65
-&lt;/span>&lt;span class="lnt">66
-&lt;/span>&lt;span class="lnt">67
-&lt;/span>&lt;span class="lnt">68
-&lt;/span>&lt;span class="lnt">69
-&lt;/span>&lt;span class="lnt">70
-&lt;/span>&lt;span class="lnt">71
-&lt;/span>&lt;span class="lnt">72
-&lt;/span>&lt;span class="lnt">73
-&lt;/span>&lt;span class="lnt">74
-&lt;/span>&lt;span class="lnt">75
-&lt;/span>&lt;span class="lnt">76
-&lt;/span>&lt;span class="lnt">77
-&lt;/span>&lt;span class="lnt">78
 &lt;/span>&lt;/code>&lt;/pre>&lt;/td>
 &lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># test.py&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Decorator to add attribute to function&lt;/span>
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Decorator to mark a function as abstract&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">def&lt;/span> &lt;span class="nf">abstract_func&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">func&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">func&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">__isabstract__&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">True&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">func&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># This is the metaclass inheriting from `type`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Metaclass inheriting from `type`&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Interface&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">type&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Init method initialized from &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">class_methods&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;all_methods&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Initializing &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">...&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">class_methods&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;all_methods&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">[])&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">base&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">required_methods&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;abstract_methods&amp;#39;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">required_methods&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">base&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;abstract_methods&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="p">[])&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">required_methods&lt;/span>&lt;span class="p">:&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="ow">not&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">class_methods&lt;/span>&lt;span class="p">:&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">msg&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&amp;#34;Can&amp;#39;t create abstract class &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">!
@@ -1776,26 +1809,18 @@ data-flex-basis="321px"
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__new__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">cls&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">namespace&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;abstract_methods&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Interface&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_get_abstract_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">namespace&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s1">&amp;#39;all_methods&amp;#39;&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">Interface&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_get_all_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">cls&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__new__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">cls&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="bp">cls&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__new__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">cls&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">bases&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@staticmethod&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">_get_abstract_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[]&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">val&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">items&lt;/span>&lt;span class="p">():&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">callable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;__isabstract__&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">False&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ret&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="n">name&lt;/span> &lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">val&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">items&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">callable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="ow">and&lt;/span> &lt;span class="nb">getattr&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="s1">&amp;#39;__isabstract__&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">False&lt;/span>&lt;span class="p">)]&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@staticmethod&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">_get_all_methods&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">namespace&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">[]&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">val&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">items&lt;/span>&lt;span class="p">():&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">callable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">ret&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">append&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">ret&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">[&lt;/span>&lt;span class="n">name&lt;/span> &lt;span class="k">for&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">val&lt;/span> &lt;span class="ow">in&lt;/span> &lt;span class="n">namespace&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">items&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="k">if&lt;/span> &lt;span class="n">callable&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">val&lt;/span>&lt;span class="p">)]&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># the __calls__() function calls the __new__() and __init__() methods of the metaclass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Using the custom metaclass&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">NetworkInterface&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">metaclass&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">Interface&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@abstract_func&lt;/span>
@@ -1806,36 +1831,87 @@ data-flex-basis="321px"
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">transfer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The object of this class will not be created &lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># because of missing abstract method&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># The following class will raise a TypeError because it does not implement all abstract methods&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">TestNetwork&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">NetworkInterface&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Init method initialized from &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">print&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s2">&amp;#34;TestNetwork initialized.&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">connect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># def transfer(self):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Uncommenting the next line will raise a TypeError&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># c = TestNetwork()&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Correct implementation&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">CompleteNetwork&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">NetworkInterface&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">connect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">c&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">TestNetwork&lt;/span>&lt;span class="p">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="ne">TypeError&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Can&lt;/span>&lt;span class="s1">&amp;#39;t create abstract class TestNetwork!&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">TestNetwork&lt;/span> &lt;span class="n">must&lt;/span> &lt;span class="n">implement&lt;/span> &lt;span class="n">abstract&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">transfer&lt;/span> &lt;span class="n">of&lt;/span> &lt;span class="k">class&lt;/span> &lt;span class="err">&amp;lt;&lt;/span>&lt;span class="nc">class&lt;/span> &lt;span class="s1">&amp;#39;__main__.NetworkInterface&amp;#39;&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>&lt;span class="err">!&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">transfer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
 &lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">After&lt;/span> &lt;span class="n">uncommenting&lt;/span> &lt;span class="n">the&lt;/span> &lt;span class="n">method&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">&amp;gt;&amp;gt;&amp;gt;&lt;/span> &lt;span class="n">python3&lt;/span> &lt;span class="n">test&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">py&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">Init&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">initialized&lt;/span> &lt;span class="kn">from&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="err">&amp;#39;&lt;/span>&lt;span class="nc">__main__&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">NetworkInterface&lt;/span>&lt;span class="s1">&amp;#39;&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">Init&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">initialized&lt;/span> &lt;span class="kn">from&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="k">class&lt;/span> &lt;span class="err">&amp;#39;&lt;/span>&lt;span class="nc">__main__&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TestNetwork&lt;/span>&lt;span class="s1">&amp;#39;&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">Init&lt;/span> &lt;span class="n">method&lt;/span> &lt;span class="n">called&lt;/span> &lt;span class="kn">from&lt;/span> &lt;span class="o">&amp;lt;&lt;/span>&lt;span class="n">__main__&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">TestNetwork&lt;/span> &lt;span class="nb">object&lt;/span> &lt;span class="n">at&lt;/span> &lt;span class="mh">0x7fc5e7659350&lt;/span>&lt;span class="o">&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">c&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">CompleteNetwork&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="c1"># This works as all abstract methods are implemented&lt;/span>
 &lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
 &lt;/div>
-&lt;/div>&lt;p>When we initialize &lt;code>TestNetwork&lt;/code>, the following happens&lt;/p>
+&lt;/div>&lt;h3 id="what-happens-during-initialization">What Happens During Initialization?
+&lt;/h3>&lt;p>When we attempt to initialize &lt;code>TestNetwork&lt;/code>:&lt;/p>
+&lt;ol>
+&lt;li>The &lt;code>Interface&lt;/code> metaclass’s &lt;code>__init__&lt;/code> method is invoked twice:
 &lt;ul>
-&lt;li>The interface init method is called twice. Once when creating the &lt;code>NetworkInterface&lt;/code> and &lt;code>TestNetwork&lt;/code> class from the metaclass blueprint.&lt;/li>
-&lt;li>In the &lt;code>Interface&lt;/code> init method, we iterate over the list of abstract methods in the parent class and make sure each one is present in the current class.&lt;/li>
-&lt;li>If we don&amp;rsquo;t find a method in the class with the same name, we raise an exception&lt;/li>
+&lt;li>First for the &lt;code>NetworkInterface&lt;/code> class.&lt;/li>
+&lt;li>Then for the &lt;code>TestNetwork&lt;/code> class.&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>The metaclass collects the list of &lt;strong>abstract methods&lt;/strong> from the parent (&lt;code>NetworkInterface&lt;/code>).&lt;/li>
+&lt;li>It checks if all abstract methods are implemented in &lt;code>TestNetwork&lt;/code>.&lt;/li>
+&lt;li>If any abstract method is missing, a &lt;code>TypeError&lt;/code> is raised.&lt;/li>
+&lt;/ol>
+&lt;h3 id="key-takeaways">Key Takeaways
+&lt;/h3>&lt;ul>
+&lt;li>&lt;strong>Abstract Methods&lt;/strong>: Marked using a decorator (&lt;code>abstract_func&lt;/code>) to indicate required methods in child classes.&lt;/li>
+&lt;li>&lt;strong>Dynamic Validation&lt;/strong>: The metaclass checks for the presence of all required methods during class creation.&lt;/li>
+&lt;li>&lt;strong>Flexibility&lt;/strong>: This implementation shows how metaclasses can control class behavior programmatically.&lt;/li>
+&lt;/ul>
+&lt;h3 id="using-abcabc-for-real-world-scenarios">Using &lt;code>abc.ABC&lt;/code> for Real-World Scenarios
+&lt;/h3>&lt;p>In practice, you should use the built-in &lt;code>abc&lt;/code> module for abstract base classes. It simplifies abstract class creation and ensures consistency:&lt;/p>
+&lt;div class="highlight">&lt;div class="chroma">
+&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
+&lt;/span>&lt;span class="lnt"> 2
+&lt;/span>&lt;span class="lnt"> 3
+&lt;/span>&lt;span class="lnt"> 4
+&lt;/span>&lt;span class="lnt"> 5
+&lt;/span>&lt;span class="lnt"> 6
+&lt;/span>&lt;span class="lnt"> 7
+&lt;/span>&lt;span class="lnt"> 8
+&lt;/span>&lt;span class="lnt"> 9
+&lt;/span>&lt;span class="lnt">10
+&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
+&lt;td class="lntd">
+&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">abc&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">ABC&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">abstractmethod&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">NetworkInterface&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">ABC&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@abstractmethod&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">connect&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nd">@abstractmethod&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">transfer&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">):&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">pass&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
+&lt;/div>
+&lt;/div>&lt;h2 id="references-and-sources">References and Sources
+&lt;/h2>&lt;ul>
+&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/functions.html#type" target="_blank" rel="noopener"
+>Python &lt;code>type&lt;/code> Metaclass Documentation&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://realpython.com/python-metaclasses/" target="_blank" rel="noopener"
+>Understanding Metaclasses in Python – Real Python&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/abc.html" target="_blank" rel="noopener"
+>Metaclasses and &lt;code>abc&lt;/code> Module in Python&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://realpython.com/primer-on-python-decorators/" target="_blank" rel="noopener"
+>Python Decorators: A Complete Guide – Real Python&lt;/a>&lt;/li>
+&lt;li>&lt;a class="link" href="https://peps.python.org/pep-3119/" target="_blank" rel="noopener"
+>PEP 3119: Introducing Abstract Base Classes&lt;/a>&lt;/li>
 &lt;/ul></description></item><item><title>The Go Spec(compiling)</title><link>https://hashimcolombowala.com/p/the-go-speccompiling/</link><pubDate>Sat, 20 Jun 2020 16:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/the-go-speccompiling/</guid><description>&lt;p>The Go compiler can compile the Go source go with different go specs. Fo example, if you have installed go 1.14, you can compile your source with &lt;code>Go spec 1.13&lt;/code>.&lt;/p>
 &lt;h3 id="the-rules-for-which-version-of-the-go-spec-used-during-compilation-appear-to-be">The rules for which version of the Go spec used during compilation appear to be
 &lt;/h3>&lt;ol>
