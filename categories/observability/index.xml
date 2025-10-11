@@ -1,852 +1,784 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Observability on Hashim Colombowala</title><link>https://hashimcolombowala.com/categories/observability/</link><description>Recent content in Observability on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 06 Sep 2025 00:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/categories/observability/index.xml" rel="self" type="application/rss+xml"/><item><title>How to Use Proper Resolution Windows in PromQL to Catch Short Spikes</title><link>https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</link><pubDate>Sat, 06 Sep 2025 00:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</guid><description>&lt;p>Let’s look at a real example: a short CPU spike that can appear blurred on your dashboard if your query resolution isn’t set properly.&lt;/p>
-&lt;h3 id="the-scenario">The Scenario
-&lt;/h3>&lt;ul>
-&lt;li>Panel range: &lt;strong>12:00–01:00 (1h)&lt;/strong>&lt;/li>
-&lt;li>Scrape interval: &lt;strong>15s&lt;/strong>&lt;/li>
-&lt;li>Metric: &lt;code>cpu_percent&lt;/code> (gauge)&lt;/li>
-&lt;li>Event: &lt;strong>CPU spikes to 90% for 20 seconds&lt;/strong> at &lt;strong>12:05:15 → 12:05:35&lt;/strong>&lt;/li>
-&lt;/ul>
-&lt;p>Prometheus scrapes every 15s, so the raw samples are:&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th style="text-align: left">Time&lt;/th>
-&lt;th style="text-align: left">CPU%&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td style="text-align: left">12:05:00&lt;/td>
-&lt;td style="text-align: left">10&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">12:05:15&lt;/td>
-&lt;td style="text-align: left">90&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">12:05:30&lt;/td>
-&lt;td style="text-align: left">10&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;p>The data is there but what how accurate your graph is depends on your query.&lt;/p>
-&lt;h3 id="baseline-query-blurred">Baseline Query (Blurred)
-&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-promql" data-lang="promql">&lt;span class="line">&lt;span class="cl">&lt;span class="kr">max_over_time&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="nv">cpu_percent&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">1m&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">)&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;p>On a 1h panel, Grafana (or other vendor equivalent) dashboards defaults to ~1m resolution. Prometheus only evaluates the query at 12:05, 12:06, 12:07, …&lt;/p>
-&lt;ul>
-&lt;li>At 12:05 → window [12:04–12:05] → max = 10&lt;/li>
-&lt;li>At 12:06 → window [12:05–12:06] → includes spike → max = 90&lt;/li>
-&lt;li>At 12:07 → window [12:06–12:07] → spike gone → max = 10&lt;/li>
-&lt;/ul>
-&lt;p>The spike appears, but it’s &lt;strong>blurred into the “12:05–12:06” bucket&lt;/strong>.&lt;/p>
-&lt;p>&lt;strong>Timeline:&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;span class="lnt">3
-&lt;/span>&lt;span class="lnt">4
-&lt;/span>&lt;span class="lnt">5
-&lt;/span>&lt;span class="lnt">6
-&lt;/span>&lt;span class="lnt">7
-&lt;/span>&lt;span class="lnt">8
-&lt;/span>&lt;span class="lnt">9
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Raw samples (15s):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:00 ─ 10%
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:15 ─ 90% &amp;lt;--- spike
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:30 ─ 10%
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Eval points (1m):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05 ─ 10%
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:06 ─ 90% &amp;lt;--- spike blurred into 1 minute bucket
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:07 ─ 10%
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;p>Graph A — Baseline (&lt;code>max_over_time(cpu_percent[1m])&lt;/code>):
-&lt;img src="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a.png"
-width="2379"
-height="780"
-srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu1620491900664182322.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu10200452981611888843.png 1024w"
-loading="lazy"
-alt="Graph A"
-class="gallery-image"
-data-flex-grow="305"
-data-flex-basis="732px"
->&lt;/p>
-&lt;h3 id="why-it-blurs">Why it blurs
-&lt;/h3>&lt;p>This is like checking your watch once a minute. If something happens at second 15, you’ll only know it happened somewhere in that minute.&lt;/p>
-&lt;h3 id="subquery-with-__range15s-sharp">Subquery with &lt;code>$__range:15s&lt;/code> (Sharp)
-&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-promql" data-lang="promql">&lt;span class="line">&lt;span class="cl">&lt;span class="kr">max_over_time&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="nv">cpu_percent&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">1m&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">)&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="err">$__range:&lt;/span>&lt;span class="s">15s&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;ul>
-&lt;li>Inner &lt;code>[1m]&lt;/code>: look back 1 minute and take the max.&lt;/li>
-&lt;li>Outer &lt;code>[$__range:15s]&lt;/code>: recompute that inner max &lt;strong>every 15 seconds&lt;/strong> across the full 1h panel.&lt;/li>
-&lt;li>Now evaluations happen at 12:05:00, 12:05:15, 12:05:30, …&lt;/li>
-&lt;/ul>
-&lt;p>That means the spike is captured &lt;strong>exactly at 12:05:15&lt;/strong>.&lt;/p>
-&lt;p>&lt;strong>Timeline:&lt;/strong>&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;span class="lnt">3
-&lt;/span>&lt;span class="lnt">4
-&lt;/span>&lt;span class="lnt">5
-&lt;/span>&lt;span class="lnt">6
-&lt;/span>&lt;span class="lnt">7
-&lt;/span>&lt;span class="lnt">8
-&lt;/span>&lt;span class="lnt">9
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-fallback" data-lang="fallback">&lt;span class="line">&lt;span class="cl">Raw samples (15s):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:00 ─ 10%
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:15 ─ 90% &amp;lt;--- spike
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:30 ─ 10%
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">Eval points (15s):
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:00 ─ 10%
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:15 ─ 90% &amp;lt;--- spike captured at exact moment
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">12:05:30 ─ 10%
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;p>Graph B — Subquery (&lt;code>max_over_time(cpu_percent[1m])[$__range:15s]&lt;/code>):
-&lt;img src="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b.png"
-width="2379"
-height="780"
-srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu6198737237259129012.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu17722494769505907227.png 1024w"
-loading="lazy"
-alt="Graph B"
-class="gallery-image"
-data-flex-grow="305"
-data-flex-basis="732px"
->&lt;/p>
-&lt;h4 id="why-its-sharp">Why it’s sharp
-&lt;/h4>&lt;p>Now you’re checking every 15 seconds, which lands exactly on the spike.&lt;/p>
-&lt;h4 id="how-subqueries-work">How Subqueries Work
-&lt;/h4>&lt;p>A subquery doesn’t change the inner function. It changes how often it’s evaluated.&lt;/p>
-&lt;ul>
-&lt;li>Inner expression: what each point means. Example: &lt;code>max_over_time(cpu[1m])&lt;/code>.&lt;/li>
-&lt;li>Outer &lt;code>[range:step]&lt;/code>: how densely to evaluate over the panel’s range. Example: &lt;code>[1h:15s]&lt;/code>.&lt;/li>
-&lt;/ul>
-&lt;h3 id="quick-grafana-tip">Quick Grafana Tip
-&lt;/h3>&lt;ul>
-&lt;li>
-&lt;p>Set &lt;strong>Min interval = scrape interval&lt;/strong> in your panel settings (e.g. 15s).&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Then use &lt;code>$__interval&lt;/code> or a subquery step close to your scrape interval.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>Example:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-promql" data-lang="promql">&lt;span class="line">&lt;span class="cl">&lt;span class="kr">max_over_time&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="nv">cpu_percent&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">1m&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">)&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="err">$__range:$__interval&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;/ul>
-&lt;p>That way, your dashboards won’t miss short bursts.&lt;/p>
-&lt;h3 id="takeaway">Takeaway
-&lt;/h3>&lt;p>If your dashboard feels too &lt;code>flat&lt;/code> and you suspect short spikes are being hidden, add a subquery with a fine resolution step:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-promql" data-lang="promql">&lt;span class="line">&lt;span class="cl">&lt;span class="kr">max_over_time&lt;/span>&lt;span class="o">(&lt;/span>&lt;span class="nv">cpu_percent&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="s">1m&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="o">)&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="err">$__range:&lt;/span>&lt;span class="s">15s&lt;/span>&lt;span class="p">]&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;p>That’s the difference between &lt;code>somewhere in that minute we spiked&lt;/code> and &lt;code>we spiked at 12:05:15&lt;/code>.&lt;/p></description></item><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction">Introduction
-&lt;/h4>&lt;p>Recently a colleague of mine shared a design doc in which he mentioned&lt;/p>
-&lt;blockquote>
-&lt;p>Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p>
-&lt;/blockquote>
-&lt;p>Now this was the first time I thought about &lt;code>callsite&lt;/code> vs &lt;code>logger&lt;/code> configuration. So here we go.&lt;/p>
-&lt;h4 id="what-is-callsite-configuration">What is Callsite Configuration?
-&lt;/h4>&lt;p>Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>Python Example&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Order processed successfully: &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">order_id&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>JVM Example&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">info&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Order processed successfully: {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">orderId&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;/ul>
-&lt;p>Callsite configuration allows you to specify details such as:&lt;/p>
-&lt;ul>
-&lt;li>Log level (e.g., &lt;code>info&lt;/code>, &lt;code>debug&lt;/code>).&lt;/li>
-&lt;li>Formatting of the message.&lt;/li>
-&lt;li>Whether the log message should even be emitted.&lt;/li>
-&lt;/ul>
-&lt;p>This method provides &lt;strong>fine-grained control&lt;/strong>, making it easier to:&lt;/p>
-&lt;ul>
-&lt;li>Adjust logging behavior for specific scenarios.&lt;/li>
-&lt;li>Suppress unnecessary logs from overwhelming your system.&lt;/li>
-&lt;li>Tailor logs for better debugging or performance insights.&lt;/li>
-&lt;/ul>
-&lt;p>Since callsite configuration operates at the source of the logging call, it takes precedence over broader logger settings.&lt;/p>
-&lt;h4 id="what-is-logger-configuration">What is Logger Configuration?
-&lt;/h4>&lt;p>Logger configuration, on the other hand, applies rules to all logs emitted by a specific logger. This is typically managed through centralized configuration files, such as:&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>&lt;code>sepia.yaml&lt;/code> for Python applications.&lt;/strong>&lt;/li>
-&lt;li>&lt;strong>&lt;code>logback.xml&lt;/code> for JVM-based applications.&lt;/strong>&lt;/li>
-&lt;/ul>
-&lt;p>Logger configuration is often used for third-party libraries like Kafka or Redis, where you can&amp;rsquo;t modify the logging calls directly. It allows you to:&lt;/p>
-&lt;ul>
-&lt;li>Set log levels globally for a library (e.g., suppressing verbose logs from Redis or Kafka).&lt;/li>
-&lt;li>Control output destinations (e.g., log files, console).&lt;/li>
-&lt;li>Apply global formatting.&lt;/li>
-&lt;/ul>
-&lt;p>While logger configuration is powerful, its broad scope can lead to excessive or insufficient logging. It&amp;rsquo;s most useful for managing logs in codebases outside your control.&lt;/p>
-&lt;h4 id="why-is-callsite-configuration-preferred">Why is Callsite Configuration Preferred?
-&lt;/h4>&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>Precision&lt;/strong>&lt;br>
-Callsite configuration lets you adjust logging behavior exactly where it matters. This ensures that logs are actionable and relevant, reducing noise.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Debugging Efficiency&lt;/strong>&lt;br>
-Fine-tuning logs at the source of an issue makes debugging faster. Developers can emit detailed logs for complex operations without cluttering the rest of the system.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Overrides Broad Rules&lt;/strong>&lt;br>
-Since callsite configurations take precedence, they allow developers to bypass general logger settings when specific adjustments are needed.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Third-Party Exceptions&lt;/strong>&lt;br>
-Logger configuration is a fallback for third-party libraries where callsite control isn’t possible. However, this should be the exception, not the norm.&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h4 id="example-combining-callsite-and-logger-configurations">Example: Combining Callsite and Logger Configurations
-&lt;/h4>&lt;h5 id="python-example">Python Example
-&lt;/h5>&lt;p>Imagine an application that uses Redis for caching. You might configure logs like this:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>Callsite Configuration&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">isEnabledFor&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">logging&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">DEBUG&lt;/span>&lt;span class="p">):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">logger&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">debug&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="sa">f&lt;/span>&lt;span class="s2">&amp;#34;Processing cache entry for key: &lt;/span>&lt;span class="si">{&lt;/span>&lt;span class="n">key&lt;/span>&lt;span class="si">}&lt;/span>&lt;span class="s2">&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Logger Configuration (&lt;code>sepia.yaml&lt;/code>)&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;span class="lnt">3
-&lt;/span>&lt;span class="lnt">4
-&lt;/span>&lt;span class="lnt">5
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">loggers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">redis&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">level&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">WARN&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">handlers&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>- &lt;span class="l">console&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;/ul>
-&lt;p>Here, callsite configuration manages log verbosity for your application code, while logger configuration ensures Redis’s internal logs don’t overwhelm the system.&lt;/p>
-&lt;h5 id="jvm-example">JVM Example
-&lt;/h5>&lt;p>Now imagine a Java application using Kafka for messaging. You might configure logs like this:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>Callsite Configuration&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt">1
-&lt;/span>&lt;span class="lnt">2
-&lt;/span>&lt;span class="lnt">3
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-java" data-lang="java">&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">isDebugEnabled&lt;/span>&lt;span class="p">())&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="p">{&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="n">logger&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="na">debug&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;Processing message with key: {}&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="n">messageKey&lt;/span>&lt;span class="p">);&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="p">}&lt;/span>&lt;span class="w">
-&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Logger Configuration (&lt;code>logback.xml&lt;/code>)&lt;/strong>:&lt;/p>
-&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-xml" data-lang="xml">&lt;span class="line">&lt;span class="cl">&lt;span class="nt">&amp;lt;configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;logger&lt;/span> &lt;span class="na">name=&lt;/span>&lt;span class="s">&amp;#34;org.apache.kafka&amp;#34;&lt;/span> &lt;span class="na">level=&lt;/span>&lt;span class="s">&amp;#34;WARN&amp;#34;&lt;/span>&lt;span class="nt">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;appender&lt;/span> &lt;span class="na">name=&lt;/span>&lt;span class="s">&amp;#34;CONSOLE&amp;#34;&lt;/span> &lt;span class="na">class=&lt;/span>&lt;span class="s">&amp;#34;ch.qos.logback.core.ConsoleAppender&amp;#34;&lt;/span>&lt;span class="nt">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;encoder&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;pattern&amp;gt;&lt;/span>%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n&lt;span class="nt">&amp;lt;/pattern&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/encoder&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/appender&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;root&lt;/span> &lt;span class="na">level=&lt;/span>&lt;span class="s">&amp;#34;INFO&amp;#34;&lt;/span>&lt;span class="nt">&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;appender-ref&lt;/span> &lt;span class="na">ref=&lt;/span>&lt;span class="s">&amp;#34;CONSOLE&amp;#34;&lt;/span>&lt;span class="nt">/&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nt">&amp;lt;/root&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nt">&amp;lt;/configuration&amp;gt;&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;/li>
-&lt;/ul>
-&lt;p>Here, callsite configuration provides fine-grained control for your Kafka-related logs, while logger configuration keeps Kafka’s verbose logs at a manageable level.&lt;/p>
-&lt;h4 id="best-practices-for-logging-configurations">Best Practices for Logging Configurations
-&lt;/h4>&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>Use Callsite Configurations for Your Code&lt;/strong>&lt;br>
-Apply logging settings directly in your application code to maintain control and precision.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Fallback to Logger Configurations for Third-Party Libraries&lt;/strong>&lt;br>
-Use logger configurations sparingly to manage logs from libraries or systems you can’t modify.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Document Logging Policies&lt;/strong>&lt;br>
-Maintain clear documentation on when to use callsite versus logger configurations to ensure consistency across your codebase.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Monitor and Adjust&lt;/strong>&lt;br>
-Periodically review logs to ensure they provide actionable insights without overwhelming storage or analysis tools.&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h4 id="resources">Resources
-&lt;/h4>&lt;ul>
-&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/logging.html" target="_blank" rel="noopener"
->Python Logging Documentation&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://logback.qos.ch/documentation.html" target="_blank" rel="noopener"
->Logback Documentation&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://12factor.net/logs" target="_blank" rel="noopener"
->12-Factor App: Logs&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://redis.io/docs/management/logging/" target="_blank" rel="noopener"
->Redis Logging Configuration Guide&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://kafka.apache.org/documentation.html#log-config" target="_blank" rel="noopener"
->Kafka Logging Configuration Guide&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Trade Offs made in o11y systems for high volume traffic</title><link>https://hashimcolombowala.com/p/tradeoffs/</link><pubDate>Fri, 29 Nov 2024 08:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/tradeoffs/</guid><description>&lt;h3 id="introduction">Introduction
-&lt;/h3>&lt;p>Phillip Carter&amp;rsquo;s blog &lt;a class="link" href="https://phillipcarter.dev/2024/09/14/the-observability-cap-theorem/" target="_blank" rel="noopener"
->&amp;ldquo;The Observability CAP Theorem&amp;rdquo;&lt;/a> explores the challenging balancing act of building and managing observability systems for high-traffic organizations, something which resonates with me. It explores the trade-offs between key features of observability—like cost, data detail, retention, and query efficiency—and how organizations have to prioritize based on their specific needs.&lt;/p>
-&lt;p>One big takeaway is that no system can excel at everything. For example, making data queries fast and efficient might mean sacrificing how much data you can store long-term or how detailed that data is.&lt;/p>
-&lt;p>Another point that stood out is how observability priorities change over time. What works today might need to evolve as your company grows, regulations change, or new tools emerge. With that in mind, I wanted to write some thoughts and takeaways from the blog—both to reflect on and as a guide for future decisions.&lt;/p>
-&lt;h3 id="properties-of-observability">Properties of Observability
-&lt;/h3>&lt;ul>
-&lt;li>Quick and efficient real-time querying of your data&lt;/li>
-&lt;li>Sufficient historical data availability per query, ranging from days to years&lt;/li>
-&lt;li>Comprehensive access to relevant data for a specific context&lt;/li>
-&lt;li>Cost-effective operations that align with budgetary expectations&lt;/li>
-&lt;/ul>
-&lt;h3 id="trade-offs-in-observability-systems">Trade-offs in Observability Systems
-&lt;/h3>&lt;p>Due to the challenges of managing large volumes of data, observability systems often make trade-offs to optimize for specific use cases or properties. These trade-offs include:&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>Comprehensive Metric Storage vs. Investigation Efficiency&lt;/strong>: Observability systems may prioritize the ability to cheaply store and observe metrics for extensive datasets, but this can come at the cost of making in-depth investigations into root causes more challenging.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Extensive Log Retention vs. Query Costs&lt;/strong>: Systems may enable the retention of all log data, even in a user-managed cloud environment, but this often involves incurring costs for each query or analysis performed.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Fast Trace Queries vs. Sampling Trade-offs&lt;/strong>: To enable fast querying and analysis of trace data, systems may rely on effective sampling techniques, potentially reducing the completeness of the data available for analysis.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Unified Data Ingestion vs. User Experience Fragmentation&lt;/strong>: Systems that allow all types of data to be sent to a single tool may result in inconsistent user experiences, depending on the type of data being analyzed.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Uniform Analysis Across Data Sources vs. Specialized Capabilities&lt;/strong>: Tools that offer consistent analysis and visualization for all data types may sacrifice advanced features optimized for specific kinds of telemetry data.&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;h3 id="prioritizing-observability-properties-for-companies-generating-high-volume-traffic">&lt;strong>Prioritizing Observability Properties for companies generating high volume traffic&lt;/strong>
-&lt;/h3>&lt;p>For experienced engineers in organizations, unsampled high volume data can be stored cost-effectively in long-term archives, priorities shift to emphasize real-time operational efficiency. The updated order of importance is as follows:&lt;/p>
-&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>Fast Queries for Incident Response&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Quick access to actionable insights during incidents is critical for minimizing downtime and addressing urgent issues.&lt;/li>
-&lt;li>Engineers value systems that enable rapid querying over recent, relevant data, as this directly impacts the ability to resolve problems efficiently.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Efficient Sampling and Aggregation&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Effective techniques like sampling, filtering, and aggregation allow teams to maintain representativeness while reducing data volume and cost.&lt;/li>
-&lt;li>This ensures that a smaller, relevant subset of data is readily available in fast-querying stores, while the rest can be archived for later use if needed.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Cost-Effective Compliance Data Retention&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Compliance data can be stored in low-cost archival systems (e.g., object storage like AWS S3 or similar solutions), minimizing its impact on operational observability costs.&lt;/li>
-&lt;li>Retrieval and processing can be deferred to meet regulatory requirements without affecting real-time observability needs.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Cost-Conscious Operations&lt;/strong>&lt;/p>
-&lt;ul>
-&lt;li>Observability costs must align with organizational budgets. Prioritizing cost-effective tools and strategies ensures observability delivers value without overextending financial resources.&lt;/li>
-&lt;li>Open-source solutions or tiered pricing models for commercial tools can help manage costs effectively.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ol>
-&lt;h3 id="conclusion">Conclusion
-&lt;/h3>&lt;p>Observability handles different types of data streams with unpredictable volumes. The trade-offs in observability systems are rooted in technical and organizational realities. The ultimate impact of these trade-offs often depends on an organization’s unique priorities, such as tolerance for incident duration, audit requirements, tool standardization, and budget constraints. These priorities can shift over time due to internal dynamics or external pressures.&lt;/p></description></item><item><title>Delta vs. Cumulative Metrics: Key Differences and System Preferences</title><link>https://hashimcolombowala.com/p/delta/</link><pubDate>Tue, 26 Nov 2024 06:49:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/delta/</guid><description>&lt;p>When it comes to collecting and analyzing metrics, one crucial decision is whether to use &lt;strong>delta&lt;/strong> or &lt;strong>cumulative&lt;/strong> metrics. These two approaches define how measurements are reported over time, and different metrics systems have their preferences based on their design and use cases. In this blog post, we’ll explore the difference between delta and cumulative metrics, examine their trade-offs, and highlight the systems that prefer one over the other.&lt;/p>
-&lt;h3 id="understanding-temporality">&lt;strong>Understanding Temporality&lt;/strong>
-&lt;/h3>&lt;p>Temporality refers to the way metrics are recorded and reported over time. Choosing the right temporality depends on your monitoring backend and analytical needs.&lt;/p>
-&lt;ul>
-&lt;li>
-&lt;p>&lt;strong>Cumulative Temporality&lt;/strong>: Reports the running total of a metric from the beginning of a measurement period. Suitable for tracking trends and totals. Example: Total bytes transferred over time (&lt;a class="link" href="https://grafana.com/blog/2024/11/25/how-to-use-opentelemetry-and-grafana-alloy-to-convert-delta-to-cumulative-at-scale/" target="_blank" rel="noopener"
->source&lt;/a>).&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Delta Temporality&lt;/strong>: Reports the difference in value for a metric since the last measurement. Ideal for real-time insights into changes over intervals. Example: Number of requests processed per interval (&lt;a class="link" href="https://opentelemetry.io/docs/concepts/metric-temporality/" target="_blank" rel="noopener"
->source&lt;/a>).&lt;/p>
-&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>OpenTelemetry&lt;/strong> provides flexibility by supporting both delta and cumulative metrics. This allows observability platforms to choose a model that aligns with their architecture (&lt;a class="link" href="https://opentelemetry.io/" target="_blank" rel="noopener"
->learn more&lt;/a>).&lt;/p>
-&lt;p>&lt;strong>Cumulative Metrics&lt;/strong>:&lt;/p>
-&lt;ul>
-&lt;li>These represent the total value accumulated from the start of the measurement up to the current point.&lt;/li>
-&lt;li>Every reported value includes all previous measurements, providing a running total.&lt;/li>
-&lt;li>Example:
-&lt;ul>
-&lt;li>At time t0: 5&lt;/li>
-&lt;li>At time t0+10s: 10&lt;/li>
-&lt;li>At time t0+20s: 20&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>&lt;a class="link" href="https://prometheus.io/docs/concepts/metric_types/#counter" target="_blank" rel="noopener"
->Prometheus documentation explains how cumulative counters are processed&lt;/a>.&lt;/li>
-&lt;li>&lt;strong>Use case&lt;/strong>: Cumulative metrics are ideal when you need a holistic view of total occurrences, such as the total number of requests or errors since the application started. They also help mitigate data loss because missed intervals can still be accounted for in subsequent reports.&lt;/li>
-&lt;/ul>
-&lt;p>&lt;strong>Delta Metrics&lt;/strong>:&lt;/p>
-&lt;ul>
-&lt;li>Delta metrics report only the change in value since the last measurement.&lt;/li>
-&lt;li>Each value reflects the increment or decrement during a specific reporting interval.&lt;/li>
-&lt;li>Example:
-&lt;ul>
-&lt;li>At time t0: 5&lt;/li>
-&lt;li>At time t0+10s: 5&lt;/li>
-&lt;li>At time t0+20s: 10&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>&lt;a class="link" href="https://opentelemetry.io/docs/reference/specification/metrics/data-model/#temporality" target="_blank" rel="noopener"
->Learn more about delta metrics and how they&amp;rsquo;re handled in OpenTelemetry&lt;/a>.&lt;/li>
-&lt;li>&lt;strong>Use case&lt;/strong>: Delta metrics are great for analyzing the rate of change over specific intervals. They’re especially useful in systems designed for high-frequency reporting where capturing incremental updates is more efficient.&lt;/li>
-&lt;/ul>
-&lt;h3 id="key-differences-between-delta-and-cumulative-metrics">&lt;strong>Key Differences Between Delta and Cumulative Metrics&lt;/strong>
-&lt;/h3>&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th style="text-align: left">Feature&lt;/th>
-&lt;th style="text-align: left">Cumulative Metrics&lt;/th>
-&lt;th style="text-align: left">Delta Metrics&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td style="text-align: left">&lt;strong>Representation&lt;/strong>&lt;/td>
-&lt;td style="text-align: left">Running total since the start&lt;/td>
-&lt;td style="text-align: left">Increment since the last report&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">&lt;strong>Data Loss Handling&lt;/strong>&lt;/td>
-&lt;td style="text-align: left">Resilient to missed intervals&lt;/td>
-&lt;td style="text-align: left">Data may be lost if intervals are missed&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">&lt;strong>Rate Calculation&lt;/strong>&lt;/td>
-&lt;td style="text-align: left">Requires backend calculations&lt;/td>
-&lt;td style="text-align: left">Directly provides the rate per interval&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">&lt;strong>Overhead&lt;/strong>&lt;/td>
-&lt;td style="text-align: left">More storage-intensive for long periods&lt;/td>
-&lt;td style="text-align: left">More efficient for short intervals&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;h3 id="metrics-systems-and-their-preferences">&lt;strong>Metrics Systems and Their Preferences&lt;/strong>
-&lt;/h3>&lt;h4 id="metrics-systems-using-cumulative-metrics">&lt;strong>Metrics Systems Using Cumulative Metrics&lt;/strong>
-&lt;/h4>&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>Prometheus&lt;/strong>: Cumulative metrics are the default. Counters track the total value over time, and functions like &lt;code>rate()&lt;/code> derive per-second rates.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Google Cloud Monitoring&lt;/strong>: Uses cumulative metrics to represent continuous totals, like the number of requests served.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Amazon CloudWatch&lt;/strong>: Designed around cumulative metrics, with built-in support for rate and delta calculations.&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h4 id="metrics-systems-using-delta-metrics">&lt;strong>Metrics Systems Using Delta Metrics&lt;/strong>
-&lt;/h4>&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>OpenTelemetry (OTLP)&lt;/strong>: Delta temporality is supported for certain metric types, allowing granular reporting over intervals.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>StatsD&lt;/strong>: Metrics like counters are reported as deltas, focusing on changes during the last interval for lightweight and efficient ingestion.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Datadog&lt;/strong>: Prefers delta metrics for some integrations to provide detailed visibility into per-second rates.&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h4 id="systems-supporting-both-delta-and-cumulative-metrics">&lt;strong>Systems Supporting Both Delta and Cumulative Metrics&lt;/strong>
-&lt;/h4>&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>OpenTelemetry&lt;/strong>: Provides flexibility by allowing users to configure metrics as either cumulative or delta.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Grafana Mimir and Cortex&lt;/strong>: While aligned with Prometheus&amp;rsquo; cumulative approach, these systems can process both formats.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Elastic Observability&lt;/strong>: Supports both, though cumulative metrics are more effective for long-term storage and trend analysis.&lt;/p>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Splunk Observability Cloud&lt;/strong>: Handles both delta and cumulative metrics, adapting to the data source requirements.&lt;/p>
-&lt;/li>
-&lt;/ol>
-&lt;h3 id="choosing-the-right-temporality">&lt;strong>Choosing the Right Temporality&lt;/strong>
-&lt;/h3>&lt;p>When deciding between delta and cumulative metrics, consider the following:&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>System Compatibility&lt;/strong>: Some systems (e.g., Prometheus) work better with cumulative metrics, while others (e.g., StatsD) prefer deltas.&lt;/li>
-&lt;li>&lt;strong>Data Loss Resilience&lt;/strong>: Cumulative metrics are more forgiving when intervals are missed.&lt;/li>
-&lt;li>&lt;strong>Analysis Needs&lt;/strong>: Use delta metrics for fine-grained interval analysis and cumulative metrics for overall trends and totals.&lt;/li>
-&lt;/ul>
-&lt;h3 id="further-reading-and-sources">&lt;strong>Further Reading and Sources&lt;/strong>
-&lt;/h3>&lt;ul>
-&lt;li>&lt;a class="link" href="https://opentelemetry.io/docs/reference/specification/metrics/data-model/#temporality" target="_blank" rel="noopener"
->OpenTelemetry Metric Data Model&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://prometheus.io/docs/concepts/metric_types/" target="_blank" rel="noopener"
->Prometheus Metric Types and Temporality&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://grafana.com/blog/2024/11/25/how-to-use-opentelemetry-and-grafana-alloy-to-convert-delta-to-cumulative-at-scale/" target="_blank" rel="noopener"
->Grafana Blog: Converting Delta to Cumulative Metrics&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://cloud.google.com/monitoring/docs/concepts/metric-types" target="_blank" rel="noopener"
->Google Cloud Monitoring and Metric Temporality&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Another Off-by-One (Mostly) Problem and Prometheus Counter Spikes</title><link>https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/</link><pubDate>Wed, 09 Oct 2024 21:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/</guid><description>&lt;h3 id="the-problem">The Problem
-&lt;/h3>&lt;p>We have observed several Prometheus counters showing false spikes (i.e., no matching increase in logs) that could correlate with nodes experiencing kernel panics and reboots.&lt;/p>
-&lt;h3 id="why-do-counters-spike">Why Do Counters Spike?
-&lt;/h3>&lt;p>In Prometheus, counters are expected to be monotonic: they can never decrease. The only time a counter timeseries can decrease is if it is reset to zero (e.g., when a container restarts).&lt;/p>
-&lt;p>The PromQL functions &lt;code>increase()&lt;/code> and &lt;code>rate()&lt;/code> have special logic to handle counter resets like this. If a counter has a value of 100 and the next data point is 99, it is assumed that the timeseries was first reset to 0 and then incremented 99 more times. This would cause a jump of 99 in most graphs.&lt;/p>
-&lt;p>&lt;img src="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph.png"
-width="1492"
-height="513"
-srcset="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu10347298088471375106.png 480w, https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu2622312036944885573.png 1024w"
-loading="lazy"
-alt="Graph"
-class="gallery-image"
-data-flex-grow="290"
-data-flex-basis="698px"
->&lt;/p>
-&lt;h3 id="background">Background
-&lt;/h3>&lt;ul>
-&lt;li>Our Python app is running on a Gunicorn server with multiple workers. This means multiple Python processes are serving requests because Python&amp;rsquo;s threading is restricted by the Global Interpreter Lock (GIL). Using multiprocessing is a good workaround.&lt;/li>
-&lt;li>The app is running on a pod on a Kubernetes node.&lt;/li>
-&lt;li>This app is instrumented with the Prometheus Python client in multiprocessing mode because each worker process runs independently and maintains separate metrics. Multiprocessing mode aggregates these metrics across all workers, ensuring that Prometheus scrapes produce accurate, unified data across the entire application, reflecting all requests handled by all workers.&lt;/li>
-&lt;li>In multiprocessing mode, each process writes its metrics to a separate &lt;a class="link" href="https://github.com/prometheus/client_python/blob/v0.12.0/prometheus_client/mmap_dict.py#L61-L69" target="_blank" rel="noopener"
->set of mmapped files&lt;/a>. On scrape, the exporter web server reads all of these files and merges them (i.e., counters from process A and B are summed). In our Kubernetes setup, these files are stored in &lt;code>/tmp&lt;/code>, which is mounted as a Kubernetes &lt;code>emptyDir&lt;/code> volume in most of our workloads.&lt;/li>
-&lt;/ul>
-&lt;h3 id="how-are-reboots-causing-spikes">How Are Reboots Causing Spikes?
-&lt;/h3>&lt;p>&lt;a class="link" href="https://kubernetes.io/docs/concepts/storage/volumes/#emptydir" target="_blank" rel="noopener"
->It turns out the &lt;code>emptyDir&lt;/code> mounted to &lt;code>/tmp&lt;/code> persists across container crashes&lt;/a>.&lt;/p>
-&lt;p>We were able to exec into a pod that experienced a node reboot and confirmed that the filesystem timestamps in the metric files predated the node reboot by several days.&lt;/p>
-&lt;p>&lt;img src="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell.png"
-width="1600"
-height="1303"
-srcset="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu13800648201417889505.png 480w, https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu6015823213156503612.png 1024w"
-loading="lazy"
-alt="Shell"
-class="gallery-image"
-data-flex-grow="122"
-data-flex-basis="294px"
->&lt;/p>
-&lt;p>&lt;strong>This means that after a reboot, pods are coming back with their old counter values&lt;/strong>. This would normally be fine as long as the node is not down for too long—the counter would just resume at the previous value and see no reset, as long as it hasn&amp;rsquo;t fallen out of the backend aggregator&amp;rsquo;s buffer (which has a 10-minute window in our setup).&lt;/p>
-&lt;p>In the backend, we drilled into the raw data points for the counter during one of the spikes and noticed it was incrementing and then decrementing by exactly one:&lt;/p>
-&lt;table>
-&lt;thead>
-&lt;tr>
-&lt;th style="text-align: left">TIMESTAMP&lt;/th>
-&lt;th style="text-align: left">VALUE&lt;/th>
-&lt;/tr>
-&lt;/thead>
-&lt;tbody>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:05:05.37-04:00&lt;/td>
-&lt;td style="text-align: left">72929&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:05:35.37-04:00&lt;/td>
-&lt;td style="text-align: left">72929&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:06:05.37-04:00&lt;/td>
-&lt;td style="text-align: left">72930&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:06:35.371-04:00&lt;/td>
-&lt;td style="text-align: left">72930&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:07:05.371-04:00&lt;/td>
-&lt;td style="text-align: left">72932&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:07:35.37-04:00&lt;/td>
-&lt;td style="text-align: left">72932&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:08:05.37-04:00&lt;/td>
-&lt;td style="text-align: left">72933&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:10:59.487-04:00&lt;/td>
-&lt;td style="text-align: left">72932 &lt;code>(decrease in counter)&lt;/code>&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:11:29.496-04:00&lt;/td>
-&lt;td style="text-align: left">72932&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:11:59.5-04:00&lt;/td>
-&lt;td style="text-align: left">72932&lt;/td>
-&lt;/tr>
-&lt;tr>
-&lt;td style="text-align: left">2024-09-23T05:12:29.489-04:00&lt;/td>
-&lt;td style="text-align: left">72932&lt;/td>
-&lt;/tr>
-&lt;/tbody>
-&lt;/table>
-&lt;h3 id="sequence-of-events">Sequence of Events
-&lt;/h3>&lt;ol>
-&lt;li>The application process increments a counter from &lt;em>n&lt;/em> to &lt;em>n+1&lt;/em> and writes the value to the mmapped file. This writes to the Linux kernel&amp;rsquo;s page cache (and is not immediately flushed to disk).&lt;/li>
-&lt;li>A scrape occurs. The multiprocess exporter opens and reads all files. The kernel sees some of the files are already in the page cache and skips reading them from disk. The scrape exports the counter as &lt;em>n+1&lt;/em>.&lt;/li>
-&lt;li>A kernel panic happens before the page cache is flushed to disk. The counter increment is lost.&lt;/li>
-&lt;li>The node encounters a kernel panic and reboots. Since the shutdown was not graceful, pods remain assigned to the node, so after startup containers are restarted with the same pod names, etc. Since the pod name is the same, the &lt;code>emptyDir&lt;/code> volume is reused, and the pod keeps the last counter value that was flushed to disk (&lt;em>n&lt;/em>).&lt;/li>
-&lt;li>A scrape occurs, and we export the counter with a value of &lt;em>n&lt;/em>. Prometheus queries run &lt;code>increase([..., n+1, n])&lt;/code>, which is interpreted as an increase of &lt;em>n&lt;/em>, causing a spike.&lt;/li>
-&lt;/ol>
-&lt;p>However, we have not attempted to reproduce this behavior to confirm this theory. Since this depends on the timing of the kernel writing the dirty page to disk and the kernel panic, it also makes sense that we would not see this behavior consistently with node restarts.&lt;/p>
-&lt;h3 id="how-can-we-fix-it">How Can We Fix It?
-&lt;/h3>&lt;p>While a fix for the node reboot issue has been identified, we can be more robust here. The simplest solution is to clear out the metric files in &lt;code>/tmp&lt;/code> on startup. Prometheus is designed for this—counter resets are normal.&lt;/p>
-&lt;ol>
-&lt;li>We could set the Prometheus multiproc directory to a memory-backed &lt;code>emptyDir&lt;/code> volume (&lt;code>emptyDir.medium: Memory&lt;/code>). This would naturally be cleared on node restart. This would make writes count against container memory instead.&lt;/li>
-&lt;li>We could add an init container that runs &lt;code>rm $PROMETHEUS_MULTIPROC_DIR/*.db&lt;/code> on startup. This might impact pod start time slightly but is the simplest solution.&lt;/li>
-&lt;li>We could make the application delete &lt;code>$PROMETHEUS_MULTIPROC_DIR/*.db&lt;/code> on startup.&lt;/li>
-&lt;/ol>
-&lt;h3 id="conclusion">Conclusion
-&lt;/h3>&lt;p>So here we have it. An off-by-one (decrement to the count) can lead to an increment of 99. Who would have thought.&lt;/p></description></item><item><title>Learning Generics by extending the prometheus python client</title><link>https://hashimcolombowala.com/p/learning-generics-by-extending-the-prometheus-python-client/</link><pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate><guid>https://hashimcolombowala.com/p/learning-generics-by-extending-the-prometheus-python-client/</guid><description>&lt;p>Imagine you&amp;rsquo;re writing a library to extend the &lt;a class="link" href="https://github.com/prometheus/client_python" target="_blank" rel="noopener"
->Prometheus Python client&lt;/a> and need to add some &lt;strong>dynamic labels&lt;/strong> specific to the environment. Ideally, you would add most of your labels at the &lt;strong>collector&lt;/strong> end to avoid writing extensions, but there are situations where injecting dynamic labels is unavoidable. For these cases, you might want to extend the client in a structured and type-safe manner.&lt;/p>
-&lt;h2 id="what-are-generics-and-why-do-we-use-them-in-python">What Are Generics? And Why Do We Use Them in Python?
-&lt;/h2>&lt;p>Generics are a feature commonly associated with statically typed languages. They allow you to create code that works with a variety of types while maintaining type safety. By declaring &amp;ldquo;placeholder types,&amp;rdquo; generics help us write higher-level patterns that simplify declarations and reduce redundancy.&lt;/p>
-&lt;p>While Python doesn’t enforce type checking at runtime (as long as the code is syntactically valid, it will run), tools like &lt;strong>type hints&lt;/strong> and third-party linters like &lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
->mypy&lt;/a> bring the safety of statically typed languages to Python. These tools enable developers to:&lt;/p>
-&lt;ul>
-&lt;li>Catch type errors early.&lt;/li>
-&lt;li>Improve code readability.&lt;/li>
-&lt;li>Document function and class behavior clearly.&lt;/li>
-&lt;/ul>
-&lt;h3 id="generics-in-python">Generics in Python
-&lt;/h3>&lt;p>Generics in Python are brought to life using &lt;strong>type hints&lt;/strong> from the &lt;a class="link" href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener"
->&lt;code>typing&lt;/code>&lt;/a> module. In essence, generics in Python are a &lt;strong>programming style&lt;/strong> adapted from statically typed languages to achieve similar benefits in Python&amp;rsquo;s dynamic environment.&lt;/p>
-&lt;h2 id="extending-the-prometheus-python-client-with-generics">Extending the Prometheus Python Client with Generics
-&lt;/h2>&lt;p>Below is an example of extending the Prometheus client to support dynamic labels using generics. This approach makes it easier to manage labels dynamically while preserving type safety.&lt;/p>
-&lt;h3 id="example-code-with-comments">Example Code with Comments
-&lt;/h3>&lt;div class="highlight">&lt;div class="chroma">
-&lt;table class="lntable">&lt;tr>&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code>&lt;span class="lnt"> 1
-&lt;/span>&lt;span class="lnt"> 2
-&lt;/span>&lt;span class="lnt"> 3
-&lt;/span>&lt;span class="lnt"> 4
-&lt;/span>&lt;span class="lnt"> 5
-&lt;/span>&lt;span class="lnt"> 6
-&lt;/span>&lt;span class="lnt"> 7
-&lt;/span>&lt;span class="lnt"> 8
-&lt;/span>&lt;span class="lnt"> 9
-&lt;/span>&lt;span class="lnt">10
-&lt;/span>&lt;span class="lnt">11
-&lt;/span>&lt;span class="lnt">12
-&lt;/span>&lt;span class="lnt">13
-&lt;/span>&lt;span class="lnt">14
-&lt;/span>&lt;span class="lnt">15
-&lt;/span>&lt;span class="lnt">16
-&lt;/span>&lt;span class="lnt">17
-&lt;/span>&lt;span class="lnt">18
-&lt;/span>&lt;span class="lnt">19
-&lt;/span>&lt;span class="lnt">20
-&lt;/span>&lt;span class="lnt">21
-&lt;/span>&lt;span class="lnt">22
-&lt;/span>&lt;span class="lnt">23
-&lt;/span>&lt;span class="lnt">24
-&lt;/span>&lt;span class="lnt">25
-&lt;/span>&lt;span class="lnt">26
-&lt;/span>&lt;span class="lnt">27
-&lt;/span>&lt;span class="lnt">28
-&lt;/span>&lt;span class="lnt">29
-&lt;/span>&lt;span class="lnt">30
-&lt;/span>&lt;span class="lnt">31
-&lt;/span>&lt;span class="lnt">32
-&lt;/span>&lt;span class="lnt">33
-&lt;/span>&lt;span class="lnt">34
-&lt;/span>&lt;/code>&lt;/pre>&lt;/td>
-&lt;td class="lntd">
-&lt;pre tabindex="0" class="chroma">&lt;code class="language-python" data-lang="python">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">prometheus_client&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Counter&lt;/span> &lt;span class="k">as&lt;/span> &lt;span class="n">_PromCounter&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">prometheus_client&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">Histogram&lt;/span> &lt;span class="k">as&lt;/span> &lt;span class="n">_PromHistogram&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kn">from&lt;/span> &lt;span class="nn">typing&lt;/span> &lt;span class="kn">import&lt;/span> &lt;span class="n">TypeVar&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Generic&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Iterable&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">Dict&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">cast&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Create a new generic type, bound to two specific Prometheus metric types&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="n">_MetricsTypeT&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">TypeVar&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s1">&amp;#39;_MetricsTypeT&amp;#39;&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">_PromCounter&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">_PromHistogram&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Base class of type generic; the child class will pass in the type&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">_MetricsBase&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">Generic&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">]):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">label_names&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Iterable&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">str&lt;/span>&lt;span class="p">]):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Default labels dynamically fetched (e.g., environment-specific)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Dict&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">str&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">get_default_labels&lt;/span>&lt;span class="p">()&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">all_label_names&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">list&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="nb">list&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">label_names&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">+&lt;/span> &lt;span class="nb">list&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">keys&lt;/span>&lt;span class="p">())&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">_MetricsTypeT&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="kc">None&lt;/span> &lt;span class="c1"># Parent metric instance&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Provides dynamic label functionality&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="nf">labels&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="n">labelargs&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">**&lt;/span>&lt;span class="n">labelkwargs&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">-&amp;gt;&lt;/span> &lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="n">labelargs&lt;/span>&lt;span class="p">:&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Append default labels to positional arguments&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">labelargs&lt;/span> &lt;span class="o">+=&lt;/span> &lt;span class="nb">tuple&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">values&lt;/span>&lt;span class="p">())&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">cast&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">labels&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="n">labelargs&lt;/span>&lt;span class="p">))&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Merge default labels into keyword arguments&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">labelkwargs&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">update&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">default_labels&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="n">cast&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">_MetricsTypeT&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">labels&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">**&lt;/span>&lt;span class="n">labelkwargs&lt;/span>&lt;span class="p">))&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Child class passing a specific type (_PromCounter) to the base class via generics&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">class&lt;/span> &lt;span class="nc">Counter&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">_MetricsBase&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="n">_PromCounter&lt;/span>&lt;span class="p">]):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">def&lt;/span> &lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">name&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">str&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">documentation&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nb">str&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">labelnames&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="n">Iterable&lt;/span>&lt;span class="p">[&lt;/span>&lt;span class="nb">str&lt;/span>&lt;span class="p">]&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="p">()):&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">super&lt;/span>&lt;span class="p">()&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="fm">__init__&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="n">label_names&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">labelnames&lt;/span>&lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1"># Create the actual Prometheus Counter metric&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">_parent_metric&lt;/span> &lt;span class="o">=&lt;/span> &lt;span class="n">_PromCounter&lt;/span>&lt;span class="p">(&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="n">name&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">documentation&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="n">documentation&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="n">labelnames&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="bp">self&lt;/span>&lt;span class="o">.&lt;/span>&lt;span class="n">all_label_names&lt;/span>
-&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">)&lt;/span>
-&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/td>&lt;/tr>&lt;/table>
-&lt;/div>
-&lt;/div>&lt;h3 id="key-points">Key Points:
-&lt;/h3>&lt;ol>
-&lt;li>
-&lt;p>&lt;strong>Generics in Base Class&lt;/strong>:&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>_MetricsBase&lt;/code> accepts a generic type (&lt;code>_MetricsTypeT&lt;/code>), which can be either a Prometheus &lt;code>Counter&lt;/code> or &lt;code>Histogram&lt;/code>.&lt;/li>
-&lt;li>This ensures type safety across methods like &lt;code>labels()&lt;/code>.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Dynamic Label Handling&lt;/strong>:&lt;/p>
-&lt;ul>
-&lt;li>&lt;code>default_labels&lt;/code> are fetched dynamically, e.g., from the environment or configuration.&lt;/li>
-&lt;li>These labels are automatically added to the user-provided labels when creating or using metrics.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;li>
-&lt;p>&lt;strong>Child Classes&lt;/strong>:&lt;/p>
-&lt;ul>
-&lt;li>Child classes (&lt;code>Counter&lt;/code>, &lt;code>Histogram&lt;/code>) specify the type of Prometheus metric they represent.&lt;/li>
-&lt;li>They inherit the generic behavior while remaining strongly typed.&lt;/li>
-&lt;/ul>
-&lt;/li>
-&lt;/ol>
-&lt;h2 id="the-final-word">The Final Word
-&lt;/h2>&lt;p>In my project, I used generics to type my base class &lt;code>_MetricsBase&lt;/code>. This class accepts a &lt;strong>generic type&lt;/strong> that is passed in by its child classes (&lt;code>Counter&lt;/code>, &lt;code>Histogram&lt;/code>). The &lt;code>labels()&lt;/code> method dynamically appends environment-specific labels while ensuring type safety. By leveraging &lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
->mypy&lt;/a> or similar tools, I achieved many of the benefits of statically typed languages in Python.&lt;/p>
-&lt;h3 id="complete-code">Complete Code
-&lt;/h3>&lt;p>You can find the complete code for this example &lt;a class="link" href="https://github.com/hash167/prom_client_generics/" target="_blank" rel="noopener"
->here&lt;/a>.&lt;/p>
-&lt;h2 id="further-reading">Further Reading
-&lt;/h2>&lt;ul>
-&lt;li>&lt;a class="link" href="https://github.com/prometheus/client_python" target="_blank" rel="noopener"
->Prometheus Python Client Library&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://docs.python.org/3/library/typing.html" target="_blank" rel="noopener"
->Python Typing Documentation&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://peps.python.org/pep-0484/#generic-classes" target="_blank" rel="noopener"
->Generics in Python&lt;/a>&lt;/li>
-&lt;li>&lt;a class="link" href="https://github.com/python/mypy" target="_blank" rel="noopener"
->mypy Type Checker&lt;/a>&lt;/li>
-&lt;/ul></description></item><item><title>Designing a metrics system notes</title><link>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</link><pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate><guid>https://hashimcolombowala.com/p/designing-a-metrics-system-notes/</guid><description>&lt;p>To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p>
-&lt;h3 id="requirements-for-a-metrics-system">Requirements for a Metrics System
-&lt;/h3>&lt;ul>
-&lt;li>&lt;strong>Multidimensional Data Model&lt;/strong>: The metrics system should support a multidimensional data model that can be sliced and diced along different dimensions as defined by the service (e.g., instance, service, endpoint, method).&lt;/li>
-&lt;li>&lt;strong>Operational Simplicity&lt;/strong>: The system should be easy to operate and maintain, minimizing overhead and complexity.&lt;/li>
-&lt;li>&lt;strong>Scalable Data Collection&lt;/strong>: The system must support scalable data collection and offer a decentralized architecture, allowing independent teams to set up their own monitoring servers.&lt;/li>
-&lt;li>&lt;strong>Powerful Query Language&lt;/strong>: A powerful query language should be available to leverage the data model for alerting and graphing, enabling precise insights into system performance.&lt;/li>
-&lt;/ul>
-&lt;h3 id="client-libraries">Client Libraries
-&lt;/h3>&lt;p>Client libraries play an essential role in the metrics system:&lt;/p>
-&lt;ul>
-&lt;li>They handle details like thread safety, bookkeeping, and producing the Prometheus text exposition format in response to HTTP requests.&lt;/li>
-&lt;li>Since metrics-based monitoring doesn&amp;rsquo;t track individual events, client library memory usage doesn&amp;rsquo;t increase with more events. Instead, memory usage depends on the number of metrics being tracked.&lt;/li>
-&lt;/ul>
-&lt;h3 id="instrumentation">Instrumentation
-&lt;/h3>&lt;p>To effectively monitor different types of services, appropriate instrumentation methods must be used. Here are three common types of services and how they should be instrumented:&lt;/p>
-&lt;h4 id="online-serving-systems">Online-Serving Systems
-&lt;/h4>&lt;p>For online-serving systems, such as web services, the &lt;strong>RED Method&lt;/strong> is used. This method involves tracking:&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>Requests&lt;/strong>: The count of incoming requests.&lt;/li>
-&lt;li>&lt;strong>Errors&lt;/strong>: The count of failed requests.&lt;/li>
-&lt;li>&lt;strong>Duration&lt;/strong>: The latency or response time of requests.&lt;/li>
-&lt;/ul>
-&lt;p>For example, a cache might track these metrics for both overall performance and for cache misses that need to be recalculated or fetched from a backend.&lt;/p>
-&lt;h4 id="offline-serving-systems">Offline-Serving Systems
-&lt;/h4>&lt;p>Offline-serving systems, such as log processors, usually batch up work and consist of multiple stages in a pipeline with queues in between. These systems run continuously, which distinguishes them from batch jobs. The &lt;strong>USE Method&lt;/strong> is used for these types of systems:&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>Utilization&lt;/strong>: How much of the system&amp;rsquo;s capacity is in use (e.g., how much work is in progress).&lt;/li>
-&lt;li>&lt;strong>Saturation&lt;/strong>: The amount of queued work and how much work is currently being processed.&lt;/li>
-&lt;li>&lt;strong>Errors&lt;/strong>: Any errors encountered during processing.&lt;/li>
-&lt;/ul>
-&lt;h4 id="batch-jobs">Batch Jobs
-&lt;/h4>&lt;p>Batch jobs are processes that run at scheduled intervals. The key metrics for batch jobs include:&lt;/p>
-&lt;ul>
-&lt;li>&lt;strong>Run Time&lt;/strong>: How long it took for the job to complete.&lt;/li>
-&lt;li>&lt;strong>Stage Duration&lt;/strong>: How long each stage of the job took to complete.&lt;/li>
-&lt;li>&lt;strong>Success Time&lt;/strong>: The time at which the job last succeeded.&lt;/li>
-&lt;/ul>
-&lt;p>Alerts can be set for when the job hasn&amp;rsquo;t succeeded within a certain time frame.&lt;/p>
-&lt;p>&lt;strong>Idempotency for Batch Jobs&lt;/strong>: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p></description></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Observability on Hashim Colombowala</title>
+        <link>http://localhost:1313/categories/observability/</link>
+        <description>Recent content in Observability on Hashim Colombowala</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Sat, 06 Sep 2025 00:00:00 -0700</lastBuildDate><atom:link href="http://localhost:1313/categories/observability/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>How to Use Proper Resolution Windows in PromQL to Catch Short Spikes</title>
+        <link>http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</link>
+        <pubDate>Sat, 06 Sep 2025 00:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</guid>
+        <description>&lt;p&gt;Let’s look at a real example: a short CPU spike that can appear blurred on your dashboard if your query resolution isn’t set properly.&lt;/p&gt;
+&lt;h3 id=&#34;the-scenario&#34;&gt;The Scenario
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Panel range: &lt;strong&gt;12:00–01:00 (1h)&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Scrape interval: &lt;strong&gt;15s&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;Metric: &lt;code&gt;cpu_percent&lt;/code&gt; (gauge)&lt;/li&gt;
+&lt;li&gt;Event: &lt;strong&gt;CPU spikes to 90% for 20 seconds&lt;/strong&gt; at &lt;strong&gt;12:05:15 → 12:05:35&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Prometheus scrapes every 15s, so the raw samples are:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;Time&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;CPU%&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;12:05:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;10&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;12:05:15&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;90&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;12:05:30&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;10&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;p&gt;The data is there but what how accurate your graph is depends on your query.&lt;/p&gt;
+&lt;h3 id=&#34;baseline-query-blurred&#34;&gt;Baseline Query (Blurred)
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;On a 1h panel, Grafana (or other vendor equivalent) dashboards defaults to ~1m resolution. Prometheus only evaluates the query at 12:05, 12:06, 12:07, …&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;At 12:05 → window [12:04–12:05] → max = 10&lt;/li&gt;
+&lt;li&gt;At 12:06 → window [12:05–12:06] → includes spike → max = 90&lt;/li&gt;
+&lt;li&gt;At 12:07 → window [12:06–12:07] → spike gone → max = 10&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;The spike appears, but it’s &lt;strong&gt;blurred into the “12:05–12:06” bucket&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Timeline:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Raw samples (15s):
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:00 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:15 ─ 90%   &amp;lt;--- spike
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:30 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Eval points (1m):
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:06 ─ 90%   &amp;lt;--- spike blurred into 1 minute bucket
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:07 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Graph A — Baseline (&lt;code&gt;max_over_time(cpu_percent[1m])&lt;/code&gt;):
+&lt;img src=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a.png&#34;
+	width=&#34;2379&#34;
+	height=&#34;780&#34;
+	srcset=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu1620491900664182322.png 480w, http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu10200452981611888843.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Graph A&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;305&#34;
+		data-flex-basis=&#34;732px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;why-it-blurs&#34;&gt;Why it blurs
+&lt;/h3&gt;&lt;p&gt;This is like checking your watch once a minute. If something happens at second 15, you’ll only know it happened somewhere in that minute.&lt;/p&gt;
+&lt;h3 id=&#34;subquery-with-__range15s-sharp&#34;&gt;Subquery with &lt;code&gt;$__range:15s&lt;/code&gt; (Sharp)
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;$__range:&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;15s&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
+&lt;li&gt;Inner &lt;code&gt;[1m]&lt;/code&gt;: look back 1 minute and take the max.&lt;/li&gt;
+&lt;li&gt;Outer &lt;code&gt;[$__range:15s]&lt;/code&gt;: recompute that inner max &lt;strong&gt;every 15 seconds&lt;/strong&gt; across the full 1h panel.&lt;/li&gt;
+&lt;li&gt;Now evaluations happen at 12:05:00, 12:05:15, 12:05:30, …&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That means the spike is captured &lt;strong&gt;exactly at 12:05:15&lt;/strong&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Timeline:&lt;/strong&gt;&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Raw samples (15s):
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:00 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:15 ─ 90%   &amp;lt;--- spike
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:30 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Eval points (15s):
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:00 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:15 ─ 90%   &amp;lt;--- spike captured at exact moment
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:30 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Graph B — Subquery (&lt;code&gt;max_over_time(cpu_percent[1m])[$__range:15s]&lt;/code&gt;):
+&lt;img src=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b.png&#34;
+	width=&#34;2379&#34;
+	height=&#34;780&#34;
+	srcset=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu6198737237259129012.png 480w, http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu17722494769505907227.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Graph B&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;305&#34;
+		data-flex-basis=&#34;732px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h4 id=&#34;why-its-sharp&#34;&gt;Why it’s sharp
+&lt;/h4&gt;&lt;p&gt;Now you’re checking every 15 seconds, which lands exactly on the spike.&lt;/p&gt;
+&lt;h4 id=&#34;how-subqueries-work&#34;&gt;How Subqueries Work
+&lt;/h4&gt;&lt;p&gt;A subquery doesn’t change the inner function. It changes how often it’s evaluated.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Inner expression: what each point means. Example: &lt;code&gt;max_over_time(cpu[1m])&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;Outer &lt;code&gt;[range:step]&lt;/code&gt;: how densely to evaluate over the panel’s range. Example: &lt;code&gt;[1h:15s]&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;quick-grafana-tip&#34;&gt;Quick Grafana Tip
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;Set &lt;strong&gt;Min interval = scrape interval&lt;/strong&gt; in your panel settings (e.g. 15s).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Then use &lt;code&gt;$__interval&lt;/code&gt; or a subquery step close to your scrape interval.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;Example:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;$__range:$__interval&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;That way, your dashboards won’t miss short bursts.&lt;/p&gt;
+&lt;h3 id=&#34;takeaway&#34;&gt;Takeaway
+&lt;/h3&gt;&lt;p&gt;If your dashboard feels too &lt;code&gt;flat&lt;/code&gt; and you suspect short spikes are being hidden, add a subquery with a fine resolution step:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;$__range:&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;15s&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That’s the difference between &lt;code&gt;somewhere in that minute we spiked&lt;/code&gt; and &lt;code&gt;we spiked at 12:05:15&lt;/code&gt;.&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title>
+        <link>http://localhost:1313/p/callsite/</link>
+        <pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/p/callsite/</guid>
+        <description>&lt;h4 id=&#34;introduction&#34;&gt;Introduction
+&lt;/h4&gt;&lt;p&gt;Recently a colleague of mine shared a design doc in which he mentioned&lt;/p&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;p&gt;Now this was the first time I thought about &lt;code&gt;callsite&lt;/code&gt; vs &lt;code&gt;logger&lt;/code&gt; configuration. So here we go.&lt;/p&gt;
+&lt;h4 id=&#34;what-is-callsite-configuration&#34;&gt;What is Callsite Configuration?
+&lt;/h4&gt;&lt;p&gt;Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Python Example&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;logger&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;info&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;sa&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Order processed successfully: &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;order_id&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;JVM Example&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;logger&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;info&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Order processed successfully: {}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;orderId&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Callsite configuration allows you to specify details such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Log level (e.g., &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;debug&lt;/code&gt;).&lt;/li&gt;
+&lt;li&gt;Formatting of the message.&lt;/li&gt;
+&lt;li&gt;Whether the log message should even be emitted.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;This method provides &lt;strong&gt;fine-grained control&lt;/strong&gt;, making it easier to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Adjust logging behavior for specific scenarios.&lt;/li&gt;
+&lt;li&gt;Suppress unnecessary logs from overwhelming your system.&lt;/li&gt;
+&lt;li&gt;Tailor logs for better debugging or performance insights.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Since callsite configuration operates at the source of the logging call, it takes precedence over broader logger settings.&lt;/p&gt;
+&lt;h4 id=&#34;what-is-logger-configuration&#34;&gt;What is Logger Configuration?
+&lt;/h4&gt;&lt;p&gt;Logger configuration, on the other hand, applies rules to all logs emitted by a specific logger. This is typically managed through centralized configuration files, such as:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;sepia.yaml&lt;/code&gt; for Python applications.&lt;/strong&gt;&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;&lt;code&gt;logback.xml&lt;/code&gt; for JVM-based applications.&lt;/strong&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Logger configuration is often used for third-party libraries like Kafka or Redis, where you can&amp;rsquo;t modify the logging calls directly. It allows you to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Set log levels globally for a library (e.g., suppressing verbose logs from Redis or Kafka).&lt;/li&gt;
+&lt;li&gt;Control output destinations (e.g., log files, console).&lt;/li&gt;
+&lt;li&gt;Apply global formatting.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;While logger configuration is powerful, its broad scope can lead to excessive or insufficient logging. It&amp;rsquo;s most useful for managing logs in codebases outside your control.&lt;/p&gt;
+&lt;h4 id=&#34;why-is-callsite-configuration-preferred&#34;&gt;Why is Callsite Configuration Preferred?
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Precision&lt;/strong&gt;&lt;br&gt;
+Callsite configuration lets you adjust logging behavior exactly where it matters. This ensures that logs are actionable and relevant, reducing noise.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Debugging Efficiency&lt;/strong&gt;&lt;br&gt;
+Fine-tuning logs at the source of an issue makes debugging faster. Developers can emit detailed logs for complex operations without cluttering the rest of the system.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Overrides Broad Rules&lt;/strong&gt;&lt;br&gt;
+Since callsite configurations take precedence, they allow developers to bypass general logger settings when specific adjustments are needed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Third-Party Exceptions&lt;/strong&gt;&lt;br&gt;
+Logger configuration is a fallback for third-party libraries where callsite control isn’t possible. However, this should be the exception, not the norm.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;example-combining-callsite-and-logger-configurations&#34;&gt;Example: Combining Callsite and Logger Configurations
+&lt;/h4&gt;&lt;h5 id=&#34;python-example&#34;&gt;Python Example
+&lt;/h5&gt;&lt;p&gt;Imagine an application that uses Redis for caching. You might configure logs like this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Callsite Configuration&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;logger&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;isEnabledFor&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;logging&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;DEBUG&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;n&#34;&gt;logger&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;debug&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;sa&#34;&gt;f&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;Processing cache entry for key: &lt;/span&gt;&lt;span class=&#34;si&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;key&lt;/span&gt;&lt;span class=&#34;si&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;s2&#34;&gt;&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Logger Configuration (&lt;code&gt;sepia.yaml&lt;/code&gt;)&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-yaml&#34; data-lang=&#34;yaml&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;loggers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;  &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;redis&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;level&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;l&#34;&gt;WARN&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;handlers&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;      &lt;/span&gt;- &lt;span class=&#34;l&#34;&gt;console&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here, callsite configuration manages log verbosity for your application code, while logger configuration ensures Redis’s internal logs don’t overwhelm the system.&lt;/p&gt;
+&lt;h5 id=&#34;jvm-example&#34;&gt;JVM Example
+&lt;/h5&gt;&lt;p&gt;Now imagine a Java application using Kafka for messaging. You might configure logs like this:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Callsite Configuration&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-java&#34; data-lang=&#34;java&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;if&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;logger&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;isDebugEnabled&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;())&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;p&#34;&gt;{&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;    &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;logger&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;na&#34;&gt;debug&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;Processing message with key: {}&amp;#34;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt;&lt;span class=&#34;w&#34;&gt; &lt;/span&gt;&lt;span class=&#34;n&#34;&gt;messageKey&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;);&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;w&#34;&gt;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Logger Configuration (&lt;code&gt;logback.xml&lt;/code&gt;)&lt;/strong&gt;:&lt;/p&gt;
+&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-xml&#34; data-lang=&#34;xml&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;&amp;lt;configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;logger&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;name=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;org.apache.kafka&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;level=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;WARN&amp;#34;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;appender&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;name=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;CONSOLE&amp;#34;&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;class=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;ch.qos.logback.core.ConsoleAppender&amp;#34;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nt&#34;&gt;&amp;lt;encoder&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;nt&#34;&gt;&amp;lt;pattern&amp;gt;&lt;/span&gt;%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n&lt;span class=&#34;nt&#34;&gt;&amp;lt;/pattern&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nt&#34;&gt;&amp;lt;/encoder&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;/appender&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;root&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;level=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;INFO&amp;#34;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nt&#34;&gt;&amp;lt;appender-ref&lt;/span&gt; &lt;span class=&#34;na&#34;&gt;ref=&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;&amp;#34;CONSOLE&amp;#34;&lt;/span&gt;&lt;span class=&#34;nt&#34;&gt;/&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;nt&#34;&gt;&amp;lt;/root&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;nt&#34;&gt;&amp;lt;/configuration&amp;gt;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Here, callsite configuration provides fine-grained control for your Kafka-related logs, while logger configuration keeps Kafka’s verbose logs at a manageable level.&lt;/p&gt;
+&lt;h4 id=&#34;best-practices-for-logging-configurations&#34;&gt;Best Practices for Logging Configurations
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Use Callsite Configurations for Your Code&lt;/strong&gt;&lt;br&gt;
+Apply logging settings directly in your application code to maintain control and precision.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fallback to Logger Configurations for Third-Party Libraries&lt;/strong&gt;&lt;br&gt;
+Use logger configurations sparingly to manage logs from libraries or systems you can’t modify.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Document Logging Policies&lt;/strong&gt;&lt;br&gt;
+Maintain clear documentation on when to use callsite versus logger configurations to ensure consistency across your codebase.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Monitor and Adjust&lt;/strong&gt;&lt;br&gt;
+Periodically review logs to ensure they provide actionable insights without overwhelming storage or analysis tools.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;resources&#34;&gt;Resources
+&lt;/h4&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://docs.python.org/3/library/logging.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Python Logging Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://logback.qos.ch/documentation.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Logback Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://12factor.net/logs&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;12-Factor App: Logs&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://redis.io/docs/management/logging/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Redis Logging Configuration Guide&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://kafka.apache.org/documentation.html#log-config&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Kafka Logging Configuration Guide&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>Trade Offs made in o11y systems for high volume traffic</title>
+        <link>http://localhost:1313/p/tradeoffs/</link>
+        <pubDate>Fri, 29 Nov 2024 08:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/p/tradeoffs/</guid>
+        <description>&lt;h3 id=&#34;introduction&#34;&gt;Introduction
+&lt;/h3&gt;&lt;p&gt;Phillip Carter&amp;rsquo;s blog &lt;a class=&#34;link&#34; href=&#34;https://phillipcarter.dev/2024/09/14/the-observability-cap-theorem/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&amp;ldquo;The Observability CAP Theorem&amp;rdquo;&lt;/a&gt; explores the challenging balancing act of building and managing observability systems for high-traffic organizations, something which resonates with me. It explores the trade-offs between key features of observability—like cost, data detail, retention, and query efficiency—and how organizations have to prioritize based on their specific needs.&lt;/p&gt;
+&lt;p&gt;One big takeaway is that no system can excel at everything. For example, making data queries fast and efficient might mean sacrificing how much data you can store long-term or how detailed that data is.&lt;/p&gt;
+&lt;p&gt;Another point that stood out is how observability priorities change over time. What works today might need to evolve as your company grows, regulations change, or new tools emerge. With that in mind, I wanted to write some thoughts and takeaways from the blog—both to reflect on and as a guide for future decisions.&lt;/p&gt;
+&lt;h3 id=&#34;properties-of-observability&#34;&gt;Properties of Observability
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Quick and efficient real-time querying of your data&lt;/li&gt;
+&lt;li&gt;Sufficient historical data availability per query, ranging from days to years&lt;/li&gt;
+&lt;li&gt;Comprehensive access to relevant data for a specific context&lt;/li&gt;
+&lt;li&gt;Cost-effective operations that align with budgetary expectations&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;trade-offs-in-observability-systems&#34;&gt;Trade-offs in Observability Systems
+&lt;/h3&gt;&lt;p&gt;Due to the challenges of managing large volumes of data, observability systems often make trade-offs to optimize for specific use cases or properties. These trade-offs include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Comprehensive Metric Storage vs. Investigation Efficiency&lt;/strong&gt;: Observability systems may prioritize the ability to cheaply store and observe metrics for extensive datasets, but this can come at the cost of making in-depth investigations into root causes more challenging.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Extensive Log Retention vs. Query Costs&lt;/strong&gt;: Systems may enable the retention of all log data, even in a user-managed cloud environment, but this often involves incurring costs for each query or analysis performed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fast Trace Queries vs. Sampling Trade-offs&lt;/strong&gt;: To enable fast querying and analysis of trace data, systems may rely on effective sampling techniques, potentially reducing the completeness of the data available for analysis.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Unified Data Ingestion vs. User Experience Fragmentation&lt;/strong&gt;: Systems that allow all types of data to be sent to a single tool may result in inconsistent user experiences, depending on the type of data being analyzed.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Uniform Analysis Across Data Sources vs. Specialized Capabilities&lt;/strong&gt;: Tools that offer consistent analysis and visualization for all data types may sacrifice advanced features optimized for specific kinds of telemetry data.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;prioritizing-observability-properties-for-companies-generating-high-volume-traffic&#34;&gt;&lt;strong&gt;Prioritizing Observability Properties for companies generating high volume traffic&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;For experienced engineers in organizations, unsampled high volume data can be stored cost-effectively in long-term archives, priorities shift to emphasize real-time operational efficiency. The updated order of importance is as follows:&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Fast Queries for Incident Response&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Quick access to actionable insights during incidents is critical for minimizing downtime and addressing urgent issues.&lt;/li&gt;
+&lt;li&gt;Engineers value systems that enable rapid querying over recent, relevant data, as this directly impacts the ability to resolve problems efficiently.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Efficient Sampling and Aggregation&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Effective techniques like sampling, filtering, and aggregation allow teams to maintain representativeness while reducing data volume and cost.&lt;/li&gt;
+&lt;li&gt;This ensures that a smaller, relevant subset of data is readily available in fast-querying stores, while the rest can be archived for later use if needed.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Cost-Effective Compliance Data Retention&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Compliance data can be stored in low-cost archival systems (e.g., object storage like AWS S3 or similar solutions), minimizing its impact on operational observability costs.&lt;/li&gt;
+&lt;li&gt;Retrieval and processing can be deferred to meet regulatory requirements without affecting real-time observability needs.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Cost-Conscious Operations&lt;/strong&gt;&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Observability costs must align with organizational budgets. Prioritizing cost-effective tools and strategies ensures observability delivers value without overextending financial resources.&lt;/li&gt;
+&lt;li&gt;Open-source solutions or tiered pricing models for commercial tools can help manage costs effectively.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;conclusion&#34;&gt;Conclusion
+&lt;/h3&gt;&lt;p&gt;Observability handles different types of data streams with unpredictable volumes. The trade-offs in observability systems are rooted in technical and organizational realities. The ultimate impact of these trade-offs often depends on an organization’s unique priorities, such as tolerance for incident duration, audit requirements, tool standardization, and budget constraints. These priorities can shift over time due to internal dynamics or external pressures.&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Delta vs. Cumulative Metrics: Key Differences and System Preferences</title>
+        <link>http://localhost:1313/p/delta/</link>
+        <pubDate>Tue, 26 Nov 2024 06:49:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/p/delta/</guid>
+        <description>&lt;p&gt;When it comes to collecting and analyzing metrics, one crucial decision is whether to use &lt;strong&gt;delta&lt;/strong&gt; or &lt;strong&gt;cumulative&lt;/strong&gt; metrics. These two approaches define how measurements are reported over time, and different metrics systems have their preferences based on their design and use cases. In this blog post, we’ll explore the difference between delta and cumulative metrics, examine their trade-offs, and highlight the systems that prefer one over the other.&lt;/p&gt;
+&lt;h3 id=&#34;understanding-temporality&#34;&gt;&lt;strong&gt;Understanding Temporality&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;Temporality refers to the way metrics are recorded and reported over time. Choosing the right temporality depends on your monitoring backend and analytical needs.&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Cumulative Temporality&lt;/strong&gt;: Reports the running total of a metric from the beginning of a measurement period. Suitable for tracking trends and totals. Example: Total bytes transferred over time (&lt;a class=&#34;link&#34; href=&#34;https://grafana.com/blog/2024/11/25/how-to-use-opentelemetry-and-grafana-alloy-to-convert-delta-to-cumulative-at-scale/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;source&lt;/a&gt;).&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Delta Temporality&lt;/strong&gt;: Reports the difference in value for a metric since the last measurement. Ideal for real-time insights into changes over intervals. Example: Number of requests processed per interval (&lt;a class=&#34;link&#34; href=&#34;https://opentelemetry.io/docs/concepts/metric-temporality/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;source&lt;/a&gt;).&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;OpenTelemetry&lt;/strong&gt; provides flexibility by supporting both delta and cumulative metrics. This allows observability platforms to choose a model that aligns with their architecture (&lt;a class=&#34;link&#34; href=&#34;https://opentelemetry.io/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;learn more&lt;/a&gt;).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Cumulative Metrics&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;These represent the total value accumulated from the start of the measurement up to the current point.&lt;/li&gt;
+&lt;li&gt;Every reported value includes all previous measurements, providing a running total.&lt;/li&gt;
+&lt;li&gt;Example:
+&lt;ul&gt;
+&lt;li&gt;At time t0: 5&lt;/li&gt;
+&lt;li&gt;At time t0+10s: 10&lt;/li&gt;
+&lt;li&gt;At time t0+20s: 20&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://prometheus.io/docs/concepts/metric_types/#counter&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Prometheus documentation explains how cumulative counters are processed&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Use case&lt;/strong&gt;: Cumulative metrics are ideal when you need a holistic view of total occurrences, such as the total number of requests or errors since the application started. They also help mitigate data loss because missed intervals can still be accounted for in subsequent reports.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;&lt;strong&gt;Delta Metrics&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Delta metrics report only the change in value since the last measurement.&lt;/li&gt;
+&lt;li&gt;Each value reflects the increment or decrement during a specific reporting interval.&lt;/li&gt;
+&lt;li&gt;Example:
+&lt;ul&gt;
+&lt;li&gt;At time t0: 5&lt;/li&gt;
+&lt;li&gt;At time t0+10s: 5&lt;/li&gt;
+&lt;li&gt;At time t0+20s: 10&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://opentelemetry.io/docs/reference/specification/metrics/data-model/#temporality&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Learn more about delta metrics and how they&amp;rsquo;re handled in OpenTelemetry&lt;/a&gt;.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Use case&lt;/strong&gt;: Delta metrics are great for analyzing the rate of change over specific intervals. They’re especially useful in systems designed for high-frequency reporting where capturing incremental updates is more efficient.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;key-differences-between-delta-and-cumulative-metrics&#34;&gt;&lt;strong&gt;Key Differences Between Delta and Cumulative Metrics&lt;/strong&gt;
+&lt;/h3&gt;&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;Feature&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;Cumulative Metrics&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;Delta Metrics&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;Representation&lt;/strong&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;Running total since the start&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;Increment since the last report&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;Data Loss Handling&lt;/strong&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;Resilient to missed intervals&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;Data may be lost if intervals are missed&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;Rate Calculation&lt;/strong&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;Requires backend calculations&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;Directly provides the rate per interval&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;&lt;strong&gt;Overhead&lt;/strong&gt;&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;More storage-intensive for long periods&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;More efficient for short intervals&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;metrics-systems-and-their-preferences&#34;&gt;&lt;strong&gt;Metrics Systems and Their Preferences&lt;/strong&gt;
+&lt;/h3&gt;&lt;h4 id=&#34;metrics-systems-using-cumulative-metrics&#34;&gt;&lt;strong&gt;Metrics Systems Using Cumulative Metrics&lt;/strong&gt;
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Prometheus&lt;/strong&gt;: Cumulative metrics are the default. Counters track the total value over time, and functions like &lt;code&gt;rate()&lt;/code&gt; derive per-second rates.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Google Cloud Monitoring&lt;/strong&gt;: Uses cumulative metrics to represent continuous totals, like the number of requests served.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Amazon CloudWatch&lt;/strong&gt;: Designed around cumulative metrics, with built-in support for rate and delta calculations.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;metrics-systems-using-delta-metrics&#34;&gt;&lt;strong&gt;Metrics Systems Using Delta Metrics&lt;/strong&gt;
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;OpenTelemetry (OTLP)&lt;/strong&gt;: Delta temporality is supported for certain metric types, allowing granular reporting over intervals.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;StatsD&lt;/strong&gt;: Metrics like counters are reported as deltas, focusing on changes during the last interval for lightweight and efficient ingestion.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Datadog&lt;/strong&gt;: Prefers delta metrics for some integrations to provide detailed visibility into per-second rates.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h4 id=&#34;systems-supporting-both-delta-and-cumulative-metrics&#34;&gt;&lt;strong&gt;Systems Supporting Both Delta and Cumulative Metrics&lt;/strong&gt;
+&lt;/h4&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;OpenTelemetry&lt;/strong&gt;: Provides flexibility by allowing users to configure metrics as either cumulative or delta.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Grafana Mimir and Cortex&lt;/strong&gt;: While aligned with Prometheus&amp;rsquo; cumulative approach, these systems can process both formats.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Elastic Observability&lt;/strong&gt;: Supports both, though cumulative metrics are more effective for long-term storage and trend analysis.&lt;/p&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Splunk Observability Cloud&lt;/strong&gt;: Handles both delta and cumulative metrics, adapting to the data source requirements.&lt;/p&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;choosing-the-right-temporality&#34;&gt;&lt;strong&gt;Choosing the Right Temporality&lt;/strong&gt;
+&lt;/h3&gt;&lt;p&gt;When deciding between delta and cumulative metrics, consider the following:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;System Compatibility&lt;/strong&gt;: Some systems (e.g., Prometheus) work better with cumulative metrics, while others (e.g., StatsD) prefer deltas.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Data Loss Resilience&lt;/strong&gt;: Cumulative metrics are more forgiving when intervals are missed.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Analysis Needs&lt;/strong&gt;: Use delta metrics for fine-grained interval analysis and cumulative metrics for overall trends and totals.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;further-reading-and-sources&#34;&gt;&lt;strong&gt;Further Reading and Sources&lt;/strong&gt;
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://opentelemetry.io/docs/reference/specification/metrics/data-model/#temporality&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;OpenTelemetry Metric Data Model&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://prometheus.io/docs/concepts/metric_types/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Prometheus Metric Types and Temporality&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://grafana.com/blog/2024/11/25/how-to-use-opentelemetry-and-grafana-alloy-to-convert-delta-to-cumulative-at-scale/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Grafana Blog: Converting Delta to Cumulative Metrics&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://cloud.google.com/monitoring/docs/concepts/metric-types&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Google Cloud Monitoring and Metric Temporality&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>Another Off-by-One (Mostly) Problem and Prometheus Counter Spikes</title>
+        <link>http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/</link>
+        <pubDate>Wed, 09 Oct 2024 21:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/</guid>
+        <description>&lt;h3 id=&#34;the-problem&#34;&gt;The Problem
+&lt;/h3&gt;&lt;p&gt;We have observed several Prometheus counters showing false spikes (i.e., no matching increase in logs) that could correlate with nodes experiencing kernel panics and reboots.&lt;/p&gt;
+&lt;h3 id=&#34;why-do-counters-spike&#34;&gt;Why Do Counters Spike?
+&lt;/h3&gt;&lt;p&gt;In Prometheus, counters are expected to be monotonic: they can never decrease. The only time a counter timeseries can decrease is if it is reset to zero (e.g., when a container restarts).&lt;/p&gt;
+&lt;p&gt;The PromQL functions &lt;code&gt;increase()&lt;/code&gt; and &lt;code&gt;rate()&lt;/code&gt; have special logic to handle counter resets like this. If a counter has a value of 100 and the next data point is 99, it is assumed that the timeseries was first reset to 0 and then incremented 99 more times. This would cause a jump of 99 in most graphs.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph.png&#34;
+	width=&#34;1492&#34;
+	height=&#34;513&#34;
+	srcset=&#34;http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu10347298088471375106.png 480w, http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu2622312036944885573.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Graph&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;290&#34;
+		data-flex-basis=&#34;698px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;h3 id=&#34;background&#34;&gt;Background
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;Our Python app is running on a Gunicorn server with multiple workers. This means multiple Python processes are serving requests because Python&amp;rsquo;s threading is restricted by the Global Interpreter Lock (GIL). Using multiprocessing is a good workaround.&lt;/li&gt;
+&lt;li&gt;The app is running on a pod on a Kubernetes node.&lt;/li&gt;
+&lt;li&gt;This app is instrumented with the Prometheus Python client in multiprocessing mode because each worker process runs independently and maintains separate metrics. Multiprocessing mode aggregates these metrics across all workers, ensuring that Prometheus scrapes produce accurate, unified data across the entire application, reflecting all requests handled by all workers.&lt;/li&gt;
+&lt;li&gt;In multiprocessing mode, each process writes its metrics to a separate &lt;a class=&#34;link&#34; href=&#34;https://github.com/prometheus/client_python/blob/v0.12.0/prometheus_client/mmap_dict.py#L61-L69&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;set of mmapped files&lt;/a&gt;. On scrape, the exporter web server reads all of these files and merges them (i.e., counters from process A and B are summed). In our Kubernetes setup, these files are stored in &lt;code&gt;/tmp&lt;/code&gt;, which is mounted as a Kubernetes &lt;code&gt;emptyDir&lt;/code&gt; volume in most of our workloads.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;how-are-reboots-causing-spikes&#34;&gt;How Are Reboots Causing Spikes?
+&lt;/h3&gt;&lt;p&gt;&lt;a class=&#34;link&#34; href=&#34;https://kubernetes.io/docs/concepts/storage/volumes/#emptydir&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;It turns out the &lt;code&gt;emptyDir&lt;/code&gt; mounted to &lt;code&gt;/tmp&lt;/code&gt; persists across container crashes&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;We were able to exec into a pod that experienced a node reboot and confirmed that the filesystem timestamps in the metric files predated the node reboot by several days.&lt;/p&gt;
+&lt;p&gt;&lt;img src=&#34;http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell.png&#34;
+	width=&#34;1600&#34;
+	height=&#34;1303&#34;
+	srcset=&#34;http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu13800648201417889505.png 480w, http://localhost:1313/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu6015823213156503612.png 1024w&#34;
+	loading=&#34;lazy&#34;
+	
+		alt=&#34;Shell&#34;
+	
+	
+		class=&#34;gallery-image&#34; 
+		data-flex-grow=&#34;122&#34;
+		data-flex-basis=&#34;294px&#34;
+	
+&gt;&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;This means that after a reboot, pods are coming back with their old counter values&lt;/strong&gt;. This would normally be fine as long as the node is not down for too long—the counter would just resume at the previous value and see no reset, as long as it hasn&amp;rsquo;t fallen out of the backend aggregator&amp;rsquo;s buffer (which has a 10-minute window in our setup).&lt;/p&gt;
+&lt;p&gt;In the backend, we drilled into the raw data points for the counter during one of the spikes and noticed it was incrementing and then decrementing by exactly one:&lt;/p&gt;
+&lt;table&gt;
+  &lt;thead&gt;
+      &lt;tr&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;TIMESTAMP&lt;/th&gt;
+          &lt;th style=&#34;text-align: left&#34;&gt;VALUE&lt;/th&gt;
+      &lt;/tr&gt;
+  &lt;/thead&gt;
+  &lt;tbody&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:05:05.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72929&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:05:35.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72929&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:06:05.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72930&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:06:35.371-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72930&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:07:05.371-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:07:35.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:08:05.37-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72933&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:10:59.487-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932 &lt;code&gt;(decrease in counter)&lt;/code&gt;&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:11:29.496-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:11:59.5-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+      &lt;tr&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;2024-09-23T05:12:29.489-04:00&lt;/td&gt;
+          &lt;td style=&#34;text-align: left&#34;&gt;72932&lt;/td&gt;
+      &lt;/tr&gt;
+  &lt;/tbody&gt;
+&lt;/table&gt;
+&lt;h3 id=&#34;sequence-of-events&#34;&gt;Sequence of Events
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;The application process increments a counter from &lt;em&gt;n&lt;/em&gt; to &lt;em&gt;n+1&lt;/em&gt; and writes the value to the mmapped file. This writes to the Linux kernel&amp;rsquo;s page cache (and is not immediately flushed to disk).&lt;/li&gt;
+&lt;li&gt;A scrape occurs. The multiprocess exporter opens and reads all files. The kernel sees some of the files are already in the page cache and skips reading them from disk. The scrape exports the counter as &lt;em&gt;n+1&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;A kernel panic happens before the page cache is flushed to disk. The counter increment is lost.&lt;/li&gt;
+&lt;li&gt;The node encounters a kernel panic and reboots. Since the shutdown was not graceful, pods remain assigned to the node, so after startup containers are restarted with the same pod names, etc. Since the pod name is the same, the &lt;code&gt;emptyDir&lt;/code&gt; volume is reused, and the pod keeps the last counter value that was flushed to disk (&lt;em&gt;n&lt;/em&gt;).&lt;/li&gt;
+&lt;li&gt;A scrape occurs, and we export the counter with a value of &lt;em&gt;n&lt;/em&gt;. Prometheus queries run &lt;code&gt;increase([..., n+1, n])&lt;/code&gt;, which is interpreted as an increase of &lt;em&gt;n&lt;/em&gt;, causing a spike.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;However, we have not attempted to reproduce this behavior to confirm this theory. Since this depends on the timing of the kernel writing the dirty page to disk and the kernel panic, it also makes sense that we would not see this behavior consistently with node restarts.&lt;/p&gt;
+&lt;h3 id=&#34;how-can-we-fix-it&#34;&gt;How Can We Fix It?
+&lt;/h3&gt;&lt;p&gt;While a fix for the node reboot issue has been identified, we can be more robust here. The simplest solution is to clear out the metric files in &lt;code&gt;/tmp&lt;/code&gt; on startup. Prometheus is designed for this—counter resets are normal.&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;We could set the Prometheus multiproc directory to a memory-backed &lt;code&gt;emptyDir&lt;/code&gt; volume (&lt;code&gt;emptyDir.medium: Memory&lt;/code&gt;). This would naturally be cleared on node restart. This would make writes count against container memory instead.&lt;/li&gt;
+&lt;li&gt;We could add an init container that runs &lt;code&gt;rm $PROMETHEUS_MULTIPROC_DIR/*.db&lt;/code&gt; on startup. This might impact pod start time slightly but is the simplest solution.&lt;/li&gt;
+&lt;li&gt;We could make the application delete &lt;code&gt;$PROMETHEUS_MULTIPROC_DIR/*.db&lt;/code&gt; on startup.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h3 id=&#34;conclusion&#34;&gt;Conclusion
+&lt;/h3&gt;&lt;p&gt;So here we have it. An off-by-one (decrement to the count) can lead to an increment of 99. Who would have thought.&lt;/p&gt;
+</description>
+        </item>
+        <item>
+        <title>Learning Generics by extending the prometheus python client</title>
+        <link>http://localhost:1313/p/learning-generics-by-extending-the-prometheus-python-client/</link>
+        <pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/learning-generics-by-extending-the-prometheus-python-client/</guid>
+        <description>&lt;p&gt;Imagine you&amp;rsquo;re writing a library to extend the &lt;a class=&#34;link&#34; href=&#34;https://github.com/prometheus/client_python&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Prometheus Python client&lt;/a&gt; and need to add some &lt;strong&gt;dynamic labels&lt;/strong&gt; specific to the environment. Ideally, you would add most of your labels at the &lt;strong&gt;collector&lt;/strong&gt; end to avoid writing extensions, but there are situations where injecting dynamic labels is unavoidable. For these cases, you might want to extend the client in a structured and type-safe manner.&lt;/p&gt;
+&lt;h2 id=&#34;what-are-generics-and-why-do-we-use-them-in-python&#34;&gt;What Are Generics? And Why Do We Use Them in Python?
+&lt;/h2&gt;&lt;p&gt;Generics are a feature commonly associated with statically typed languages. They allow you to create code that works with a variety of types while maintaining type safety. By declaring &amp;ldquo;placeholder types,&amp;rdquo; generics help us write higher-level patterns that simplify declarations and reduce redundancy.&lt;/p&gt;
+&lt;p&gt;While Python doesn’t enforce type checking at runtime (as long as the code is syntactically valid, it will run), tools like &lt;strong&gt;type hints&lt;/strong&gt; and third-party linters like &lt;a class=&#34;link&#34; href=&#34;https://github.com/python/mypy&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;mypy&lt;/a&gt; bring the safety of statically typed languages to Python. These tools enable developers to:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Catch type errors early.&lt;/li&gt;
+&lt;li&gt;Improve code readability.&lt;/li&gt;
+&lt;li&gt;Document function and class behavior clearly.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;generics-in-python&#34;&gt;Generics in Python
+&lt;/h3&gt;&lt;p&gt;Generics in Python are brought to life using &lt;strong&gt;type hints&lt;/strong&gt; from the &lt;a class=&#34;link&#34; href=&#34;https://docs.python.org/3/library/typing.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;&lt;code&gt;typing&lt;/code&gt;&lt;/a&gt; module. In essence, generics in Python are a &lt;strong&gt;programming style&lt;/strong&gt; adapted from statically typed languages to achieve similar benefits in Python&amp;rsquo;s dynamic environment.&lt;/p&gt;
+&lt;h2 id=&#34;extending-the-prometheus-python-client-with-generics&#34;&gt;Extending the Prometheus Python Client with Generics
+&lt;/h2&gt;&lt;p&gt;Below is an example of extending the Prometheus client to support dynamic labels using generics. This approach makes it easier to manage labels dynamically while preserving type safety.&lt;/p&gt;
+&lt;h3 id=&#34;example-code-with-comments&#34;&gt;Example Code with Comments
+&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-python&#34; data-lang=&#34;python&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;prometheus_client&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Counter&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PromCounter&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;prometheus_client&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Histogram&lt;/span&gt; &lt;span class=&#34;k&#34;&gt;as&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PromHistogram&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kn&#34;&gt;from&lt;/span&gt; &lt;span class=&#34;nn&#34;&gt;typing&lt;/span&gt; &lt;span class=&#34;kn&#34;&gt;import&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TypeVar&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Generic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Iterable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Dict&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cast&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Create a new generic type, bound to two specific Prometheus metric types&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;n&#34;&gt;_MetricsTypeT&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;TypeVar&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;s1&#34;&gt;&amp;#39;_MetricsTypeT&amp;#39;&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PromCounter&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PromHistogram&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Base class of type generic; the child class will pass in the type&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;_MetricsBase&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;Generic&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_MetricsTypeT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__init__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;label_names&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Iterable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;# Default labels dynamically fetched (e.g., environment-specific)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;default_labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Dict&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;get_default_labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;all_label_names&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;list&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;list&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;label_names&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;list&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;default_labels&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;keys&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;())&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_parent_metric&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_MetricsTypeT&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;kc&#34;&gt;None&lt;/span&gt;  &lt;span class=&#34;c1&#34;&gt;# Parent metric instance&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;c1&#34;&gt;# Provides dynamic label functionality&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;nf&#34;&gt;labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labelargs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;**&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labelkwargs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;-&amp;gt;&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_MetricsTypeT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;if&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;labelargs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;c1&#34;&gt;# Append default labels to positional arguments&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;labelargs&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;+=&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;tuple&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;default_labels&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;values&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;())&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cast&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_MetricsTypeT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_parent_metric&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;*&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labelargs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;# Merge default labels into keyword arguments&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;n&#34;&gt;labelkwargs&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;update&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;default_labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;cast&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_MetricsTypeT&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_parent_metric&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labels&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;**&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labelkwargs&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;))&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;c1&#34;&gt;# Child class passing a specific type (_PromCounter) to the base class via generics&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;k&#34;&gt;class&lt;/span&gt; &lt;span class=&#34;nc&#34;&gt;Counter&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_MetricsBase&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_PromCounter&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;    &lt;span class=&#34;k&#34;&gt;def&lt;/span&gt; &lt;span class=&#34;fm&#34;&gt;__init__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;documentation&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;labelnames&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;:&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;Iterable&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;nb&#34;&gt;str&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;p&#34;&gt;()):&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;nb&#34;&gt;super&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;()&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;fm&#34;&gt;__init__&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;label_names&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;labelnames&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;c1&#34;&gt;# Create the actual Prometheus Counter metric&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;_parent_metric&lt;/span&gt; &lt;span class=&#34;o&#34;&gt;=&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;_PromCounter&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;(&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;            &lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;name&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;documentation&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;documentation&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;,&lt;/span&gt; &lt;span class=&#34;n&#34;&gt;labelnames&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;=&lt;/span&gt;&lt;span class=&#34;bp&#34;&gt;self&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;.&lt;/span&gt;&lt;span class=&#34;n&#34;&gt;all_label_names&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;        &lt;span class=&#34;p&#34;&gt;)&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;h3 id=&#34;key-points&#34;&gt;Key Points:
+&lt;/h3&gt;&lt;ol&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Generics in Base Class&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;_MetricsBase&lt;/code&gt; accepts a generic type (&lt;code&gt;_MetricsTypeT&lt;/code&gt;), which can be either a Prometheus &lt;code&gt;Counter&lt;/code&gt; or &lt;code&gt;Histogram&lt;/code&gt;.&lt;/li&gt;
+&lt;li&gt;This ensures type safety across methods like &lt;code&gt;labels()&lt;/code&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Dynamic Label Handling&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;code&gt;default_labels&lt;/code&gt; are fetched dynamically, e.g., from the environment or configuration.&lt;/li&gt;
+&lt;li&gt;These labels are automatically added to the user-provided labels when creating or using metrics.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;li&gt;
+&lt;p&gt;&lt;strong&gt;Child Classes&lt;/strong&gt;:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;Child classes (&lt;code&gt;Counter&lt;/code&gt;, &lt;code&gt;Histogram&lt;/code&gt;) specify the type of Prometheus metric they represent.&lt;/li&gt;
+&lt;li&gt;They inherit the generic behavior while remaining strongly typed.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;/li&gt;
+&lt;/ol&gt;
+&lt;h2 id=&#34;the-final-word&#34;&gt;The Final Word
+&lt;/h2&gt;&lt;p&gt;In my project, I used generics to type my base class &lt;code&gt;_MetricsBase&lt;/code&gt;. This class accepts a &lt;strong&gt;generic type&lt;/strong&gt; that is passed in by its child classes (&lt;code&gt;Counter&lt;/code&gt;, &lt;code&gt;Histogram&lt;/code&gt;). The &lt;code&gt;labels()&lt;/code&gt; method dynamically appends environment-specific labels while ensuring type safety. By leveraging &lt;a class=&#34;link&#34; href=&#34;https://github.com/python/mypy&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;mypy&lt;/a&gt; or similar tools, I achieved many of the benefits of statically typed languages in Python.&lt;/p&gt;
+&lt;h3 id=&#34;complete-code&#34;&gt;Complete Code
+&lt;/h3&gt;&lt;p&gt;You can find the complete code for this example &lt;a class=&#34;link&#34; href=&#34;https://github.com/hash167/prom_client_generics/&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;here&lt;/a&gt;.&lt;/p&gt;
+&lt;h2 id=&#34;further-reading&#34;&gt;Further Reading
+&lt;/h2&gt;&lt;ul&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/prometheus/client_python&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Prometheus Python Client Library&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://docs.python.org/3/library/typing.html&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Python Typing Documentation&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://peps.python.org/pep-0484/#generic-classes&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;Generics in Python&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class=&#34;link&#34; href=&#34;https://github.com/python/mypy&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;mypy Type Checker&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        </item>
+        <item>
+        <title>Designing a metrics system notes</title>
+        <link>http://localhost:1313/p/designing-a-metrics-system-notes/</link>
+        <pubDate>Fri, 01 Jul 2022 01:33:40 +0000</pubDate>
+        
+        <guid>http://localhost:1313/p/designing-a-metrics-system-notes/</guid>
+        <description>&lt;p&gt;To effectively monitor and understand the performance of your applications and infrastructure, having a well-designed metrics system is crucial. Here are the key requirements and components for building a reliable metrics system.&lt;/p&gt;
+&lt;h3 id=&#34;requirements-for-a-metrics-system&#34;&gt;Requirements for a Metrics System
+&lt;/h3&gt;&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Multidimensional Data Model&lt;/strong&gt;: The metrics system should support a multidimensional data model that can be sliced and diced along different dimensions as defined by the service (e.g., instance, service, endpoint, method).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Operational Simplicity&lt;/strong&gt;: The system should be easy to operate and maintain, minimizing overhead and complexity.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Scalable Data Collection&lt;/strong&gt;: The system must support scalable data collection and offer a decentralized architecture, allowing independent teams to set up their own monitoring servers.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Powerful Query Language&lt;/strong&gt;: A powerful query language should be available to leverage the data model for alerting and graphing, enabling precise insights into system performance.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;client-libraries&#34;&gt;Client Libraries
+&lt;/h3&gt;&lt;p&gt;Client libraries play an essential role in the metrics system:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;They handle details like thread safety, bookkeeping, and producing the Prometheus text exposition format in response to HTTP requests.&lt;/li&gt;
+&lt;li&gt;Since metrics-based monitoring doesn&amp;rsquo;t track individual events, client library memory usage doesn&amp;rsquo;t increase with more events. Instead, memory usage depends on the number of metrics being tracked.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h3 id=&#34;instrumentation&#34;&gt;Instrumentation
+&lt;/h3&gt;&lt;p&gt;To effectively monitor different types of services, appropriate instrumentation methods must be used. Here are three common types of services and how they should be instrumented:&lt;/p&gt;
+&lt;h4 id=&#34;online-serving-systems&#34;&gt;Online-Serving Systems
+&lt;/h4&gt;&lt;p&gt;For online-serving systems, such as web services, the &lt;strong&gt;RED Method&lt;/strong&gt; is used. This method involves tracking:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Requests&lt;/strong&gt;: The count of incoming requests.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Errors&lt;/strong&gt;: The count of failed requests.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Duration&lt;/strong&gt;: The latency or response time of requests.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;For example, a cache might track these metrics for both overall performance and for cache misses that need to be recalculated or fetched from a backend.&lt;/p&gt;
+&lt;h4 id=&#34;offline-serving-systems&#34;&gt;Offline-Serving Systems
+&lt;/h4&gt;&lt;p&gt;Offline-serving systems, such as log processors, usually batch up work and consist of multiple stages in a pipeline with queues in between. These systems run continuously, which distinguishes them from batch jobs. The &lt;strong&gt;USE Method&lt;/strong&gt; is used for these types of systems:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Utilization&lt;/strong&gt;: How much of the system&amp;rsquo;s capacity is in use (e.g., how much work is in progress).&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Saturation&lt;/strong&gt;: The amount of queued work and how much work is currently being processed.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Errors&lt;/strong&gt;: Any errors encountered during processing.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;h4 id=&#34;batch-jobs&#34;&gt;Batch Jobs
+&lt;/h4&gt;&lt;p&gt;Batch jobs are processes that run at scheduled intervals. The key metrics for batch jobs include:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;&lt;strong&gt;Run Time&lt;/strong&gt;: How long it took for the job to complete.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Stage Duration&lt;/strong&gt;: How long each stage of the job took to complete.&lt;/li&gt;
+&lt;li&gt;&lt;strong&gt;Success Time&lt;/strong&gt;: The time at which the job last succeeded.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Alerts can be set for when the job hasn&amp;rsquo;t succeeded within a certain time frame.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Idempotency for Batch Jobs&lt;/strong&gt;: Idempotency is an important concept for batch jobs. It means that performing an operation more than once has the same effect as performing it only once, which is crucial for reliability and preventing unintended side effects.&lt;/p&gt;
+</description>
+        </item>
+        
+    </channel>
+</rss>

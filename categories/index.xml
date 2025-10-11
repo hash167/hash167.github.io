@@ -1,1 +1,67 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Categories on Hashim Colombowala</title><link>https://hashimcolombowala.com/categories/</link><description>Recent content in Categories on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 06 Sep 2025 00:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/categories/index.xml" rel="self" type="application/rss+xml"/><item><title>Observability</title><link>https://hashimcolombowala.com/categories/observability/</link><pubDate>Sat, 06 Sep 2025 00:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/categories/observability/</guid><description/></item><item><title>Infrastructure</title><link>https://hashimcolombowala.com/categories/infrastructure/</link><pubDate>Wed, 25 Jun 2025 23:00:00 +0000</pubDate><guid>https://hashimcolombowala.com/categories/infrastructure/</guid><description/></item><item><title>K8s</title><link>https://hashimcolombowala.com/categories/k8s/</link><pubDate>Wed, 25 Jun 2025 23:00:00 +0000</pubDate><guid>https://hashimcolombowala.com/categories/k8s/</guid><description/></item><item><title>Kotlin</title><link>https://hashimcolombowala.com/categories/kotlin/</link><pubDate>Fri, 13 Dec 2024 22:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/categories/kotlin/</guid><description/></item><item><title>Controllers</title><link>https://hashimcolombowala.com/categories/controllers/</link><pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate><guid>https://hashimcolombowala.com/categories/controllers/</guid><description/></item><item><title>Streaming Infra</title><link>https://hashimcolombowala.com/categories/streaming-infra/</link><pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/categories/streaming-infra/</guid><description/></item><item><title>Python</title><link>https://hashimcolombowala.com/categories/python/</link><pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate><guid>https://hashimcolombowala.com/categories/python/</guid><description/></item></channel></rss>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+        <title>Categories on Hashim Colombowala</title>
+        <link>http://localhost:1313/categories/</link>
+        <description>Recent content in Categories on Hashim Colombowala</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>en-us</language>
+        <lastBuildDate>Sat, 11 Oct 2025 10:00:00 +0000</lastBuildDate><atom:link href="http://localhost:1313/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Infrastructure</title>
+        <link>http://localhost:1313/categories/infrastructure/</link>
+        <pubDate>Sat, 11 Oct 2025 10:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/categories/infrastructure/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Observability</title>
+        <link>http://localhost:1313/categories/observability/</link>
+        <pubDate>Sat, 06 Sep 2025 00:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/categories/observability/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>K8s</title>
+        <link>http://localhost:1313/categories/k8s/</link>
+        <pubDate>Wed, 25 Jun 2025 23:00:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/categories/k8s/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Kotlin</title>
+        <link>http://localhost:1313/categories/kotlin/</link>
+        <pubDate>Fri, 13 Dec 2024 22:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/categories/kotlin/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Controllers</title>
+        <link>http://localhost:1313/categories/controllers/</link>
+        <pubDate>Sat, 12 Oct 2024 23:00:35 -0700</pubDate>
+        
+        <guid>http://localhost:1313/categories/controllers/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Streaming Infra</title>
+        <link>http://localhost:1313/categories/streaming-infra/</link>
+        <pubDate>Mon, 07 Oct 2024 23:00:00 -0700</pubDate>
+        
+        <guid>http://localhost:1313/categories/streaming-infra/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Python</title>
+        <link>http://localhost:1313/categories/python/</link>
+        <pubDate>Sat, 02 Jul 2022 14:30:00 +0000</pubDate>
+        
+        <guid>http://localhost:1313/categories/python/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
+</rss>
