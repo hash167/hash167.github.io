@@ -1,19 +1,5 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-    <channel>
-        <title>Promql on Hashim Colombowala</title>
-        <link>http://localhost:1313/tags/promql/</link>
-        <description>Recent content in Promql on Hashim Colombowala</description>
-        <generator>Hugo -- gohugo.io</generator>
-        <language>en-us</language>
-        <lastBuildDate>Sat, 06 Sep 2025 00:00:00 -0700</lastBuildDate><atom:link href="http://localhost:1313/tags/promql/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>How to Use Proper Resolution Windows in PromQL to Catch Short Spikes</title>
-        <link>http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</link>
-        <pubDate>Sat, 06 Sep 2025 00:00:00 -0700</pubDate>
-        
-        <guid>http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</guid>
-        <description>&lt;p&gt;Let’s look at a real example: a short CPU spike that can appear blurred on your dashboard if your query resolution isn’t set properly.&lt;/p&gt;
-&lt;h3 id=&#34;the-scenario&#34;&gt;The Scenario
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Promql on Hashim Colombowala</title><link>https://hashimcolombowala.com/tags/promql/</link><description>Recent content in Promql on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Sat, 06 Sep 2025 00:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/promql/index.xml" rel="self" type="application/rss+xml"/><item><title>How to Use Proper Resolution Windows in PromQL to Catch Short Spikes</title><link>https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</link><pubDate>Sat, 06 Sep 2025 00:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/</guid><description>&lt;p&gt;Let’s look at a real example: a short CPU spike that can appear blurred on your dashboard if your query resolution isn’t set properly.&lt;/p&gt;
+&lt;h3 id="the-scenario"&gt;The Scenario
 &lt;/h3&gt;&lt;ul&gt;
 &lt;li&gt;Panel range: &lt;strong&gt;12:00–01:00 (1h)&lt;/strong&gt;&lt;/li&gt;
 &lt;li&gt;Scrape interval: &lt;strong&gt;15s&lt;/strong&gt;&lt;/li&gt;
@@ -22,30 +8,30 @@
 &lt;/ul&gt;
 &lt;p&gt;Prometheus scrapes every 15s, so the raw samples are:&lt;/p&gt;
 &lt;table&gt;
-  &lt;thead&gt;
-      &lt;tr&gt;
-          &lt;th style=&#34;text-align: left&#34;&gt;Time&lt;/th&gt;
-          &lt;th style=&#34;text-align: left&#34;&gt;CPU%&lt;/th&gt;
-      &lt;/tr&gt;
-  &lt;/thead&gt;
-  &lt;tbody&gt;
-      &lt;tr&gt;
-          &lt;td style=&#34;text-align: left&#34;&gt;12:05:00&lt;/td&gt;
-          &lt;td style=&#34;text-align: left&#34;&gt;10&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td style=&#34;text-align: left&#34;&gt;12:05:15&lt;/td&gt;
-          &lt;td style=&#34;text-align: left&#34;&gt;90&lt;/td&gt;
-      &lt;/tr&gt;
-      &lt;tr&gt;
-          &lt;td style=&#34;text-align: left&#34;&gt;12:05:30&lt;/td&gt;
-          &lt;td style=&#34;text-align: left&#34;&gt;10&lt;/td&gt;
-      &lt;/tr&gt;
-  &lt;/tbody&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;Time&lt;/th&gt;
+&lt;th&gt;CPU%&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;12:05:00&lt;/td&gt;
+&lt;td&gt;10&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12:05:15&lt;/td&gt;
+&lt;td&gt;90&lt;/td&gt;
+&lt;/tr&gt;
+&lt;tr&gt;
+&lt;td&gt;12:05:30&lt;/td&gt;
+&lt;td&gt;10&lt;/td&gt;
+&lt;/tr&gt;
+&lt;/tbody&gt;
 &lt;/table&gt;
 &lt;p&gt;The data is there but what how accurate your graph is depends on your query.&lt;/p&gt;
-&lt;h3 id=&#34;baseline-query-blurred&#34;&gt;Baseline Query (Blurred)
-&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;h3 id="baseline-query-blurred"&gt;Baseline Query (Blurred)
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-promql" data-lang="promql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kr"&gt;max_over_time&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cpu_percent&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;1m&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="w"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;On a 1h panel, Grafana (or other vendor equivalent) dashboards defaults to ~1m resolution. Prometheus only evaluates the query at 12:05, 12:06, 12:07, …&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;At 12:05 → window [12:04–12:05] → max = 10&lt;/li&gt;
@@ -54,34 +40,30 @@
 &lt;/ul&gt;
 &lt;p&gt;The spike appears, but it’s &lt;strong&gt;blurred into the “12:05–12:06” bucket&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Timeline:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Raw samples (15s):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:00 ─ 10%
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:15 ─ 90%   &amp;lt;--- spike
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:30 ─ 10%
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Eval points (1m):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05 ─ 10%
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:06 ─ 90%   &amp;lt;--- spike blurred into 1 minute bucket
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:07 ─ 10%
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Raw samples (15s):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:00 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:15 ─ 90% &amp;lt;--- spike
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:30 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Eval points (1m):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:06 ─ 90% &amp;lt;--- spike blurred into 1 minute bucket
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:07 ─ 10%
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Graph A — Baseline (&lt;code&gt;max_over_time(cpu_percent[1m])&lt;/code&gt;):
-&lt;img src=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a.png&#34;
-	width=&#34;2379&#34;
-	height=&#34;780&#34;
-	srcset=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu1620491900664182322.png 480w, http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu10200452981611888843.png 1024w&#34;
-	loading=&#34;lazy&#34;
-	
-		alt=&#34;Graph A&#34;
-	
-	
-		class=&#34;gallery-image&#34; 
-		data-flex-grow=&#34;305&#34;
-		data-flex-basis=&#34;732px&#34;
-	
+&lt;img src="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a.png"
+width="2379"
+height="780"
+srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu_dbf97adf81485d67.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu_e592d04bf40aa856.png 1024w"
+loading="lazy"
+alt="Graph A"
+class="gallery-image"
+data-flex-grow="305"
+data-flex-basis="732px"
 &gt;&lt;/p&gt;
-&lt;h3 id=&#34;why-it-blurs&#34;&gt;Why it blurs
+&lt;h3 id="why-it-blurs"&gt;Why it blurs
 &lt;/h3&gt;&lt;p&gt;This is like checking your watch once a minute. If something happens at second 15, you’ll only know it happened somewhere in that minute.&lt;/p&gt;
-&lt;h3 id=&#34;subquery-with-__range15s-sharp&#34;&gt;Subquery with &lt;code&gt;$__range:15s&lt;/code&gt; (Sharp)
-&lt;/h3&gt;&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;$__range:&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;15s&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
+&lt;h3 id="subquery-with-__range15s-sharp"&gt;Subquery with &lt;code&gt;$__range:15s&lt;/code&gt; (Sharp)
+&lt;/h3&gt;&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-promql" data-lang="promql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kr"&gt;max_over_time&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cpu_percent&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;1m&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;$__range:&lt;/span&gt;&lt;span class="s"&gt;15s&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;ul&gt;
 &lt;li&gt;Inner &lt;code&gt;[1m]&lt;/code&gt;: look back 1 minute and take the max.&lt;/li&gt;
 &lt;li&gt;Outer &lt;code&gt;[$__range:15s]&lt;/code&gt;: recompute that inner max &lt;strong&gt;every 15 seconds&lt;/strong&gt; across the full 1h panel.&lt;/li&gt;
@@ -89,58 +71,43 @@
 &lt;/ul&gt;
 &lt;p&gt;That means the spike is captured &lt;strong&gt;exactly at 12:05:15&lt;/strong&gt;.&lt;/p&gt;
 &lt;p&gt;&lt;strong&gt;Timeline:&lt;/strong&gt;&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-fallback&#34; data-lang=&#34;fallback&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Raw samples (15s):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:00 ─ 10%
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:15 ─ 90%   &amp;lt;--- spike
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:30 ─ 10%
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;Eval points (15s):
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:00 ─ 10%
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:15 ─ 90%   &amp;lt;--- spike captured at exact moment
-&lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;12:05:30 ─ 10%
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-fallback" data-lang="fallback"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Raw samples (15s):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:00 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:15 ─ 90% &amp;lt;--- spike
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:30 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;Eval points (15s):
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:00 ─ 10%
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:15 ─ 90% &amp;lt;--- spike captured at exact moment
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;12:05:30 ─ 10%
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Graph B — Subquery (&lt;code&gt;max_over_time(cpu_percent[1m])[$__range:15s]&lt;/code&gt;):
-&lt;img src=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b.png&#34;
-	width=&#34;2379&#34;
-	height=&#34;780&#34;
-	srcset=&#34;http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu6198737237259129012.png 480w, http://localhost:1313/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu17722494769505907227.png 1024w&#34;
-	loading=&#34;lazy&#34;
-	
-		alt=&#34;Graph B&#34;
-	
-	
-		class=&#34;gallery-image&#34; 
-		data-flex-grow=&#34;305&#34;
-		data-flex-basis=&#34;732px&#34;
-	
+&lt;img src="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b.png"
+width="2379"
+height="780"
+srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu_759ed8d95b9931cb.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu_4f6417aed873a12c.png 1024w"
+loading="lazy"
+alt="Graph B"
+class="gallery-image"
+data-flex-grow="305"
+data-flex-basis="732px"
 &gt;&lt;/p&gt;
-&lt;h4 id=&#34;why-its-sharp&#34;&gt;Why it’s sharp
+&lt;h4 id="why-its-sharp"&gt;Why it’s sharp
 &lt;/h4&gt;&lt;p&gt;Now you’re checking every 15 seconds, which lands exactly on the spike.&lt;/p&gt;
-&lt;h4 id=&#34;how-subqueries-work&#34;&gt;How Subqueries Work
+&lt;h4 id="how-subqueries-work"&gt;How Subqueries Work
 &lt;/h4&gt;&lt;p&gt;A subquery doesn’t change the inner function. It changes how often it’s evaluated.&lt;/p&gt;
 &lt;ul&gt;
 &lt;li&gt;Inner expression: what each point means. Example: &lt;code&gt;max_over_time(cpu[1m])&lt;/code&gt;.&lt;/li&gt;
 &lt;li&gt;Outer &lt;code&gt;[range:step]&lt;/code&gt;: how densely to evaluate over the panel’s range. Example: &lt;code&gt;[1h:15s]&lt;/code&gt;.&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h3 id=&#34;quick-grafana-tip&#34;&gt;Quick Grafana Tip
+&lt;h3 id="quick-grafana-tip"&gt;Quick Grafana Tip
 &lt;/h3&gt;&lt;ul&gt;
-&lt;li&gt;
-&lt;p&gt;Set &lt;strong&gt;Min interval = scrape interval&lt;/strong&gt; in your panel settings (e.g. 15s).&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Then use &lt;code&gt;$__interval&lt;/code&gt; or a subquery step close to your scrape interval.&lt;/p&gt;
-&lt;/li&gt;
-&lt;li&gt;
-&lt;p&gt;Example:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;$__range:$__interval&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
+&lt;li&gt;Set &lt;strong&gt;Min interval = scrape interval&lt;/strong&gt; in your panel settings (e.g. 15s).&lt;/li&gt;
+&lt;li&gt;Then use &lt;code&gt;$__interval&lt;/code&gt; or a subquery step close to your scrape interval.&lt;/li&gt;
+&lt;li&gt;Example:&lt;/li&gt;
 &lt;/ul&gt;
-&lt;p&gt;That way, your dashboards won’t miss short bursts.&lt;/p&gt;
-&lt;h3 id=&#34;takeaway&#34;&gt;Takeaway
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-promql" data-lang="promql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kr"&gt;max_over_time&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cpu_percent&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;1m&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;$__range:$__interval&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That way, your dashboards won’t miss short bursts.&lt;/p&gt;
+&lt;h3 id="takeaway"&gt;Takeaway
 &lt;/h3&gt;&lt;p&gt;If your dashboard feels too &lt;code&gt;flat&lt;/code&gt; and you suspect short spikes are being hidden, add a subquery with a fine resolution step:&lt;/p&gt;
-&lt;div class=&#34;highlight&#34;&gt;&lt;pre tabindex=&#34;0&#34; class=&#34;chroma&#34;&gt;&lt;code class=&#34;language-promql&#34; data-lang=&#34;promql&#34;&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;kr&#34;&gt;max_over_time&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;(&lt;/span&gt;&lt;span class=&#34;nv&#34;&gt;cpu_percent&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;1m&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;o&#34;&gt;)&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;[&lt;/span&gt;&lt;span class=&#34;err&#34;&gt;$__range:&lt;/span&gt;&lt;span class=&#34;s&#34;&gt;15s&lt;/span&gt;&lt;span class=&#34;p&#34;&gt;]&lt;/span&gt;&lt;span class=&#34;w&#34;&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That’s the difference between &lt;code&gt;somewhere in that minute we spiked&lt;/code&gt; and &lt;code&gt;we spiked at 12:05:15&lt;/code&gt;.&lt;/p&gt;
-</description>
-        </item>
-        
-    </channel>
-</rss>
+&lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-promql" data-lang="promql"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kr"&gt;max_over_time&lt;/span&gt;&lt;span class="o"&gt;(&lt;/span&gt;&lt;span class="nv"&gt;cpu_percent&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="s"&gt;1m&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="o"&gt;)&lt;/span&gt;&lt;span class="p"&gt;[&lt;/span&gt;&lt;span class="err"&gt;$__range:&lt;/span&gt;&lt;span class="s"&gt;15s&lt;/span&gt;&lt;span class="p"&gt;]&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That’s the difference between &lt;code&gt;somewhere in that minute we spiked&lt;/code&gt; and &lt;code&gt;we spiked at 12:05:15&lt;/code&gt;.&lt;/p&gt;</description></item></channel></rss>
