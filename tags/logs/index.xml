@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Logs on Hashim Colombowala</title><link>https://hashimcolombowala.com/tags/logs/</link><description>Recent content in Logs on Hashim Colombowala</description><generator>Hugo -- gohugo.io</generator><language>en-us</language><lastBuildDate>Tue, 03 Dec 2024 15:00:00 -0700</lastBuildDate><atom:link href="https://hashimcolombowala.com/tags/logs/index.xml" rel="self" type="application/rss+xml"/><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction"&gt;Introduction
 &lt;/h4&gt;&lt;p&gt;Recently a colleague of mine shared a design doc in which he mentioned&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;Now this was the first time I thought about &lt;code&gt;callsite&lt;/code&gt; vs &lt;code&gt;logger&lt;/code&gt; configuration. So here we go.&lt;/p&gt;
 &lt;h4 id="what-is-callsite-configuration"&gt;What is Callsite Configuration?
 &lt;/h4&gt;&lt;p&gt;Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p&gt;
@@ -86,7 +87,7 @@ Logger configuration is a fallback for third-party libraries where callsite cont
 &lt;p&gt;&lt;strong&gt;Callsite Configuration&lt;/strong&gt;:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;isDebugEnabled&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Processing message with key: {}&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;messageKey&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;Logger Configuration (&lt;code&gt;logback.xml&lt;/code&gt;)&lt;/strong&gt;:&lt;/p&gt;

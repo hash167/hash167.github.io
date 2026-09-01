@@ -34,7 +34,7 @@
 &lt;h2 id="using-it-with-flask"&gt;Using It with Flask
 &lt;/h2&gt;&lt;p&gt;Here&amp;rsquo;s what that looks like in practice:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;flask&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;afflib.olly._prometheus_client.middleware&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;PrometheusServerMiddleware&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;.middleware&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;PrometheusServerMiddleware&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="n"&gt;app&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="n"&gt;Flask&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="vm"&gt;__name__&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
@@ -49,14 +49,14 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;app&lt;/span&gt;&lt;span class="o"&gt;.&lt;/span&gt;&lt;span class="n"&gt;run&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;port&lt;/span&gt;&lt;span class="o"&gt;=&lt;/span&gt;&lt;span class="mi"&gt;8080&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;Now:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;&lt;code&gt;http://localhost:8080/hello&lt;/code&gt; → your app&lt;/li&gt;
-&lt;li&gt;&lt;code&gt;http://localhost:9100/&lt;/code&gt; → Prometheus metrics&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;http://localhost:8080/hello&lt;/code&gt; -&amp;gt; your app&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;http://localhost:9100/&lt;/code&gt; -&amp;gt; Prometheus metrics&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;No threads, no second server.&lt;/p&gt;
 &lt;h2 id="using-it-with-falcon-rpc-servers"&gt;Using It with Falcon (RPC Servers)
 &lt;/h2&gt;&lt;p&gt;Same deal for Falcon, which works great for RPC servers:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-python" data-lang="python"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="nn"&gt;falcon&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;afflib.olly._prometheus_client.middleware&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;PrometheusServerMiddleware&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="kn"&gt;from&lt;/span&gt; &lt;span class="nn"&gt;.middleware&lt;/span&gt; &lt;span class="kn"&gt;import&lt;/span&gt; &lt;span class="n"&gt;PrometheusServerMiddleware&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;class&lt;/span&gt; &lt;span class="nc"&gt;RPCResource&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="nf"&gt;on_post&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;self&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;req&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;resp&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
@@ -97,7 +97,7 @@
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;And hey, for small scripts or quick demos, that&amp;rsquo;s totally fine.&lt;/p&gt;
 &lt;p&gt;But for production apps:&lt;/p&gt;
 &lt;ul&gt;
-&lt;li&gt;It runs in a thread — so lifecycle/shutdown gets trickier.&lt;/li&gt;
+&lt;li&gt;It runs in a thread, so lifecycle/shutdown gets trickier.&lt;/li&gt;
 &lt;li&gt;Doesn&amp;rsquo;t play well with Gunicorn or uWSGI (each process needs its own metrics).&lt;/li&gt;
 &lt;li&gt;If your app crashes but the metrics thread keeps running… Prometheus might scrape old data.&lt;/li&gt;
 &lt;/ul&gt;
@@ -169,7 +169,7 @@
 &lt;img src="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a.png"
 width="2379"
 height="780"
-srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu_dbf97adf81485d67.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu_e592d04bf40aa856.png 1024w"
+srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu_1b8ba8c154c71e2e.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_a_hu_87d6043c41b95180.png 1024w"
 loading="lazy"
 alt="Graph A"
 class="gallery-image"
@@ -200,7 +200,7 @@ data-flex-basis="732px"
 &lt;img src="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b.png"
 width="2379"
 height="780"
-srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu_759ed8d95b9931cb.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu_4f6417aed873a12c.png 1024w"
+srcset="https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu_a1cd67f456b8cef0.png 480w, https://hashimcolombowala.com/p/how-to-use-proper-resolution-windows-in-promql-to-catch-short-spikes/graph_b_hu_2ccb5df067ee244e.png 1024w"
 loading="lazy"
 alt="Graph B"
 class="gallery-image"
@@ -229,7 +229,8 @@ data-flex-basis="732px"
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;That’s the difference between &lt;code&gt;somewhere in that minute we spiked&lt;/code&gt; and &lt;code&gt;we spiked at 12:05:15&lt;/code&gt;.&lt;/p&gt;</description></item><item><title>Callsite vs Logger Configurations: Fine-Tuning Your Logging Strategy</title><link>https://hashimcolombowala.com/p/callsite/</link><pubDate>Tue, 03 Dec 2024 15:00:00 -0700</pubDate><guid>https://hashimcolombowala.com/p/callsite/</guid><description>&lt;h4 id="introduction"&gt;Introduction
 &lt;/h4&gt;&lt;p&gt;Recently a colleague of mine shared a design doc in which he mentioned&lt;/p&gt;
 &lt;blockquote&gt;
-&lt;p&gt;Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p&gt;&lt;/blockquote&gt;
+&lt;p&gt;Callsite configuration for logging is strongly preferred for &amp;hellip;&amp;hellip;&lt;/p&gt;
+&lt;/blockquote&gt;
 &lt;p&gt;Now this was the first time I thought about &lt;code&gt;callsite&lt;/code&gt; vs &lt;code&gt;logger&lt;/code&gt; configuration. So here we go.&lt;/p&gt;
 &lt;h4 id="what-is-callsite-configuration"&gt;What is Callsite Configuration?
 &lt;/h4&gt;&lt;p&gt;Callsite configuration applies logging settings directly to the code location where the logging call occurs. For instance, if you have a line like:&lt;/p&gt;
@@ -314,7 +315,7 @@ Logger configuration is a fallback for third-party libraries where callsite cont
 &lt;p&gt;&lt;strong&gt;Callsite Configuration&lt;/strong&gt;:&lt;/p&gt;
 &lt;div class="highlight"&gt;&lt;pre tabindex="0" class="chroma"&gt;&lt;code class="language-java" data-lang="java"&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="k"&gt;if&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;isDebugEnabled&lt;/span&gt;&lt;span class="p"&gt;())&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="p"&gt;{&lt;/span&gt;&lt;span class="w"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;logger&lt;/span&gt;&lt;span class="p"&gt;.&lt;/span&gt;&lt;span class="na"&gt;debug&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="s"&gt;&amp;#34;Processing message with key: {}&amp;#34;&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt;&lt;span class="w"&gt; &lt;/span&gt;&lt;span class="n"&gt;messageKey&lt;/span&gt;&lt;span class="p"&gt;);&lt;/span&gt;&lt;span class="w"&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="w"&gt;&lt;/span&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="p"&gt;}&lt;/span&gt;&lt;span class="w"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/li&gt;
 &lt;li&gt;
 &lt;p&gt;&lt;strong&gt;Logger Configuration (&lt;code&gt;logback.xml&lt;/code&gt;)&lt;/strong&gt;:&lt;/p&gt;
@@ -569,7 +570,7 @@ Periodically review logs to ensure they provide actionable insights without over
 &lt;p&gt;&lt;img src="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph.png"
 width="1492"
 height="513"
-srcset="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu_2dceeed703f51a0f.png 480w, https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu_3c9824d85f8eaf0b.png 1024w"
+srcset="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu_a13c4af331dfc227.png 480w, https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/graph_hu_5cd3b27a8b96a6cf.png 1024w"
 loading="lazy"
 alt="Graph"
 class="gallery-image"
@@ -591,7 +592,7 @@ data-flex-basis="698px"
 &lt;p&gt;&lt;img src="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell.png"
 width="1600"
 height="1303"
-srcset="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu_5d5b131cb035e363.png 480w, https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu_96a99a7d05d1c922.png 1024w"
+srcset="https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu_46ca57c7c00a445f.png 480w, https://hashimcolombowala.com/p/another-off-by-one-mostly-problem-and-prometheus-counter-spikes/shell_hu_af8aac37257e94ba.png 1024w"
 loading="lazy"
 alt="Shell"
 class="gallery-image"

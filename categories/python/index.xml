@@ -271,7 +271,7 @@
 &lt;p&gt;&lt;img src="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth.png"
 width="576"
 height="323"
-srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu_e02baf2b8292caf6.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu_45265d79f5ff308a.png 1024w"
+srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu_3f45bf748e3ce591.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/session_auth_hu_2a6dc7348c14e7bb.png 1024w"
 loading="lazy"
 alt="Session-Based Authentication"
 class="gallery-image"
@@ -336,7 +336,7 @@ data-flex-basis="427px"
 &lt;p&gt;&lt;img src="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth.png"
 width="1186"
 height="885"
-srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu_def29e072131d7a1.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu_dd44ee0ca9a3e552.png 1024w"
+srcset="https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu_d73253a44220d0f7.png 480w, https://hashimcolombowala.com/p/comparing-session-based-and-token-based-authentication/auth/token_auth_hu_2a3ff2d1d638f384.png 1024w"
 loading="lazy"
 alt="Token-Based Authentication"
 class="gallery-image"
@@ -411,7 +411,7 @@ data-flex-basis="321px"
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;for&lt;/span&gt; &lt;span class="n"&gt;method&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;required_methods&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;if&lt;/span&gt; &lt;span class="n"&gt;method&lt;/span&gt; &lt;span class="ow"&gt;not&lt;/span&gt; &lt;span class="ow"&gt;in&lt;/span&gt; &lt;span class="n"&gt;class_methods&lt;/span&gt;&lt;span class="p"&gt;:&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="n"&gt;msg&lt;/span&gt; &lt;span class="o"&gt;=&lt;/span&gt; &lt;span class="sa"&gt;f&lt;/span&gt;&lt;span class="s2"&gt;&amp;#34;&amp;#34;&amp;#34;Can&amp;#39;t create abstract class &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;!
-&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="s2"&gt;&lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; must implement abstract method &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;method&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; of class &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;base&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;!&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
+&lt;/span&gt;&lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; must implement abstract method &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;method&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt; of class &lt;/span&gt;&lt;span class="si"&gt;{&lt;/span&gt;&lt;span class="n"&gt;base&lt;/span&gt;&lt;span class="si"&gt;}&lt;/span&gt;&lt;span class="s2"&gt;!&amp;#34;&amp;#34;&amp;#34;&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;raise&lt;/span&gt; &lt;span class="ne"&gt;TypeError&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="n"&gt;msg&lt;/span&gt;&lt;span class="p"&gt;)&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class="line"&gt;&lt;span class="cl"&gt; &lt;span class="k"&gt;def&lt;/span&gt; &lt;span class="fm"&gt;__new__&lt;/span&gt;&lt;span class="p"&gt;(&lt;/span&gt;&lt;span class="bp"&gt;cls&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;name&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;bases&lt;/span&gt;&lt;span class="p"&gt;,&lt;/span&gt; &lt;span class="n"&gt;namespace&lt;/span&gt;&lt;span class="p"&gt;):&lt;/span&gt;
